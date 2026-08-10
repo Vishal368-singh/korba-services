@@ -6,8 +6,8 @@ import AuthLayout from "../layouts/AuthLayout";
 import Login from "../pages/Login/Login";
 import Dashboard from "../pages/Dashboard/Dashboard";
 import Survey from "../pages/Survey/Survey";
-import Users from "../pages/User/User";
 import SurveyPreview from "../pages/SurveyPreview/SurveyPreview";
+import SurveyorsManagement from "../pages/User/SurveyorsManagement";
 // import NotFound from "../pages/NotFound/NotFound";
 
 export default function AppRoutes() {
@@ -23,7 +23,7 @@ export default function AppRoutes() {
       <Route element={<MainLayout />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/survey" element={<Survey />} />
-        <Route path="/users" element={<Users />} />
+        <Route path="/users" element={<SurveyorsManagement />} />
         <Route
     path="/surveys/:surveyId"
     element={<SurveyPreview />}
