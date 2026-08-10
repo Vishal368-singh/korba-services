@@ -41,6 +41,11 @@ useEffect(() => {
           response = response.rejected;
           break;
 
+        // case "Rejected":
+        //   response = await fetchRejectedPendingSurveys();
+        //   response = response.rejected;
+        //   break;
+
         case "Pending":
         default:
           response = await fetchRejectedPendingSurveys();
