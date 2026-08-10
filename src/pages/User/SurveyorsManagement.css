@@ -557,3 +557,67 @@ tbody td {
 .form-group select.error:focus {
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
 }
+
+/* CSS for pagination */
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+.pagination-controls button {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 16px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.15s;
+  color: #1e293b;
+}
+.pagination-controls button:hover:not(:disabled) {
+  background: #e2e8f0;
+}
+.pagination-controls button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.pagination-controls span {
+  font-size: 14px;
+  font-weight: 500;
+  color: #475569;
+}
+
+/* Style for disabled input fields */
+.form-group input:disabled,
+.form-group select:disabled {
+  background-color: #e5e7eb !important; /* Dark gray background */
+  color: #6b7280 !important; /* Gray text */
+  cursor: not-allowed !important;
+  opacity: 0.7;
+  border-color: #d1d5db !important;
+}
+
+/* Optional: Darker background for disabled fields */
+.form-group input:disabled {
+  background-color: #d1d5db !important; /* Even darker gray */
+  color: #4b5563 !important;
+}
+
+/* If you want all disabled inputs in the app to be dark gray */
+input:disabled,
+select:disabled,
+textarea:disabled {
+  background-color: #d1d5db !important;
+  color: #4b5563 !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+  border-color: #9ca3af !important;
+}
+
+/* Hover effect on disabled fields */
+input:disabled:hover,
+select:disabled:hover {
+  background-color: #cbd5e1 !important;
+}
