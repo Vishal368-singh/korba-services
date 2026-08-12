@@ -12,7 +12,6 @@ import { useState } from "react";
 import "./Sidebar.css";
 
 export default function Sidebar({ collapsed, setCollapsed }) {
-
   const menus = [
     {
       name: "Dashboard",
@@ -38,39 +37,27 @@ export default function Sidebar({ collapsed, setCollapsed }) {
 
   return (
     <aside className={collapsed ? "sidebar collapsed" : "sidebar"}>
-
       <button
         className="collapse-btn"
-          onClick={() => setCollapsed(prev => !prev)}
+        onClick={() => setCollapsed((prev) => !prev)}
       >
         {collapsed ? <FaChevronRight /> : <FaChevronLeft />}
       </button>
 
       <ul>
-
         {menus.map((item) => (
           <li key={item.path}>
-
             <NavLink
               to={item.path}
-              className={({ isActive }) =>
-                isActive ? "menu active" : "menu"
-              }
+              className={({ isActive }) => (isActive ? "menu active" : "menu")}
             >
               <span className="icon">{item.icon}</span>
 
-              {!collapsed && (
-                <span className="title">
-                  {item.name}
-                </span>
-              )}
+              {!collapsed && <span className="title">{item.name}</span>}
             </NavLink>
-
           </li>
         ))}
-
       </ul>
-
     </aside>
   );
 }

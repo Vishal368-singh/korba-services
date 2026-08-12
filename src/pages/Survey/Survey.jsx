@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FaClipboardList,
   FaCheckCircle,
@@ -11,7 +11,6 @@ import {
 } from "react-icons/fa";
 
 import "./Survey.css";
-import { useEffect } from "react";
 import {
   fetchCompletedSurveys,
   fetchRejectedPendingSurveys,
@@ -26,32 +25,27 @@ export default function Survey() {
   const [activeTab, setActiveTab] = useState("Pending");
   const [surveyData, setSurveyData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [refreshKey,setRefreshKey]=useState(0);
 
-  useEffect(() => {
-    const loadSurveyData = async () => {
-      try {
-        setLoading(true);
+  const loadSurveyData = async () => {
+    try {
+      setLoading(true);
 
-        let response;
+      let response;
 
-        switch (activeTab) {
-          case "Approved":
-            response = await fetchCompletedSurveys();
-            break;
+      switch (activeTab) {
+        case "Approved":
+          response = await fetchCompletedSurveys();
+          break;
 
-          case "All":
-            response = await fetchAllSurveys();
-            break;
+        case "All":
+          response = await fetchAllSurveys();
+          break;
 
-          case "Rejected":
-            response = await fetchRejectedPendingSurveys();
-            response = response.rejected;
-            break;
-
-        // case "Rejected":
-        //   response = await fetchRejectedPendingSurveys();
-        //   response = response.rejected;
-        //   break;
+        case "Rejected":
+          response = await fetchRejectedPendingSurveys();
+          response = response.rejected;
+          break;
 
         case "Pending":
         default:
@@ -59,6 +53,7 @@ export default function Survey() {
           response = response.pending;
           break;
       }
+
       setSurveyData(response.surveys || []);
     } catch (error) {
       console.error("Error fetching survey data:", error);
@@ -68,13 +63,18 @@ export default function Survey() {
     }
   };
 
+  useEffect(() => {
     loadSurveyData();
   }, [activeTab]);
+
+  const handleActionComplete=()=>{
+    loadSurveyData();
+    setRefreshKey((prev)=>prev+1)
+  }
 
   return (
     <div className="survey-page">
       {/* Header */}
-
       <div className="page-header">
         <div>
           <h2>Survey Management</h2>
@@ -82,7 +82,7 @@ export default function Survey() {
         </div>
 
         <div className="header-actions">
-          <button className="refresh-btn">
+          <button className="refresh-btn" onClick={loadSurveyData}>
             <FaSyncAlt />
             Refresh
           </button>
@@ -95,17 +95,20 @@ export default function Survey() {
       </div>
 
       {/* Statistics */}
-      <SurveyStatistics />
+      <SurveyStatistics refreshTrigger={refreshKey}/>
 
       {/* Tabs */}
-
       <SurveyTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {/* Filters */}
       <SurveyFilter />
 
       {/* Table */}
-      <SurveyTable data={surveyData} activeTab={activeTab} />
+      <SurveyTable
+        data={surveyData}
+        activeTab={activeTab}
+        onActionComplete={loadSurveyData}
+      />
     </div>
   );
 }
