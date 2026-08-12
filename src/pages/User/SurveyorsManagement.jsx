@@ -330,21 +330,21 @@ function SurveyorsManagement() {
   };
 
   // Update the field username with the help of the Surveyor Name
-useEffect(() => {
-  if (formData.surveyor_name && formData.surveyor_name.trim().length > 0) {
-    const firstName = formData.surveyor_name.trim().split(' ')[0];
-    setFormData((prev) => ({
-      ...prev,
-      username: firstName.toLowerCase(),
-    }));
-  } else {
-    // Clear username when surveyor_name is empty
-    setFormData((prev) => ({
-      ...prev,
-      username: "",
-    }));
-  }
-}, [formData.surveyor_name]);
+  useEffect(() => {
+    if (formData.surveyor_name && formData.surveyor_name.trim().length > 0) {
+      const firstName = formData.surveyor_name.trim().split(" ")[0];
+      setFormData((prev) => ({
+        ...prev,
+        username: firstName.toLowerCase(),
+      }));
+    } else {
+      // Clear username when surveyor_name is empty
+      setFormData((prev) => ({
+        ...prev,
+        username: "",
+      }));
+    }
+  }, [formData.surveyor_name]);
 
   const addSurveyor = async (payload) => {
     try {
@@ -702,7 +702,7 @@ useEffect(() => {
                 <option value="surveyor">Surveyor</option>
                 <option value="supervisor">Supervisor</option>
               </select> */}
-               <input
+              <input
                 type="text"
                 id="role"
                 value={formData.role}

@@ -481,9 +481,7 @@ tbody td {
 }
 /* ---- responsive ---- */
 @media (max-width: 768px) {
-  body {
-    padding: 14px;
-  }
+
   .card {
     padding: 18px 16px;
   }
