@@ -12,7 +12,11 @@ import {
 
 import "./Survey.css";
 import { useEffect } from "react";
-import { fetchCompletedSurveys, fetchRejectedPendingSurveys } from "../../services/api";
+import {
+  fetchCompletedSurveys,
+  fetchRejectedPendingSurveys,
+  fetchAllSurveys,
+} from "../../services/api";
 import SurveyStatistics from "./SurveyStatistics";
 import SurveyTabs from "./SurveyTabs";
 import SurveyFilter from "./SurveyFilter";
@@ -23,47 +27,47 @@ export default function Survey() {
   const [surveyData, setSurveyData] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  
-useEffect(() => {
-  const loadSurveyData = async () => {
-    try {
-      setLoading(true);
+  useEffect(() => {
+    const loadSurveyData = async () => {
+      try {
+        setLoading(true);
 
-      let response;
+        let response;
 
-      switch (activeTab) {
-        case "Approved":
-          response = await fetchCompletedSurveys();
-          break;
+        switch (activeTab) {
+          case "Approved":
+            response = await fetchCompletedSurveys();
+            break;
 
-        case "Rejected":
-          response = await fetchRejectedPendingSurveys();
-          response = response.rejected;
-          break;
+          case "All":
+            response = await fetchAllSurveys();
+            break;
 
-        case "Pending":
-        default:
-          response = await fetchRejectedPendingSurveys();
-          response = response.pending;
-          break;
+          case "Rejected":
+            response = await fetchRejectedPendingSurveys();
+            response = response.rejected;
+            break;
+
+          case "Pending":
+          default:
+            response = await fetchRejectedPendingSurveys();
+            response = response.pending;
+            break;
+        }
+        setSurveyData(response.surveys || []);
+      } catch (error) {
+        console.error("Error fetching survey data:", error);
+        setSurveyData([]);
+      } finally {
+        setLoading(false);
       }
-      setSurveyData(response.surveys || []);
-    } catch (error) {
-      console.error("Error fetching survey data:", error);
-      setSurveyData([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  loadSurveyData();
-}, [activeTab]);
-
-
+    loadSurveyData();
+  }, [activeTab]);
 
   return (
     <div className="survey-page">
-
       {/* Header */}
 
       <div className="page-header">
@@ -86,24 +90,17 @@ useEffect(() => {
       </div>
 
       {/* Statistics */}
-       <SurveyStatistics />
+      <SurveyStatistics />
 
       {/* Tabs */}
 
-      <SurveyTabs
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-      />
+      <SurveyTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {/* Filters */}
       <SurveyFilter />
 
       {/* Table */}
-      <SurveyTable
-        data={surveyData}
-        activeTab={activeTab}
-      />
-
+      <SurveyTable data={surveyData} activeTab={activeTab} />
     </div>
   );
 }

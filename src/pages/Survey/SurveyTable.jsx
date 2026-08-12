@@ -1,41 +1,80 @@
+import { useState } from "react";
 import { FaEye, FaCheck, FaTimes } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import RejectModal from "../../components/Rejectmodal";
+import { approveSurveyAPI } from "../../services/api";
+import { updateSurveyStatus } from "../../services/api";
 
 export default function SurveyTable({ data = [], activeTab }) {
   const navigate = useNavigate();
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [selectedSurveyId, setSelectedSurveyId] = useState(null);
 
   const handlePreview = (surveyId) => {
     navigate(`/surveys/${surveyId}`);
   };
+  const getApproveInfo = () => {
+    const user = localStorage.getItem("user")
+      ? JSON.parse(localStorage.getItem("user"))
+      : null;
+    return {
+      approved_by: user?.name || user?.username || "",
+      approver_id: user?.id || user?.user_id || "",
+    };
+  };
+  const handleApprove = async (surveyId) => {
+    try {
+      const { approved_by, approver_id } = getApproveInfo();
 
-  const handleApprove = (surveyId) => {
-    console.log("Approve :", surveyId);
-
-    // TODO
-    // Call Approve API
+      await updateSurveyStatus({
+        survey_id: surveyId,
+        action: "approve",
+        approved_by,
+        approver_id,
+        reason: "",
+        reason_remark: "",
+      });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleReject = (surveyId) => {
-    console.log("Reject :", surveyId);
-
+    setSelectedSurveyId(surveyId);
+    setRejectModalOpen(true);
     // TODO
     // Open Reject Modal
   };
 
+  const handleRejectSubmit = async ({ surveyId, reason, description }) => {
+    try {
+      const {approved_by, approver_id}=getApproverInfo();
+      await updateSurveyStatus({
+        survey_id:surveyId,
+        action:"reject",
+        approved_by,
+        approver_id,
+        reason:reason.join(","),
+        reason_remark:description,
+      });
+      setRejectModalOpen(false);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   if (!Object.keys(data).length) {
-  return (
-     <div className="table-empty">
+    return (
+      <div className="table-empty">
         <h3>No Survey Found</h3>
         <p>No survey data available.</p>
       </div>
-  );
-}
+    );
+  }
 
   return (
     <div className="table-container">
-
       <table className="survey-table">
-
         <thead>
           <tr>
             <th>Survey ID</th>
@@ -51,59 +90,67 @@ export default function SurveyTable({ data = [], activeTab }) {
           </tr>
         </thead>
 
-       <tbody>
-        {Object.entries(data).map(([surveyId, survey]) => (
+        <tbody>
+          {Object.entries(data).map(([surveyId, survey]) => (
             <tr key={surveyId}>
-            <td>{survey.survey_id}</td>
-            <td>{survey.parcel_no}</td>
-            <td>{survey.surveyor_id}</td>
-            <td>{survey.surveyor_name}</td>
-            <td>{survey.zone}</td>
-            <td>{survey.survey_date}</td>
+              <td>{survey.survey_id}</td>
+              <td>{survey.parcel_no}</td>
+              <td>{survey.surveyor_id}</td>
+              <td>{survey.surveyor_name}</td>
+              <td>{survey.zone}</td>
+              <td>{survey.survey_date}</td>
 
-            <td>
+              <td>
                 <span className={`status ${activeTab.toLowerCase()}`}>
-                {activeTab === "Pending" ? "Pending" : activeTab === "Approved" ? "Approved" : "Rejected"}
+                  {activeTab === "Pending"
+                    ? "Pending"
+                    : activeTab === "Approved"
+                      ? "Approved"
+                      : "Rejected"}
                 </span>
-            </td>
+              </td>
 
-            <td>
+              <td>
                 <div className="action-buttons">
-                <button
+                  <button
                     className="preview-btn"
                     onClick={() => handlePreview(survey.survey_id)}
-                >
+                  >
                     <FaEye />
                     Preview
-                </button>
+                  </button>
 
-                {activeTab === "Pending" && (
+                  {activeTab === "Pending" && (
                     <>
-                    <button
+                      <button
                         className="approve-btn"
                         onClick={() => handleApprove(survey.survey_id)}
-                    >
+                      >
                         <FaCheck />
                         Approve
-                    </button>
+                      </button>
 
-                    <button
+                      <button
                         className="reject-btn"
                         onClick={() => handleReject(survey.survey_id)}
-                    >
+                      >
                         <FaTimes />
                         Reject
-                    </button>
+                      </button>
                     </>
-                )}
+                  )}
                 </div>
-            </td>
+              </td>
             </tr>
-        ))}
+          ))}
         </tbody>
-
       </table>
-
+      <RejectModal
+        isOpen={rejectModalOpen}
+        onClose={() => setRejectModalOpen(false)}
+        onSubmit={handleRejectSubmit}
+        surveyId={selectedSurveyId}
+      />
     </div>
   );
 }
