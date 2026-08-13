@@ -34,30 +34,13 @@ const statistics = [
   },
 ];
 
-export default function SurveyStatistics({refreshTrigger}) {
-  const [counts, setCounts] = useState({});
-
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    loadStatistics();
-  }, [refreshTrigger]);
-
-  const loadStatistics = async () => {
-    try {
-      setLoading(true);
-      const response = await fetchSurveyStatusCounts();
-      setCounts(response.status_counts || {});
-    } catch (error) {
-      console.error("Error fetching survey statistics:", error);
-      setCounts({});
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return <div className="stats-grid">Loading statistics...</div>;
+export default function SurveyStatistics({counts, loading}) {
+  
+  if(loading || !counts){
+    return <div className="stats-grid">Loading statistics...</div>
   }
+
+  
 
   return (
     <div className="stats-grid">
