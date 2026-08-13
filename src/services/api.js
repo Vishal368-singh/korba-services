@@ -178,9 +178,9 @@ export const fetchSurveyorsList = async () => {
 };
 
 export const addSurveyorAPI = async (payload) => {
-  debugger;
-  const token = localStorage.getItem("user")
-    ? JSON.parse(localStorage.getItem("user")).access_token
+  otpValidationModal
+  const token = localStorage.getItem("user") 
+    ? JSON.parse(localStorage.getItem("user")).access_token 
     : null;
 
   if (!token) {
@@ -198,6 +198,88 @@ export const addSurveyorAPI = async (payload) => {
   if (response.status !== 200 && response.status !== 201) {
     notify.error("Failed to add surveyor");
     throw new Error("Failed to add surveyor");
+  }
+
+  return response;
+};
+
+
+// Send OTP to email
+export const sendOTP = async (email) => {
+  const token = localStorage.getItem("user") 
+    ? JSON.parse(localStorage.getItem("user")).access_token 
+    : null;
+  
+  if (!token) {
+    notify.error("No token found. Please log in first.");
+    throw new Error("No token found. Please log in first.");
+  }
+
+  const payload = { email: email };
+  const response = await api.post(`/auth/send-otp`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (response.status !== 200 && response.status !== 201) {
+    notify.error("Failed to send OTP");
+    throw new Error("Failed to send OTP");
+  }
+  return response.data;
+};
+
+// Verify OTP
+export const verifyOTP = async (email, otp) => {
+  const token = localStorage.getItem("user") 
+    ? JSON.parse(localStorage.getItem("user")).access_token 
+    : null;
+  
+  if (!token) {
+    notify.error("No token found. Please log in first.");
+    throw new Error("No token found. Please log in first.");
+  }
+
+  const payload = { 
+    email: email, 
+    otp: otp 
+  };
+  const response = await api.post(`/auth/verify-otp`, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (response.status !== 200) {
+    notify.error("Invalid OTP. Please try again.");
+    throw new Error("Invalid OTP");
+  }
+  return response.data;
+};
+
+// Update entire survey
+export const updateSurvey = async (surveyId, surveyData) => {
+  const token = localStorage.getItem("user") 
+    ? JSON.parse(localStorage.getItem("user")).access_token 
+    : null;
+  
+  if (!token) {
+    toast.error("No token found. Please log in first.");
+    throw new Error("No token found. Please log in first.");
+  }
+
+  const response = await api.put(`/survey/update/${surveyId}`, surveyData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (response.status !== 200) {
+    toast.error("Failed to update survey");
+    throw new Error("Failed to update survey");
   }
 
   return response.data;

@@ -1,91 +1,206 @@
+import React, { useState, useEffect } from 'react';
+import { Box, Button, Typography, Paper, useMediaQuery, useTheme } from '@mui/material';
+import { Edit, Save, Cancel } from '@mui/icons-material';
 import PreviewField from "./PreviewField";
 import "../SurveyPreview.css";
 
-export default function SurveyInformationCard({ data }) {
+export default function SurveyInformationCard({ data, onUpdate }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState(data || {});
+
+  // Responsive hooks
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+
+  // Update local state when data prop changes
+  useEffect(() => {
+    if (data) {
+      setFormData(data);
+    }
+  }, [data]);
+
   if (!data) return null;
 
+  const handleFieldChange = (fieldKey, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [fieldKey]: value,
+    }));
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleSave = () => {
+    if (onUpdate) {
+      onUpdate('survey_information', formData);
+    }
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setFormData(data);
+    setIsEditing(false);
+  };
+
+  // Define fields for the card
+  const fields = [
+    { key: 'parcel_no', label: 'Parcel Number', type: 'text' },
+    { key: 'property_id', label: 'Property ID', type: 'text' },
+    { key: 'existing_property_id', label: 'Existing Property ID', type: 'text' },
+    { key: 'property_location', label: 'Property Location', type: 'text' },
+    { key: 'tax_rate_zone', label: 'Tax Rate Zone', type: 'text' },
+    { key: 'survey_id', label: 'Survey ID', type: 'text' },
+    { key: 'survey_date', label: 'Survey Date', type: 'text' },
+    { key: 'surveyor_name', label: 'Surveyor Name', type: 'text' },
+    { key: 'surveyor_id', label: 'Surveyor ID', type: 'text' },
+    { key: 'ward_no', label: 'Ward No', type: 'text' },
+    { key: 'zone', label: 'Zone', type: 'text' },
+    { key: 'colony_locality', label: 'Colony / Locality', type: 'text' },
+    { key: 'gps_latitude', label: 'GPS Latitude', type: 'text' },
+    { key: 'gps_longitude', label: 'GPS Longitude', type: 'text' },
+  ];
+
+  // Button styles with new color scheme
+  const buttonStyles = {
+    backgroundColor: '#ffffff',
+    color: '#7A1453',
+    borderColor: '#ffffff',
+    textTransform: 'none',
+    borderRadius: '8px',
+    fontSize: isMobile ? '12px' : '13px',
+    fontWeight: 500,
+    padding: isMobile ? '6px 12px' : '8px 16px',
+    minWidth: isMobile ? 'auto' : '64px',
+    '&:hover': {
+      backgroundColor: '#7A1453',
+      color: '#ffffff',
+      borderColor: '#ffffff',
+      boxShadow: '0px 0px 2px #fff',
+    },
+  };
+
+  const getGridColumns = () => {
+    if (isMobile) return '1fr';
+    if (isTablet) return 'repeat(2, 1fr)';
+    return 'repeat(auto-fill, minmax(300px, 1fr))';
+  };
+
   return (
-    <div className="section-card">
+    <Paper
+      elevation={0}
+      sx={{
+        borderRadius: isMobile ? '12px' : '16px',
+        border: '1px solid #e2e8f0',
+        overflow: 'hidden',
+        mb: 3,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+      }}
+    >
+      {/* Header */}
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: isMobile ? 'column' : 'row',
+          justifyContent: 'space-between',
+          alignItems: isMobile ? 'stretch' : 'center',
+          padding: isMobile ? '12px 16px' : '16px 24px',
+          gap: isMobile ? '12px' : '0',
+          borderBottom: '1px solid rgba(255,255,255,0.15)',
+          backgroundColor: '#7A1453',
+        }}
+      >
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 600,
+            color: '#ffffff',
+            fontSize: isMobile ? '15px' : '16px',
+            textAlign: isMobile ? 'center' : 'left',
+          }}
+        >
+          Survey Information
+        </Typography>
 
-      <div className="section-header">
-        <h3>Survey Information</h3>
-      </div>
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            gap: 1, 
+            flexDirection: isMobile ? 'column' : 'row',
+            width: isMobile ? '100%' : 'auto',
+          }}
+        >
+          {!isEditing ? (
+            <Button
+              variant="contained"
+              startIcon={<Edit />}
+              onClick={handleEdit}
+              sx={{
+                ...buttonStyles,
+                width: isMobile ? '100%' : 'auto',
+              }}
+            >
+              Edit Section
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="contained"
+                startIcon={<Cancel />}
+                onClick={handleCancel}
+                sx={{
+                  ...buttonStyles,
+                  width: isMobile ? '100%' : 'auto',
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<Save />}
+                onClick={handleSave}
+                sx={{
+                  ...buttonStyles,
+                  width: isMobile ? '100%' : 'auto',
+                }}
+              >
+                Save Section
+              </Button>
+            </>
+          )}
+        </Box>
+      </Box>
 
-      <div className="section-body">
-
-        <PreviewField
-          label="Parcel Number"
-          value={data.parcel_no}
-        />
-
-        <PreviewField
-          label="Property ID"
-          value={data.property_id}
-        />
-
-        <PreviewField
-          label="Existing Property ID"
-          value={data.existing_property_id}
-        />
-
-        <PreviewField
-          label="Property Location"
-          value={data.property_location}
-        />
-
-        <PreviewField
-          label="Tax Rate Zone"
-          value={data.tax_rate_zone}
-        />
-
-        <PreviewField
-          label="Survey ID"
-          value={data.survey_id}
-        />
-
-        <PreviewField
-          label="Survey Date"
-          value={data.survey_date}
-          type="date"
-        />
-
-        <PreviewField
-          label="Surveyor Name"
-          value={data.surveyor_name}
-        />
-
-        <PreviewField
-          label="Surveyor ID"
-          value={data.surveyor_id}
-        />
-
-        <PreviewField
-          label="Ward No"
-          value={data.ward_no}
-        />
-
-        <PreviewField
-          label="Zone"
-          value={data.zone}
-        />
-
-        <PreviewField
-          label="Colony / Locality"
-          value={data.colony_locality}
-        />
-
-        <PreviewField
-          label="GPS Latitude"
-          value={data.gps_latitude}
-        />
-
-        <PreviewField
-          label="GPS Longitude"
-          value={data.gps_longitude}
-        />
-
-      </div>
-
-    </div>
+      {/* Body */}
+      <Box 
+        sx={{ 
+          padding: isMobile ? '12px 12px' : isTablet ? '16px 20px' : '20px 24px',
+          backgroundColor: '#ffffff',
+        }}
+      >
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: getGridColumns(),
+            gap: isMobile ? '8px 12px' : isTablet ? '12px 20px' : '16px 32px',
+          }}
+        >
+          {fields.map((field) => (
+            <PreviewField
+              key={field.key}
+              label={field.label}
+              value={formData[field.key] || ''}
+              onChange={handleFieldChange}
+              fieldKey={field.key}
+              type={field.type}
+              disabled={!isEditing}
+              isMobile={isMobile}
+            />
+          ))}
+        </Box>
+      </Box>
+    </Paper>
   );
 }

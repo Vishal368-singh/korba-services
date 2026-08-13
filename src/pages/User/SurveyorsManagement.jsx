@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import "./SurveyorsManagement.css";
 import notify from "../../utils/toast";
 import { addSurveyorAPI, fetchSurveyorsList } from "../../services/api";
+import OTPModal from "./OtpModal/OTPModal";
+import { sendOTP, verifyOTP } from "../../services/api";
 
 function SurveyorsManagement() {
   // ---------- state ----------
@@ -12,7 +14,7 @@ function SurveyorsManagement() {
     password: "",
     surveyor_name: "",
     surveyor_name_hindi: "",
-    role: "surveyor",
+    role: "Surveyor",
     // surveyor_id: "",
     email: "",
     mobile: "",
@@ -20,7 +22,7 @@ function SurveyorsManagement() {
     zone_hindi: "",
     ward: "",
     ward_hindi: "",
-    num_of_parcels: "",
+    target: "",
   });
 
   // Error state: one key per field
@@ -38,6 +40,11 @@ function SurveyorsManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10); // you can make this a dropdown later
 
+  // Pending validatin Modal State
+  const [otpValidationModal, setOtpValidationModal] = useState(false);
+  const [emailForOTP, setEmailForOTP] = useState("");
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+
   // Reset to first page when search/filters change
   useEffect(() => {
     setCurrentPage(1);
@@ -47,85 +54,45 @@ function SurveyorsManagement() {
   const toastTimeout = useRef(null);
 
   // ---------- load initial mock data ----------
-  // useEffect(() => {
-  //   // Simulate initial API call
-  //   const mockData = [
-  //     {
-  //       id: 1,
-  //       username: "mladmin",
-  //       password: "****",
-  //       surveyor_name: "MLAdmin",
-  //       surveyor_name_hindi: "एमएल एडमिन",
-  //       role: "admin",
-  //       surveyor_id: "SUR22336913",
-  //       email: "admin@korba.in",
-  //       mobile: "9876543210",
-  //       zone: "Zone 1",
-  //       zone_hindi: "ज़ोन १",
-  //       ward: "Ward A",
-  //       ward_hindi: "वार्ड ए",
-  //       status: "validated",
-  //       createdAt: "2026-07-30T00:00:00",
-  //     },
-  //     {
-  //       id: 2,
-  //       username: "surveyor1",
-  //       password: "****",
-  //       surveyor_name: "Rajesh Kumar",
-  //       surveyor_name_hindi: "राजेश कुमार",
-  //       role: "surveyor",
-  //       surveyor_id: "SUR22336914",
-  //       email: "rajesh@korba.in",
-  //       mobile: "9876543211",
-  //       zone: "Zone 2",
-  //       zone_hindi: "ज़ोन २",
-  //       ward: "Ward B",
-  //       ward_hindi: "वार्ड बी",
-  //       status: "pending",
-  //       createdAt: "2026-07-28T00:00:00",
-  //     },
-  //   ];
-  //   setSurveyors(mockData);
-  //   setFiltered(mockData);
-  // }, []);
   useEffect(() => {
-    const loadSurveyors = async () => {
-      try {
-        const response = await fetchSurveyorsList();
-        // Assuming response is an array of objects like the sample
-        const data = response || []; // adjust if response has wrapper
-        // Map to our internal structure (add missing fields with defaults)
-        const mappedData = data.map((item) => ({
-          id: item.id,
-          username: item.username,
-          password: "", // not exposed
-          surveyor_name: item.surveyor_name,
-          surveyor_name_hindi: item.surveyor_name_hindi || "",
-          role: item.role || "Surveyor",
-          surveyor_id: item.surveyor_id,
-          email: item.email || "",
-          mobile: item.mobile,
-          zone: item.zone,
-          zone_hindi: item.zone_hindi || "",
-          ward: item.ward,
-          ward_hindi: item.ward_hindi || "",
-          status: item.status === "Active" ? "Active" : "Pending", // map to Active/Pending
-          createdAt: item.created_at || new Date().toISOString(),
-        }));
-        setSurveyors(mappedData);
-        setFiltered(mappedData);
-      } catch (error) {
-        console.error("Failed to load surveyors:", error);
-        showToast("Failed to load surveyors", "error");
-      }
-    };
     loadSurveyors();
   }, []);
+
+  const loadSurveyors = async () => {
+    try {
+      otpValidationModal;
+      const response = await fetchSurveyorsList();
+      // Assuming response is an array of objects like the sample
+      const data = response || []; // adjust if response has wrapper
+      // Map to our internal structure (add missing fields with defaults)
+      const mappedData = data.map((item) => ({
+        id: item.surveyor_id,
+        username: item.username,
+        surveyor_name: item.surveyor_name,
+        surveyor_name_hindi: item.surveyor_name_hindi || "",
+        role: item.role || "Surveyor",
+        surveyor_id: item.surveyor_id,
+        email: item.email || "",
+        mobile: item.mobile,
+        zone: item.zone,
+        zone_hindi: item.zone_hindi || "",
+        ward: item.ward,
+        ward_hindi: item.ward_hindi || "",
+        status:
+          item.status.toLowerCase() === "active" ? "Validated" : "Pending", // map to Active/Pending
+        createdAt: item.created_at || new Date().toISOString(),
+      }));
+      setSurveyors(mappedData);
+      setFiltered(mappedData);
+    } catch (error) {
+      console.error("Failed to load surveyors:", error);
+    }
+  };
 
   // ---------- filtering logic ----------
   useEffect(() => {
     let result = surveyors;
-
+    otpValidationModal;
     // search
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase().trim();
@@ -141,7 +108,7 @@ function SurveyorsManagement() {
 
     // status filter
     if (statusFilter) {
-      result = result.filter((s) => s.status === statusFilter);
+      result = result.filter((s) => s.status.toLowerCase() === statusFilter);
     }
 
     // zone filter
@@ -167,8 +134,12 @@ function SurveyorsManagement() {
 
   // ---------- stats ----------
   const total = surveyors.length;
-  const pending = surveyors.filter((s) => s.status === "pending").length;
-  const validated = surveyors.filter((s) => s.status === "validated").length;
+  const pending = surveyors.filter(
+    (s) => s.status.toLowerCase() === "pending",
+  ).length;
+  const validated = surveyors.filter(
+    (s) => s.status.toLowerCase() === "validated",
+  ).length;
   const notValidated = surveyors.filter(
     (s) => s.status === "not-validated",
   ).length;
@@ -187,78 +158,6 @@ function SurveyorsManagement() {
     return new Promise((resolve) => {
       setTimeout(() => resolve({ success: true, data }), 300);
     });
-  };
-
-  const updateStatus = async (id, newStatus) => {
-    try {
-      // Find the surveyor by id or surveyor_id
-      const surveyor = surveyors.find(
-        (s) => s.id === id || s.surveyor_id === id,
-      );
-      if (!surveyor) {
-        showToast("Surveyor not found", "error");
-        return;
-      }
-
-      // Call your API to update status
-      const payload = {
-        surveyor_id: surveyor.surveyor_id || id,
-        status: newStatus === "validated" ? "active" : "inactive", // adjust based on your API
-      };
-
-      // If you have a dedicated API endpoint for status update
-      // const response = await updateSurveyorStatus(payload);
-
-      // Mock API call (replace with actual)
-      await apiCall("PATCH", `/api/surveyors/${id}`, { status: newStatus });
-
-      // Update local state
-      setSurveyors((prev) =>
-        prev.map((s) => {
-          const match = s.id === id || s.surveyor_id === id;
-          if (match) {
-            const newStatusValue =
-              newStatus === "validated" ? "Active" : "Pending";
-            return { ...s, status: newStatusValue };
-          }
-          return s;
-        }),
-      );
-
-      const label = newStatus === "validated" ? "Active" : "Pending";
-      showToast(
-        `Status updated to "${label}" for ${surveyor.surveyor_name}`,
-        "success",
-      );
-    } catch (error) {
-      console.error("Failed to update status:", error);
-      showToast("Failed to update status", "error");
-    }
-  };
-
-  const deleteSurveyor = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this surveyor?"))
-      return;
-    try {
-      const surveyor = surveyors.find(
-        (s) => s.id === id || s.surveyor_id === id,
-      );
-      if (!surveyor) return;
-
-      // Call your API to delete
-      // await deleteSurveyorAPI(surveyor.surveyor_id || id);
-
-      // Mock API call (replace with actual)
-      await apiCall("DELETE", `/api/surveyors/${id}`);
-
-      setSurveyors((prev) =>
-        prev.filter((s) => s.id !== id && s.surveyor_id !== id),
-      );
-      showToast(`Surveyor "${surveyor.surveyor_name}" deleted.`, "success");
-    } catch (error) {
-      console.error("Failed to delete:", error);
-      showToast("Failed to delete surveyor", "error");
-    }
   };
 
   // ---------- form handlers ----------
@@ -286,14 +185,13 @@ function SurveyorsManagement() {
       { key: "surveyor_name", label: "Surveyor Name (EN)" },
       { key: "surveyor_name_hindi", label: "Surveyor Name (HI)" },
       { key: "role", label: "Role" },
-      // { key: "surveyor_id", label: "Surveyor ID" },
       { key: "email", label: "Email" },
       { key: "mobile", label: "Mobile" },
       { key: "zone", label: "Zone (EN)" },
       { key: "zone_hindi", label: "Zone (HI)" },
       { key: "ward", label: "Ward (EN)" },
       { key: "ward_hindi", label: "Ward (HI)" },
-      { key: "num_of_parcels", label: "No. of Parcels" },
+      { key: "target", label: "No. of Parcels" },
     ];
 
     const newErrors = {};
@@ -345,12 +243,25 @@ function SurveyorsManagement() {
       }));
     }
   }, [formData.surveyor_name]);
+  useEffect(() => {
+    if (formData.surveyor_name && formData.surveyor_name.trim().length > 0) {
+      const firstName = formData.surveyor_name.trim().split(" ")[0];
+      setFormData((prev) => ({
+        ...prev,
+        username: firstName.toLowerCase(),
+      }));
+    } else {
+      // Clear username when surveyor_name is empty
+      setFormData((prev) => ({
+        ...prev,
+        username: "",
+      }));
+    }
+  }, [formData.surveyor_name]);
 
   const addSurveyor = async (payload) => {
     try {
-      debugger;
-      // Show loading state (optional)
-      const loadingId = notify.loading("Adding surveyor...");
+      otpValidationModal;
 
       // Prepare payload for API (match the API expected fields)
       const apiPayload = {
@@ -359,57 +270,45 @@ function SurveyorsManagement() {
         surveyor_name: payload.surveyor_name,
         surveyor_name_hindi: payload.surveyor_name_hindi || "",
         role: payload.role,
-        // surveyor_id: payload.surveyor_id,
         email: payload.email || "",
         mobile: payload.mobile,
         zone: payload.zone,
         zone_hindi: payload.zone_hindi || "",
         ward: payload.ward,
         ward_hindi: payload.ward_hindi || "",
-        num_of_parcels: payload.num_of_parcels || "",
+        target: payload.target || "",
       };
 
       // Call the actual API function
+      otpValidationModal;
       const response = await addSurveyorAPI(apiPayload);
 
-      // Dismiss loading toast
-      toast.dismiss(loadingId);
+      let data = {};
 
-      // Create new surveyor object with response data
+      if (response && response.data) {
+        data = response.data;
+      }
+
+      if (data.message) {
+        notify.info(data.message);
+        handleSetFormDataInitial();
+        return;
+      }
       const newSurveyor = {
-        id: response.id || Date.now(),
+        id: data.id || Date.now(),
         ...apiPayload,
-        status: response.status || "Pending",
-        createdAt: response.created_at || new Date().toISOString(),
+        status: data.status || "Pending",
+        createdAt: data.created_at || new Date().toISOString(),
       };
-
-      // Update state - add to beginning of list
-      setSurveyors((prev) => [newSurveyor, ...prev]);
-      setFiltered((prev) => [newSurveyor, ...prev]);
 
       notify.success(
         `Surveyor "${newSurveyor.surveyor_name}" added successfully!`,
       );
 
-      // Reset form and clear errors
-      setFormData({
-        username: "",
-        password: "",
-        surveyor_name: "",
-        surveyor_name_hindi: "",
-        role: "",
-        // surveyor_id: "",
-        email: "",
-        mobile: "",
-        zone: "",
-        zone_hindi: "",
-        ward: "",
-        ward_hindi: "",
-        num_of_parcels: "",
-      });
+      await loadSurveyors();
       setErrors({});
+      handleSetFormDataInitial();
     } catch (error) {
-      toast.dismiss(loadingId);
       console.error("Error adding surveyor:", error);
       notify.error(
         error.message || "Failed to add surveyor. Please try again.",
@@ -417,8 +316,26 @@ function SurveyorsManagement() {
     }
   };
 
+  const handleSetFormDataInitial = () => {
+    // Reset form and clear errors
+    setFormData({
+      username: "",
+      password: "",
+      surveyor_name: "",
+      surveyor_name_hindi: "",
+      role: "",
+      email: "",
+      mobile: "",
+      zone: "",
+      zone_hindi: "",
+      ward: "",
+      ward_hindi: "",
+      target: "",
+    });
+  };
+
   const handleSubmit = async (e) => {
-    debugger;
+    otpValidationModal;
     e.preventDefault();
     if (!validateForm()) {
       // Focus first error field
@@ -430,6 +347,59 @@ function SurveyorsManagement() {
       return;
     }
     await addSurveyor(formData);
+  };
+
+  const handleValidationOTP = async (email) => {
+    try {
+      // Show loading
+      const loadingId = notify.loading("Sending OTP...");
+
+      // Call API to send OTP
+      // await sendOTP(email);
+
+      // Dismiss loading
+      notify.dismiss(loadingId);
+
+      // Show success message
+      notify.success(`OTP sent to ${email}`);
+
+      // Open the OTP validation modal
+      setOtpValidationModal(true);
+      setEmailForOTP(email); // Store email for verification
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      notify.error(error.message || "Failed to send OTP. Please try again.");
+    }
+  };
+
+  const handleVerify = async (otp) => {
+    try {
+      otpValidationModal;
+
+      const loadingId = notify.loading("Verifying OTP...");
+
+      // Call API to verify OTP
+      // const response = await verifyOTP(emailForOTP, otp);
+
+      if (otp !== "123456") {
+        notify.dismiss(loadingId);
+        notify.error("Invalid opt, Enter correct otp.");
+        return;
+      }
+
+      notify.dismiss(loadingId);
+      setOtpValidationModal(false);
+      notify.success("OTP verified successfully!");
+
+      // Reload surveyors list
+      await loadSurveyors();
+
+      // Optional: Reset OTP state
+      setOtp(["", "", "", "", "", ""]);
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+      notify.error(error.message || "Invalid OTP. Please try again.");
+    }
   };
 
   // ---------- render table rows ----------
@@ -453,8 +423,7 @@ function SurveyorsManagement() {
     }
 
     return paginatedData.map((s, idx) => {
-      // Status logic: Active = validated, anything else = pending
-      const isActive = s.status?.toLowerCase() === "active";
+      const isActive = s.status?.toLowerCase() === "validated";
       const displayStatus = isActive ? "validated" : "pending";
 
       let statusBadge;
@@ -487,9 +456,9 @@ function SurveyorsManagement() {
           <td>{s.email || "—"}</td>
           <td>{s.mobile}</td>
           <td>{s.zone}</td>
-          <td>{s.zone_hindi}</td>
+          {/* <td>{s.zone_hindi}</td> */}
           <td>{s.ward}</td>
-          <td>{s.ward_hindi}</td>
+          {/* <td>{s.ward_hindi}</td> */}
           <td>{statusBadge}</td>
           <td>
             <div className="action-icons">
@@ -497,9 +466,7 @@ function SurveyorsManagement() {
               {!isActive && (
                 <button
                   className="approve-btn"
-                  onClick={() =>
-                    updateStatus(s.id || s.surveyor_id, "validated")
-                  }
+                  onClick={() => handleValidationOTP(s.email)}
                   title="Validate"
                 >
                   <i className="fas fa-check-circle"></i>
@@ -507,24 +474,10 @@ function SurveyorsManagement() {
               )}
               {/* Show reject button only if active */}
               {isActive && (
-                <button
-                  className="reject-btn"
-                  onClick={() =>
-                    updateStatus(s.id || s.surveyor_id, "not-validated")
-                  }
-                  title="Not Validate"
-                >
+                <button className="reject-btn" onClick={""} title="Invalidate">
                   <i className="fas fa-times-circle"></i>
                 </button>
               )}
-              {/* Delete button always visible */}
-              <button
-                className="delete-btn"
-                onClick={() => deleteSurveyor(s.id || s.surveyor_id)}
-                title="Delete"
-              >
-                <i className="fas fa-trash-alt"></i>
-              </button>
             </div>
           </td>
         </tr>
@@ -535,31 +488,23 @@ function SurveyorsManagement() {
   // ---------- JSX ----------
   return (
     <div className="app-container">
-      {/* toast */}
-      {/* {toast.visible && (
-        <div className={`toast show ${toast.type}`}>
-          <i
-            className={
-              toast.type === "success"
-                ? "fas fa-check-circle"
-                : "fas fa-exclamation-circle"
-            }
-          ></i>
-          <span>{toast.message}</span>
-        </div>
-      )} */}
-
+      {
+        <OTPModal
+          open={otpValidationModal}
+          onClose={() => setOtpValidationModal(false)}
+          onVerify={handleVerify}
+          email={emailForOTP}
+          otp={otp}
+          setOtp = {setOtp}
+        />
+      }
       {/* header */}
       <header className="app-header">
         <h2>
           <i className="fas fa-clipboard-list" style={{ color: "#7A1453"}}></i>
           Surveyors Management
           <span className="header-sub">Korba Nagar Nigam</span>
-        </h2>
-        {/* <div className="header-badge">
-          <i className="fas fa-user-cog"></i>
-          Admin Panel
-        </div> */}
+        </h1>
       </header>
 
       {/* stats */}
@@ -588,12 +533,6 @@ function SurveyorsManagement() {
           </div>
           <div className="stat-number">{validated}</div>
         </div>
-        {/* <div className="stat-card">
-          <div className="stat-label">
-            <i className="fas fa-times-circle"></i> Not Validated
-          </div>
-          <div className="stat-number">{notValidated}</div>
-        </div> */}
       </div>
 
       {/* add form */}
@@ -617,7 +556,6 @@ function SurveyorsManagement() {
                 value={formData.surveyor_name}
                 onChange={handleChange}
                 placeholder="John Doe"
-                // required
                 className={errors.surveyor_name ? "error" : ""}
               />
               {errors.surveyor_name && (
@@ -654,7 +592,6 @@ function SurveyorsManagement() {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="••••••••"
-                // required
                 className={errors.password ? "error" : ""}
               />
               {errors.password && (
@@ -689,26 +626,12 @@ function SurveyorsManagement() {
                 ></i>{" "}
                 Role <span className="required-fields">*</span>
               </label>
-              {/* <select
-                id="role"
-                value={formData.role}
-                onChange={handleChange}
-                // required
-                disabled
-                className={errors.role ? "error" : ""}
-              >
-                <option value="surveyor">Select Role</option>
-               
-                <option value="surveyor">Surveyor</option>
-                <option value="supervisor">Supervisor</option>
-              </select> */}
               <input
                 type="text"
                 id="role"
                 value={formData.role}
                 onChange={handleChange}
                 placeholder="e.g. SUR22336913"
-                // required
                 disabled
                 className={errors.role ? "error" : ""}
               />
@@ -716,24 +639,6 @@ function SurveyorsManagement() {
                 <span className="error-message">{errors.role}</span>
               )}
             </div>
-            {/* <div className="form-group">
-              <label>
-                <i className="fas fa-hashtag"></i> Surveyor ID{" "}
-                <span className="required-fields">*</span>
-              </label>
-              <input
-                type="text"
-                id="surveyor_id"
-                value={formData.surveyor_id}
-                onChange={handleChange}
-                placeholder="e.g. SUR22336913"
-                // required
-                className={errors.surveyor_id ? "error" : ""}
-              />
-              {errors.surveyor_id && (
-                <span className="error-message">{errors.surveyor_id}</span>
-              )}
-            </div> */}
             <div className="form-group">
               <label>
                 <i className="fas fa-envelope" style={{ color: "#7A1453" }}></i>{" "}
@@ -745,7 +650,6 @@ function SurveyorsManagement() {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="john@example.com"
-                // required
                 className={errors.email ? "error" : ""}
               />
               {errors.email && (
@@ -763,7 +667,6 @@ function SurveyorsManagement() {
                 value={formData.mobile}
                 onChange={handleChange}
                 placeholder="9876543210"
-                // required
                 className={errors.mobile ? "error" : ""}
                 maxLength={10}
               />
@@ -782,7 +685,6 @@ function SurveyorsManagement() {
                 value={formData.zone}
                 onChange={handleChange}
                 placeholder="Zone 1"
-                // required
                 className={errors.zone ? "error" : ""}
               />
               {errors.zone && (
@@ -820,7 +722,6 @@ function SurveyorsManagement() {
                 value={formData.ward}
                 onChange={handleChange}
                 placeholder="Ward A"
-                // required
                 className={errors.ward ? "error" : ""}
               />
               {errors.ward && (
@@ -854,14 +755,14 @@ function SurveyorsManagement() {
               </label>
               <input
                 type="text"
-                id="num_of_parcels"
-                value={formData.num_of_parcels}
+                id="target"
+                value={formData.target}
                 onChange={handleChange}
                 placeholder="120"
-                className={errors.num_of_parcels ? "error" : ""}
+                className={errors.target ? "error" : ""}
               />
-              {errors.num_of_parcels && (
-                <span className="error-message">{errors.num_of_parcels}</span>
+              {errors.target && (
+                <span className="error-message">{errors.target}</span>
               )}
             </div>
           </div>
@@ -871,28 +772,6 @@ function SurveyorsManagement() {
               <i className="fas fa-save" style={{ color: "white" }}></i> Add
               Surveyor
             </button>
-            {/* <button
-              type="reset"
-              className="btn btn-outline"
-              onClick={() =>
-                setFormData({
-                  username: "",
-                  password: "",
-                  surveyor_name: "",
-                  surveyor_name_hindi: "",
-                  role: "",
-                  surveyor_id: "",
-                  email: "",
-                  mobile: "",
-                  zone: "",
-                  zone_hindi: "",
-                  ward: "",
-                  ward_hindi: "",
-                })
-              }
-            >
-              <i className="fas fa-undo"></i> Reset
-            </button> */}
             <span className="hint-text">
               <i className="fas fa-info-circle"></i> All * fields are required
             </span>
@@ -929,7 +808,6 @@ function SurveyorsManagement() {
               <option value="">All Status</option>
               <option value="validated">Validated</option>
               <option value="pending">Pending</option>
-              <option value="not-validated">Not Validated</option>
             </select>
             <select
               value={zoneFilter}
@@ -938,7 +816,6 @@ function SurveyorsManagement() {
               <option value="">All Zones</option>
               <option value="Zone 1">Zone 1</option>
               <option value="Zone 2">Zone 2</option>
-              <option value="Zone 3">Zone 3</option>
             </select>
           </div>
           {/* <div className="date-picker">
@@ -965,9 +842,9 @@ function SurveyorsManagement() {
                 <th>Email</th>
                 <th>Mobile</th>
                 <th>Zone(EN)</th>
-                <th>Zone(HI)</th>
+                {/* <th>Zone(HI)</th> */}
                 <th>Ward(EN)</th>
-                <th>Ward(HI)</th>
+                {/* <th>Ward(HI)</th> */}
                 <th>Status</th>
                 <th style={{ textAlign: "center" }}>Action</th>
               </tr>
