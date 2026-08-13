@@ -504,7 +504,7 @@ function SurveyorsManagement() {
           <i className="fas fa-clipboard-list" style={{ color: "#7A1453"}}></i>
           Surveyors Management
           <span className="header-sub">Korba Nagar Nigam</span>
-        </h1>
+        </h2>
       </header>
 
       {/* stats */}
