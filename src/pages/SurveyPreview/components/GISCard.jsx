@@ -27,9 +27,10 @@ export default function GISCard({ data, surveyInfo, onUpdate }) {
 
   const openMap = () => {
     if (surveyInfo?.gps_latitude && surveyInfo?.gps_longitude) {
+    if (surveyInfo?.gps_latitude && surveyInfo?.gps_longitude) {
       window.open(
         `https://www.google.com/maps?q=${surveyInfo.gps_latitude},${surveyInfo.gps_longitude}`,
-        "_blank"
+        "_blank",
       );
     }
   };

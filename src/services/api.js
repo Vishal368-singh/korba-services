@@ -286,34 +286,65 @@ export const updateSurvey = async (surveyId, surveyData) => {
 };
 
 export const updateSurveyStatus = async (payload) => {
-  const token=localStorage.getItem("user")
-   ?JSON.parse(localStorage.getItem("user")).access_token
-   :null;
-  
-  if(!token){
+  const token = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user")).access_token
+    : null;
+
+  if (!token) {
     notify.error("No token found. Please log in first. ");
     throw new Error("No token first. Please log in first.");
   }
 
-  const response=await api.post("/survey/survey-approve-reject-by-surveyid",payload,{
-  headers:{
-     Authorization:`Bearer ${token}`,
-     "Content-Type":"application/json",
-  }, 
-  });
-   
-  if(response.status!==200 && response.status!==201){
+  const response = await api.post(
+    "/survey/survey-approve-reject-by-surveyid",
+    payload,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    },
+  );
+
+  if (response.status !== 200 && response.status !== 201) {
     notify.error(
-       payload.action=="approve"
-        ?"Failed to approve survey"
-        :"Failed to reject survey"
+      payload.action == "approve"
+        ? "Failed to approve survey"
+        : "Failed to reject survey",
     );
     throw new Error("Failed to update survey status");
   }
-  
-  notify.success(
-   payload.action=="approve"?"survey approved":"survey rejected"
-  );
-return response.data;
 
+  notify.success(
+    payload.action == "approve" ? "survey approved" : "survey rejected",
+  );
+  return response.data;
+};
+
+export const fetchSurveyStatusCounts = async () => {
+  const token = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user")).access_token
+    : null;
+
+  if (!token) {
+    notify.error("No token found. Please log in first");
+    throw new Error("No token found. Please log in first");
+  }
+
+  const response = await api.post(
+    "/survey/survey-status-count",
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  if (response.status !== 200) {
+    notify.error("Failed to fetch survey statistics");
+    throw new Error("Failed to fetch survey statistics");
+  }
+
+  return response.data;
 };

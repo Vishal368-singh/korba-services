@@ -1,129 +1,119 @@
-.sidebar{
+*{
+    box-sizing: border-box;
+}
+.sidebar {
+  width: 250px;
+  min-height: calc(100vh - 70px);
 
-    width:250px;
-    min-height:calc(100vh - 70px);
+  background: #7a1453;
 
-    background:#7a1453;
+  color: white;
 
-    color:white;
+  transition: 0.3s;
 
-    transition:.3s;
-
-    position:relative;
+  position: relative;
+  
 }
 
-.sidebar.collapsed{
+.sidebar.collapsed {
+  width: 75px;
 
-    width:75px;
 }
 
-.sidebar ul{
+.sidebar ul {
+  list-style: none;
 
-    list-style:none;
-
-    padding:20px 0;
+  padding: 20px 0;
 }
 
-.sidebar li{
-
-    margin-bottom:8px;
+.sidebar li {
+  margin-bottom: 8px;
 }
 
-.menu{
+.menu {
+  display: flex;
 
-    display:flex;
+  align-items: center;
 
-    align-items:center;
+  gap: 18px;
 
-    gap:18px;
+  padding: 15px 20px;
 
-    padding:15px 20px;
+  color: white;
 
-    color:white;
+  text-decoration: none;
 
-    text-decoration:none;
-
-    transition:.3s;
+  transition: 0.3s;
 }
 
-.menu:hover{
-
-    background:#5f0f40;
+.menu:hover {
+  background: #5f0f40;
 }
 
-.menu.active{
+.menu.active {
+  background: white;
 
-    background:white;
+  color: #7a1453;
 
-    color:#7a1453;
-
-    border-left:5px solid gold;
+  border-left: 5px solid gold;
 }
 
-.icon{
+.icon {
+  font-size: 20px;
 
-    font-size:20px;
-
-    min-width:25px;
+  min-width: 25px;
 }
 
-.title{
-
-    font-size:16px;
+.title {
+  font-size: 16px;
 }
 
-.collapse-btn{
+.collapse-btn {
+  position: absolute;
 
-    position:absolute;
+  right: -15px;
 
-    right:-15px;
+  top: 250px;
 
-    top: 400px;
+  width: 30px;
 
-    width:30px;
+  height: 30px;
 
-    height:30px;
+  border-radius: 50%;
 
-    border-radius:50%;
+  border: none;
 
-    border:none;
+  background: white;
 
-    background:white;
+  color: #7a1453;
 
-    color:#7a1453;
+  cursor: pointer;
 
-    cursor:pointer;
-
-    box-shadow:0 2px 8px rgba(0,0,0,.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* Tablet */
 
-@media(max-width:768px){
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 65px;
+    left: 0;
+    bottom: 0;         /* ✅ anchor to bottom instead of calculating height */
+    
+    width: 240px;
+    min-height: unset; /* remove the vh-based calculation for mobile */
+    
+    
+  }
 
-.sidebar{
+  .sidebar.collapsed {
+    transform: translateX(-100%);
 
-    position:fixed;
+    width: 240px;
+  }
 
-    top:70px;
-
-    left:0;
-
-    z-index:999;
-
-    width:240px;
-}
-
-.sidebar.collapsed{
-
-    transform:translateX(-100%);
-
-    width:240px;
-}
-
-.collapse-btn{
-
-    right:-15px;
-}
-
+  .collapse-btn {
+    display: none;
+  }
 }

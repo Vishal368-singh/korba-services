@@ -500,8 +500,8 @@ function SurveyorsManagement() {
       }
       {/* header */}
       <header className="app-header">
-        <h1>
-          <i className="fas fa-clipboard-list" style={{ color: "#7A1453" }}></i>
+        <h2>
+          <i className="fas fa-clipboard-list" style={{ color: "#7A1453"}}></i>
           Surveyors Management
           <span className="header-sub">Korba Nagar Nigam</span>
         </h1>

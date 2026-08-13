@@ -5,7 +5,11 @@ import RejectModal from "../../components/Rejectmodal";
 import { approveSurveyAPI } from "../../services/api";
 import { updateSurveyStatus } from "../../services/api";
 
-export default function SurveyTable({ data = [], activeTab }) {
+export default function SurveyTable({
+  data = [],
+  activeTab,
+  onActionComplete,
+}) {
   const navigate = useNavigate();
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [selectedSurveyId, setSelectedSurveyId] = useState(null);
@@ -18,8 +22,8 @@ export default function SurveyTable({ data = [], activeTab }) {
       ? JSON.parse(localStorage.getItem("user"))
       : null;
     return {
-      approved_by: user?.name || user?.username || "",
-      approver_id: user?.id || user?.user_id || "",
+      approved_by: user?.username || "",
+      approver_id: user?.user_id || "",
     };
   };
   const handleApprove = async (surveyId) => {
@@ -34,6 +38,7 @@ export default function SurveyTable({ data = [], activeTab }) {
         reason: "",
         reason_remark: "",
       });
+      onActionComplete?.();
     } catch (error) {
       console.error(error);
     }
@@ -48,16 +53,17 @@ export default function SurveyTable({ data = [], activeTab }) {
 
   const handleRejectSubmit = async ({ surveyId, reason, description }) => {
     try {
-      const {approved_by, approver_id}=getApproverInfo();
+      const { approved_by, approver_id } = getApproveInfo();
       await updateSurveyStatus({
-        survey_id:surveyId,
-        action:"reject",
+        survey_id: surveyId,
+        action: "reject",
         approved_by,
         approver_id,
-        reason:reason.join(","),
-        reason_remark:description,
+        reason: reason.join(","),
+        reason_remark: description.trim() || "No additional remarks",
       });
       setRejectModalOpen(false);
+      onActionComplete?.();
     } catch (error) {
       console.error(error);
     }
