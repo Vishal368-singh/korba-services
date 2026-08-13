@@ -1,7 +1,6 @@
 .multiselect-wrapper {
   position: relative;
-  width: 100%;
-  font-size: 14px;
+  min-height: 42px;
 }
 
 .multiselect-control {
@@ -15,7 +14,9 @@
   border-radius: 6px;
   background: #fff;
   cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .multiselect-control.open {
@@ -73,7 +74,7 @@
   border: 1px solid #ccc;
   border-radius: 6px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  z-index: 50;
+  z-index: 2000;
   max-height: 260px;
   display: flex;
   flex-direction: column;
