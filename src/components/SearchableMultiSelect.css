@@ -5,6 +5,7 @@
 
 .multiselect-control {
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
@@ -26,6 +27,7 @@
 
 .multiselect-tags {
   display: flex;
+  flex-direction: row;
   flex-wrap: wrap;
   gap: 6px;
   flex: 1;
@@ -102,16 +104,45 @@
 }
 
 .multiselect-option:hover {
-  background: #f5f5f8;
+  background: #7A1453;
 }
 
 .multiselect-option.selected {
-  background: #eef0ff;
-  color: #4338ca;
+  background: #7A1453;
+  color: white;
 }
 
 .multiselect-empty {
   padding: 12px;
   color: #999;
   text-align: center;
+}
+.multiselect-option input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  background-color: #fff;
+  border: 1px solid #999;
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.multiselect-option input[type="checkbox"]:checked {
+  background-color: #fff; /* stays white even when checked */
+  border-color: #666;
+}
+
+.multiselect-option input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+  border: solid black;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }

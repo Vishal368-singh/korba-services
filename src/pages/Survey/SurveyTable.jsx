@@ -38,7 +38,7 @@ export default function SurveyTable({
         reason: "",
         reason_remark: "",
       });
-      onActionComplete?.();
+      onActionComplete?.("approve");
     } catch (error) {
       console.error(error);
     }
@@ -63,7 +63,7 @@ export default function SurveyTable({
         reason_remark: description.trim() || "No additional remarks",
       });
       setRejectModalOpen(false);
-      onActionComplete?.();
+      onActionComplete?.("reject");
     } catch (error) {
       console.error(error);
     }
@@ -106,15 +106,7 @@ export default function SurveyTable({
               <td>{survey.zone}</td>
               <td>{survey.survey_date}</td>
 
-              <td>
-                <span className={`status ${activeTab.toLowerCase()}`}>
-                  {activeTab === "Pending"
-                    ? "Pending"
-                    : activeTab === "Approved"
-                      ? "Approved"
-                      : "Rejected"}
-                </span>
-              </td>
+              <td>{survey.status}</td>
 
               <td>
                 <div className="action-buttons">

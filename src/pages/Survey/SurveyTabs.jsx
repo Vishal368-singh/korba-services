@@ -18,29 +18,10 @@ const tabs = [
     key: "Rejected",
   },
 ];
-export default function SurveyTabs({ activeTab, setActiveTab }) {
-  const [counts, setCounts] = useState({});
+export default function SurveyTabs({ activeTab, setActiveTab, counts, loading }) {
 
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    loadStatistics();
-  }, []);
-
-  const loadStatistics = async () => {
-    try {
-      setLoading(true);
-      const response = await fetchSurveyStatusCounts();
-      setCounts(response.status_counts || {});
-    } catch (error) {
-      console.error("Error fetching survey statistics:", error);
-      setCounts({});
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return <div className="stats-grid">Loading statistics...</div>;
+  if(loading || !counts){
+    return<div className="stats-grid">Loading Statistics...</div>
   }
 
   return (

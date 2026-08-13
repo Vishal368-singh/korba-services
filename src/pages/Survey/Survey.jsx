@@ -15,6 +15,7 @@ import {
   fetchCompletedSurveys,
   fetchRejectedPendingSurveys,
   fetchAllSurveys,
+  fetchSurveyStatusCounts,
 } from "../../services/api";
 import SurveyStatistics from "./SurveyStatistics";
 import SurveyTabs from "./SurveyTabs";
@@ -25,7 +26,9 @@ export default function Survey() {
   const [activeTab, setActiveTab] = useState("Pending");
   const [surveyData, setSurveyData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [refreshKey,setRefreshKey]=useState(0);
+
+  const [optimisticCounts, setOptimisticCounts] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(true);
 
   const loadSurveyData = async () => {
     try {
@@ -63,14 +66,38 @@ export default function Survey() {
     }
   };
 
+  const loadStatistics = async () => {
+    try {
+      setStatsLoading(true);
+      const response = await fetchSurveyStatusCounts();
+      setOptimisticCounts(response.status_counts || {});
+    } catch (error) {
+      console.error("Error fetching survey statistics:", error);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadSurveyData();
   }, [activeTab]);
 
-  const handleActionComplete=()=>{
+  useEffect(() => {
+    loadStatistics();
+  }, []);
+
+  const handleActionComplete = (action) => {
     loadSurveyData();
-    setRefreshKey((prev)=>prev+1)
-  }
+    setOptimisticCounts((prev) => {
+      if (!prev) return prev;
+      const updated = { ...prev };
+      updated.Pending = Math.max(0, (updated.pending || 0) - 1);
+      if (action === "approve") updated.Approved = (updated.Approved || 0) + 1;
+      if (action === "reject") updated.Rejected = (updated.Rejected || 0) + 1;
+      return updated;
+    });
+    loadStatistics();
+  };
 
   return (
     <div className="survey-page">
@@ -95,10 +122,15 @@ export default function Survey() {
       </div>
 
       {/* Statistics */}
-      <SurveyStatistics refreshTrigger={refreshKey}/>
+      <SurveyStatistics counts={optimisticCounts} loading={statsLoading} />
 
       {/* Tabs */}
-      <SurveyTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+      <SurveyTabs
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        counts={optimisticCounts}
+        loading={statsLoading}
+      />
 
       {/* Filters */}
       <SurveyFilter />
@@ -107,7 +139,7 @@ export default function Survey() {
       <SurveyTable
         data={surveyData}
         activeTab={activeTab}
-        onActionComplete={loadSurveyData}
+        onActionComplete={handleActionComplete}
       />
     </div>
   );
