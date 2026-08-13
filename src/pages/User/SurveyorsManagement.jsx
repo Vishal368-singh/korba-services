@@ -243,6 +243,21 @@ function SurveyorsManagement() {
       }));
     }
   }, [formData.surveyor_name]);
+  useEffect(() => {
+    if (formData.surveyor_name && formData.surveyor_name.trim().length > 0) {
+      const firstName = formData.surveyor_name.trim().split(" ")[0];
+      setFormData((prev) => ({
+        ...prev,
+        username: firstName.toLowerCase(),
+      }));
+    } else {
+      // Clear username when surveyor_name is empty
+      setFormData((prev) => ({
+        ...prev,
+        username: "",
+      }));
+    }
+  }, [formData.surveyor_name]);
 
   const addSurveyor = async (payload) => {
     try {

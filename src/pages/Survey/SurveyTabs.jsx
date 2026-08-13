@@ -1,8 +1,9 @@
-export default function SurveyTabs({
-  activeTab,
-  setActiveTab,
-}) {
+export default function SurveyTabs({ activeTab, setActiveTab }) {
   const tabs = [
+    {
+      label: "All",
+      count: 2450,
+    },
     {
       label: "Pending",
       count: 220,
@@ -22,18 +23,12 @@ export default function SurveyTabs({
       {tabs.map((tab) => (
         <button
           key={tab.label}
-          className={
-            activeTab === tab.label
-              ? "tab active"
-              : "tab"
-          }
+          className={activeTab === tab.label ? "tab active" : "tab"}
           onClick={() => setActiveTab(tab.label)}
         >
           {tab.label}
 
-          <span className="tab-count">
-            {tab.count}
-          </span>
+          <span className="tab-count">{tab.count}</span>
         </button>
       ))}
     </div>

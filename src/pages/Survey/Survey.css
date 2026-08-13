@@ -9,7 +9,6 @@
 .survey-page {
     background: #f5f7fa;
     min-height: calc(100vh - 70px);
-    padding: 24px;
 }
 
 /* ==========================================================
@@ -228,13 +227,14 @@
 
 .survey-table thead {
     background: #7A1453;
-    color: white;
+    color:white;
 }
 
 .survey-table th {
     padding: 15px;
     text-align: left;
     white-space: nowrap;
+    color: white;
 }
 
 .survey-table td {
@@ -453,3 +453,5 @@ color:#777;
 }
 
 }
+
+
