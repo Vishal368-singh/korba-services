@@ -178,9 +178,9 @@ export const fetchSurveyorsList = async () => {
 };
 
 export const addSurveyorAPI = async (payload) => {
-  otpValidationModal
-  const token = localStorage.getItem("user") 
-    ? JSON.parse(localStorage.getItem("user")).access_token 
+  otpValidationModal;
+  const token = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user")).access_token
     : null;
 
   if (!token) {
@@ -203,13 +203,12 @@ export const addSurveyorAPI = async (payload) => {
   return response;
 };
 
-
 // Send OTP to email
 export const sendOTP = async (email) => {
-  const token = localStorage.getItem("user") 
-    ? JSON.parse(localStorage.getItem("user")).access_token 
+  const token = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user")).access_token
     : null;
-  
+
   if (!token) {
     notify.error("No token found. Please log in first.");
     throw new Error("No token found. Please log in first.");
@@ -232,18 +231,18 @@ export const sendOTP = async (email) => {
 
 // Verify OTP
 export const verifyOTP = async (email, otp) => {
-  const token = localStorage.getItem("user") 
-    ? JSON.parse(localStorage.getItem("user")).access_token 
+  const token = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user")).access_token
     : null;
-  
+
   if (!token) {
     notify.error("No token found. Please log in first.");
     throw new Error("No token found. Please log in first.");
   }
 
-  const payload = { 
-    email: email, 
-    otp: otp 
+  const payload = {
+    email: email,
+    otp: otp,
   };
   const response = await api.post(`/auth/verify-otp`, payload, {
     headers: {
@@ -261,10 +260,10 @@ export const verifyOTP = async (email, otp) => {
 
 // Update entire survey
 export const updateSurvey = async (surveyId, surveyData) => {
-  const token = localStorage.getItem("user") 
-    ? JSON.parse(localStorage.getItem("user")).access_token 
+  const token = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user")).access_token
     : null;
-  
+
   if (!token) {
     toast.error("No token found. Please log in first.");
     throw new Error("No token found. Please log in first.");
@@ -347,4 +346,21 @@ export const fetchSurveyStatusCounts = async () => {
   }
 
   return response.data;
+};
+
+// TODO: replace with real API call once TL provides the endpoint
+export const fetchKeyIndicators = async () => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        indicators: [
+          { key: "unique_parcels", label: "Unique Parcels", value: 181, subtext: "96.8% of Total Surveys" },
+          { key: "unique_properties", label: "Unique Properties", value: 187, subtext: "100% of Total Surveys" },
+          { key: "total_plot_area", label: "Total Plot Area (sq.ft.)", value: 301355, subtext: "100% of Total Surveys" },
+          { key: "total_builtup_area", label: "Total Built-up Area (sq.ft.)", value: 248853, subtext: "82.6% of Plot Area" },
+          { key: "vacant_properties", label: "Vacant Properties", value: 26, subtext: "13.9% of Total Properties" }
+        ],
+      });
+    }, 300);
+  });
 };

@@ -21,6 +21,7 @@ import SurveyStatistics from "./SurveyStatistics";
 import SurveyTabs from "./SurveyTabs";
 import SurveyFilter from "./SurveyFilter";
 import SurveyTable from "./SurveyTable";
+import notify from "../../utils/toast";
 
 export default function Survey() {
   const [activeTab, setActiveTab] = useState("Pending");
@@ -98,7 +99,10 @@ export default function Survey() {
     });
     loadStatistics();
   };
-
+  const handleRefreshClick = async () => {
+    await loadSurveyData();
+    notify.success("Data Refresh");
+  };
   return (
     <div className="survey-page">
       {/* Header */}
@@ -109,7 +113,7 @@ export default function Survey() {
         </div>
 
         <div className="header-actions">
-          <button className="refresh-btn" onClick={loadSurveyData}>
+          <button className="refresh-btn" onClick={handleRefreshClick}>
             <FaSyncAlt />
             Refresh
           </button>
