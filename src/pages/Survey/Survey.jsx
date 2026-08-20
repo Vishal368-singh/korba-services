@@ -21,14 +21,22 @@ import SurveyStatistics from "./SurveyStatistics";
 import SurveyTabs from "./SurveyTabs";
 import SurveyFilter from "./SurveyFilter";
 import SurveyTable from "./SurveyTable";
+import notify from "../../utils/toast";
+import Pagination from "./Pagination";
 
 export default function Survey() {
   const [activeTab, setActiveTab] = useState("Pending");
   const [surveyData, setSurveyData] = useState([]);
   const [loading, setLoading] = useState(false);
-
   const [optimisticCounts, setOptimisticCounts] = useState(null);
   const [statsLoading, setStatsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    total_surveys: 0,
+    total_pages: 1,
+    has_next: false,
+    has_previous: false,
+  });
 
   const loadSurveyData = async () => {
     try {
@@ -38,32 +46,49 @@ export default function Survey() {
 
       switch (activeTab) {
         case "Approved":
-          response = await fetchCompletedSurveys();
+          response = await fetchCompletedSurveys(currentPage);
           break;
 
         case "All":
-          response = await fetchAllSurveys();
+          response = await fetchAllSurveys(currentPage);
           break;
 
         case "Rejected":
-          response = await fetchRejectedPendingSurveys();
+          response = await fetchRejectedPendingSurveys(currentPage);
           response = response.rejected;
           break;
 
         case "Pending":
         default:
-          response = await fetchRejectedPendingSurveys();
+          response = await fetchRejectedPendingSurveys(currentPage);
           response = response.pending;
           break;
       }
 
       setSurveyData(response.surveys || []);
+      setPagination({
+        total_surveys: response.total_surveys ?? 0,
+        total_pages: response.total_pages ?? 1,
+        has_next: response.has_next ?? false,
+        has_previous: response.has_previous ?? false,
+      });
     } catch (error) {
       console.error("Error fetching survey data:", error);
       setSurveyData([]);
     } finally {
       setLoading(false);
     }
+  };
+  useEffect(() => {
+    loadSurveyData();
+  }, [activeTab, currentPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
   };
 
   const loadStatistics = async () => {
@@ -98,7 +123,10 @@ export default function Survey() {
     });
     loadStatistics();
   };
-
+  const handleRefreshClick = async () => {
+    await loadSurveyData();
+    notify.success("Data Refresh");
+  };
   return (
     <div className="survey-page">
       {/* Header */}
@@ -109,7 +137,7 @@ export default function Survey() {
         </div>
 
         <div className="header-actions">
-          <button className="refresh-btn" onClick={loadSurveyData}>
+          <button className="refresh-btn" onClick={handleRefreshClick}>
             <FaSyncAlt />
             Refresh
           </button>
@@ -140,6 +168,14 @@ export default function Survey() {
         data={surveyData}
         activeTab={activeTab}
         onActionComplete={handleActionComplete}
+      />
+      <Pagination
+        totalRecords={pagination.total_surveys}
+        currentPage={currentPage}
+        totalPages={pagination.total_pages}
+        hasNext={pagination.has_next}
+        hasPrevious={pagination.has_previous}
+        onPageChange={handlePageChange}
       />
     </div>
   );
