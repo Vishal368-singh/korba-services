@@ -12,6 +12,7 @@ body {
 .app-container {
   max-width: 1440px;
   margin: 0 auto;
+  margin-top: 70px;
 }
 /* ---- header ---- */
 .app-header {
@@ -22,18 +23,7 @@ body {
   flex-wrap: wrap;
   gap: 16px;
 }
-.app-header h1 {
-  font-size:22px;
-  font-weight: 700;
-  color: #0b2b4a;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.app-header h1 i {
-  color: #1a73e8;
-  font-size: 28px;
-}
+
 .header-sub {
   font-size: 14px;
   font-weight: 400;

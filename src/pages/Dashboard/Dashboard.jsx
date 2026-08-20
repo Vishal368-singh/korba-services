@@ -17,7 +17,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 ">
+    <div className="px-4 sm:px-6 lg:px-8 mt-[70px] ">
       <DashboardHeader
         startDate={startDate}
         endDate={endDate}
