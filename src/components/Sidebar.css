@@ -1,0 +1,250 @@
+* {
+  box-sizing: border-box;
+}
+
+/* =========================
+   SIDEBAR - DESKTOP
+   ========================= */
+
+.sidebar {
+  width: 250px;
+  min-height: calc(100vh - 70px);
+
+  background: #7a1453;
+  color: white;
+
+  position: relative;
+  z-index: 1000;
+
+  transition:
+    width 0.3s ease,
+    transform 0.3s ease;
+
+  overflow-x: hidden;
+}
+
+.sidebar.collapsed {
+  width: 75px;
+}
+
+/* =========================
+   SIDEBAR MENU
+   ========================= */
+
+.sidebar ul {
+  list-style: none;
+  padding: 20px 0;
+  margin: 0;
+}
+
+.sidebar li {
+  margin-bottom: 8px;
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+
+  padding: 15px 20px;
+
+  color: white;
+  text-decoration: none;
+
+  transition:
+    background 0.3s ease,
+    color 0.3s ease;
+}
+
+.menu:hover {
+  background: #5f0f40;
+}
+
+.menu.active {
+  background: white;
+  color: #7a1453;
+
+  border-left: 5px solid gold;
+}
+
+.icon {
+  font-size: 20px;
+  min-width: 25px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title {
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+/* =========================
+   COLLAPSE BUTTON
+   ========================= */
+
+.collapse-btn {
+  position: absolute;
+
+  right: -15px;
+  top: 250px;
+
+  width: 30px;
+  height: 30px;
+
+  border-radius: 50%;
+  border: none;
+
+  background: white;
+  color: #7a1453;
+
+  cursor: pointer;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+  z-index: 1001;
+}
+
+
+/* =====================================================
+   TABLET / MOBILE
+   Navbar height = 70px
+   ===================================================== */
+
+@media (max-width: 768px) {
+
+  .sidebar {
+    position: fixed;
+
+    /*
+     * Navbar is 70px at this breakpoint.
+     * Sidebar starts immediately below navbar.
+     */
+    top: 65px;
+    left: 0;
+
+    /*
+     * Remaining viewport after navbar.
+     */
+    height: calc(100dvh - 70px);
+
+    width: 240px;
+
+    min-height: 0;
+
+    background: #7a1453;
+
+    /*
+     * Sidebar gets its own scroll.
+     */
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    /*
+     * Navbar = 1001
+     * Sidebar = 1000
+     */
+    z-index: 1000;
+
+    -webkit-overflow-scrolling: touch;
+
+    /*
+     * Prevent sidebar scrolling from
+     * propagating to the page.
+     */
+    overscroll-behavior: contain;
+
+    transition: transform 0.3s ease;
+  }
+
+  /* =========================
+     MOBILE MENU
+     ========================= */
+
+  .sidebar ul {
+    padding: 20px 0;
+    margin: 0;
+  }
+
+  .sidebar li {
+    margin-bottom: 8px;
+  }
+
+  .menu {
+    display: flex;
+    align-items: center;
+
+    gap: 18px;
+
+    padding: 15px 20px;
+
+    min-height: 54px;
+  }
+
+  .icon {
+    font-size: 20px;
+    min-width: 25px;
+  }
+
+  .title {
+    font-size: 16px;
+    line-height: 1.4;
+  }
+
+  /* =========================
+     HIDE COLLAPSE BUTTON
+     ========================= */
+
+  .collapse-btn {
+    display: none;
+  }
+
+  /* =========================
+     COLLAPSED SIDEBAR
+     ========================= */
+
+  .sidebar.collapsed {
+    width: 240px;
+
+    transform: translateX(-100%);
+  }
+}
+
+
+/* =====================================================
+   SMALL MOBILE
+   Navbar height = 65px
+   ===================================================== */
+
+@media (max-width: 480px) {
+
+  .sidebar {
+    /*
+     * Your navbar becomes 65px here.
+     */
+    top: 65px;
+
+    /*
+     * Fill the remaining screen.
+     */
+    height: calc(100dvh - 65px);
+
+    width: 240px;
+  }
+
+  .menu {
+    gap: 16px;
+    padding: 14px 18px;
+  }
+
+  .icon {
+    font-size: 19px;
+    min-width: 24px;
+  }
+
+  .title {
+    font-size: 15px;
+  }
+}

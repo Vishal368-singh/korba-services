@@ -1,0 +1,206 @@
+/* ==========================================================
+   Common Section Card
+========================================================== */
+
+.section-card {
+    background: #ffffff;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    border: 1px solid #ececec;
+}
+
+/* ==========================================================
+   Section Header
+========================================================== */
+
+.section-header {
+    background: #7A1453;
+    color: #ffffff;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* ==========================================================
+   Section Body
+========================================================== */
+
+.section-body {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+}
+
+/* ==========================================================
+   Preview Field
+========================================================== */
+
+.preview-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.preview-field label {
+    font-size: 13px;
+    color: #666;
+    font-weight: 600;
+}
+
+.preview-value {
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+    padding: 12px 14px;
+    background: #fafafa;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    color: #333;
+    font-size: 15px;
+    word-break: break-word;
+}
+
+/* ==========================================================
+   Tables (Floor Details etc.)
+========================================================== */
+
+.table-wrapper {
+    padding: 20px;
+    overflow-x: auto;
+}
+
+.table-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 850px;
+}
+
+.table-wrapper th {
+    background: #7A1453;
+    color: white;
+    padding: 12px;
+    text-align: left;
+}
+
+.table-wrapper td {
+    padding: 12px;
+    border-bottom: 1px solid #ececec;
+}
+
+.table-wrapper tbody tr:hover {
+    background: #faf5f8;
+}
+
+/* ==========================================================
+   Images
+========================================================== */
+
+.image-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.image-card {
+    border: 1px solid #ececec;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.image-card img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+}
+
+.image-card h4 {
+    margin: 0;
+    padding: 12px;
+    font-size: 15px;
+    color: #7A1453;
+    background: #f7f7f7;
+}
+
+/* ==========================================================
+   Buttons
+========================================================== */
+
+.preview-action {
+    padding: 20px;
+}
+
+.preview-btn {
+    background: #7A1453;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.preview-btn:hover {
+    background: #5f0f40;
+}
+
+/* ==========================================================
+   Responsive
+========================================================== */
+
+@media (max-width: 992px) {
+
+    .section-body {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    .section-header {
+        padding: 14px 16px;
+    }
+
+    .section-header h3 {
+        font-size: 16px;
+    }
+
+    .section-body {
+        grid-template-columns: 1fr;
+        padding: 16px;
+    }
+
+    .table-wrapper {
+        padding: 16px;
+    }
+
+    .image-grid {
+        grid-template-columns: 1fr;
+        padding: 16px;
+    }
+
+}
+
+@media (max-width: 576px) {
+
+    .section-card {
+        border-radius: 10px;
+    }
+
+    .preview-value {
+        font-size: 14px;
+    }
+
+}

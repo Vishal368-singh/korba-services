@@ -1,0 +1,148 @@
+.multiselect-wrapper {
+  position: relative;
+  min-height: 42px;
+}
+
+.multiselect-control {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 42px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.multiselect-control.open {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.multiselect-tags {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1;
+}
+
+.multiselect-placeholder {
+  color: #999;
+}
+
+.multiselect-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #eef0ff;
+  color: #4338ca;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.tag-remove {
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.tag-remove:hover {
+  color: #e53935;
+}
+
+.multiselect-arrow {
+  color: #666;
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.multiselect-arrow.rotated {
+  transform: rotate(180deg);
+}
+
+.multiselect-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  z-index: 2000;
+  max-height: 260px;
+  display: flex;
+  flex-direction: column;
+}
+
+.multiselect-search {
+  padding: 10px 12px;
+  border: none;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  outline: none;
+}
+
+.multiselect-options {
+  overflow-y: auto;
+  max-height: 200px;
+}
+
+.multiselect-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.multiselect-option:hover {
+  background: #7A1453;
+}
+
+.multiselect-option.selected {
+  background: #7A1453;
+  color: white;
+}
+
+.multiselect-empty {
+  padding: 12px;
+  color: #999;
+  text-align: center;
+}
+.multiselect-option input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  background-color: #fff;
+  border: 1px solid #999;
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.multiselect-option input[type="checkbox"]:checked {
+  background-color: #fff; /* stays white even when checked */
+  border-color: #666;
+}
+
+.multiselect-option input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+  border: solid black;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
