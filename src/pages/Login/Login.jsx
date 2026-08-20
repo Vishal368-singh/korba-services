@@ -9,10 +9,13 @@ export default function Login() {
   const router = useNavigate();
 
   const handleSubmit = async (e) => {
+    
     const payload = {
       username: e.target[0].value,
       password: e.target[1].value,
     };
+
+   
     e.preventDefault();  {/* the default behavior of a <form> is to submit the form and reload the page. */ }
     const response = await login(payload);
     localStorage.setItem("user", JSON.stringify(response));
