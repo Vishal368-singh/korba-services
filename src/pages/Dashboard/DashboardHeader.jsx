@@ -3,7 +3,13 @@ import DateRangePicker from "./DateRangePicker";
 
 const PRIMARY = "#7a1453";
 
-export default function DashboardHeader({ startDate, endDate, onDateChange }) {
+export default function DashboardHeader({
+  startDate,
+  endDate,
+  onDateChange,
+  onDownloadReport,
+  isDownloading,
+}) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-4">
       <div>
@@ -20,15 +26,15 @@ export default function DashboardHeader({ startDate, endDate, onDateChange }) {
           startDate={startDate}
           endDate={endDate}
           onChange={onDateChange}
-          
         />
         <button
+          onClick={onDownloadReport}
+          disabled={isDownloading}
           style={{ backgroundColor: PRIMARY }}
           className="flex items-center justify-center gap-2 text-white px-5 py-2 h-10 rounded-lg text-sm font-medium hover:opacity-90 transition w-60 sm:w-70"
         >
           <FaDownload />
-          Download Report
-          <FaChevronDown className="text-xs" />
+          {isDownloading ? "Generating..." : "Download Report"}
         </button>
       </div>
     </div>

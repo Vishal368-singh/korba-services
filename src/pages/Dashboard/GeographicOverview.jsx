@@ -20,7 +20,7 @@ export default function GeographicOverview() {
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-5 flex flex-col">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-[#7a1453] mt-1 ml-2">
           Geographic Overview
         </h3>

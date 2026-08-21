@@ -25,15 +25,8 @@
   flex-wrap: wrap;
 }
 
-.page-header h2 {
-  color: #7a1453;
-  font-size: 28px;
-  margin-bottom: 5px;
-}
 
-.page-header p {
-  color: #666;
-}
+
 
 .header-actions {
   display: flex;
