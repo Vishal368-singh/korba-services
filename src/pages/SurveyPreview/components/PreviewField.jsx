@@ -1,69 +1,93 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, IconButton, Box, Typography, useMediaQuery, useTheme } from '@mui/material';
-import { Edit, Save, Cancel } from '@mui/icons-material';
+import {
+  TextField,
+  Box,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
 
-export default function PreviewField({ 
-  label, 
-  value, 
-  onChange, 
+export default function PreviewField({
+  label,
+  value,
+  onChange,
   fieldKey,
-  type = 'text',
+  type = "text",
   disabled = true,
   multiline = false,
   rows = 1,
   required = false,
   isMobile = false,
-  suffix = '' // Add this prop
-}) {
-  const [isEditing, setIsEditing] = useState(false);
+  suffix = "",
+  error = "",
+}){
   const [localValue, setLocalValue] = useState(value || '');
+  const [localError, setLocalError] = useState('');
 
   const theme = useTheme();
   const isSmallMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  // Update local value when prop changes
   useEffect(() => {
     setLocalValue(value || '');
+    setLocalError('');
   }, [value]);
 
-  // Reset editing state when disabled prop changes
-  useEffect(() => {
-    if (disabled) {
-      setIsEditing(false);
-    }
-  }, [disabled]);
-
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
-
-  const handleSave = () => {
-    if (onChange && fieldKey) {
-      onChange(fieldKey, localValue);
-    }
-    setIsEditing(false);
-  };
-
-  const handleCancel = () => {
-    setLocalValue(value || '');
-    setIsEditing(false);
-  };
-
   const handleChange = (e) => {
-    setLocalValue(e.target.value);
-  };
+    let newValue = e.target.value;
 
-  const showEditButton = !disabled && !isEditing;
+    // Mobile number
+    if (fieldKey === 'mobile_number') {
+      // Only numbers
+      newValue = newValue.replace(/\D/g, '');
+
+      // Maximum 10 digits
+      newValue = newValue.slice(0, 10);
+
+      setLocalValue(newValue);
+
+      // Clear error while user is entering
+      if (newValue.length === 10) {
+        if (!/^[6-9]\d{9}$/.test(newValue)) {
+          setLocalError('Enter a valid 10-digit mobile number');
+        } else {
+          setLocalError('');
+        }
+      } else {
+        setLocalError('');
+      }
+
+      onChange(fieldKey, newValue);
+      return;
+    }
+
+    setLocalValue(newValue);
+    onChange(fieldKey, newValue);
+
+    if (required && !newValue.trim()) {
+      setLocalError(`${label} is required`);
+    } else {
+      setLocalError('');
+    }
+  };
 
   return (
-    <Box className="preview-field" sx={{ mb: isMobile ? 1 : 2 }}>
-      <Box sx={{ 
-        display: 'flex', 
-        flexDirection: isSmallMobile ? 'column' : 'row',
-        alignItems: isSmallMobile ? 'stretch' : 'flex-start', 
-        gap: isSmallMobile ? 1 : 2 
-      }}>
+    <Box
+      className="preview-field"
+      sx={{
+        mb: isMobile ? 1 : 2,
+      }}
+    >
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: isSmallMobile ? 'column' : 'row',
+          alignItems: isSmallMobile ? 'stretch' : 'flex-start',
+          gap: isSmallMobile ? 1 : 2,
+        }}
+      >
         <Box sx={{ flex: 1 }}>
+
+          {/* Label */}
           <Typography
             variant="caption"
             sx={{
@@ -77,51 +101,86 @@ export default function PreviewField({
             }}
           >
             {label}
-            {required && <span style={{ color: '#ef4444', marginLeft: '4px' }}>*</span>}
+
+            {required && (
+              <span
+                style={{
+                  color: '#ef4444',
+                  marginLeft: '4px',
+                }}
+              >
+                *
+              </span>
+            )}
           </Typography>
 
-          {isEditing ? (
+          {/* EDIT MODE */}
+          {!disabled ? (
             <TextField
               fullWidth
               value={localValue}
               onChange={handleChange}
-              type={type}
+              type={
+                fieldKey === 'mobile_number'
+                  ? 'tel'
+                  : type
+              }
               multiline={multiline}
               rows={multiline ? rows : 1}
-              size={isSmallMobile ? "small" : "small"}
+              size="small"
               variant="outlined"
-              autoFocus
+              error={!!localError}
+              helperText={localError}
+              inputProps={
+                fieldKey === 'mobile_number'
+                  ? {
+                      maxLength: 10,
+                      inputMode: 'numeric',
+                    }
+                  : {}
+              }
               sx={{
                 '& .MuiOutlinedInput-root': {
                   backgroundColor: '#ffffff',
+
                   '& fieldset': {
                     borderColor: '#7A1453',
-                    borderWidth: '2px',
                   },
+
                   '&:hover fieldset': {
                     borderColor: '#7A1453',
                   },
+
                   '&.Mui-focused fieldset': {
                     borderColor: '#7A1453',
                     borderWidth: '2px',
                   },
                 },
+
                 '& .MuiInputBase-input': {
                   fontSize: isMobile ? '13px' : '14px',
                   color: '#0b2b4a',
-                  padding: isSmallMobile ? '8px 12px' : '10px 14px',
+                  padding: isSmallMobile
+                    ? '8px 12px'
+                    : '10px 14px',
                 },
               }}
             />
           ) : (
+
+            /* VIEW MODE */
             <Typography
               variant="body2"
               sx={{
                 color: '#0b2b4a',
                 fontSize: isMobile ? '13px' : '14px',
                 fontWeight: 500,
-                padding: isSmallMobile ? '6px 8px' : '8px 12px',
-                minHeight: isSmallMobile ? '32px' : '36px',
+                padding: isSmallMobile
+                  ? '6px 8px'
+                  : '8px 12px',
+                minHeight: isSmallMobile
+                  ? '32px'
+                  : '36px',
                 backgroundColor: '#f8fafc',
                 borderRadius: '4px',
                 wordBreak: 'break-word',
@@ -131,60 +190,7 @@ export default function PreviewField({
               {value || '—'} {suffix}
             </Typography>
           )}
-        </Box>
 
-        <Box sx={{ 
-          display: 'flex', 
-          gap: 0.5, 
-          mt: isSmallMobile ? 0 : 2.5,
-          alignSelf: isSmallMobile ? 'flex-end' : 'flex-start',
-        }}>
-          {isEditing ? (
-            <>
-              <IconButton
-                size={isSmallMobile ? "small" : "small"}
-                onClick={handleSave}
-                sx={{
-                  color: '#22c55e',
-                  padding: isSmallMobile ? '4px' : '8px',
-                  '&:hover': {
-                    backgroundColor: 'rgba(34, 197, 94, 0.08)',
-                  },
-                }}
-              >
-                <Save fontSize={isSmallMobile ? "small" : "small"} />
-              </IconButton>
-              <IconButton
-                size={isSmallMobile ? "small" : "small"}
-                onClick={handleCancel}
-                sx={{
-                  color: '#ef4444',
-                  padding: isSmallMobile ? '4px' : '8px',
-                  '&:hover': {
-                    backgroundColor: 'rgba(239, 68, 68, 0.08)',
-                  },
-                }}
-              >
-                <Cancel fontSize={isSmallMobile ? "small" : "small"} />
-              </IconButton>
-            </>
-          ) : (
-            showEditButton && (
-              <IconButton
-                size={isSmallMobile ? "small" : "small"}
-                onClick={handleEdit}
-                sx={{
-                  color: '#7A1453',
-                  padding: isSmallMobile ? '4px' : '8px',
-                  '&:hover': {
-                    backgroundColor: 'rgba(122, 20, 83, 0.08)',
-                  },
-                }}
-              >
-                <Edit fontSize={isSmallMobile ? "small" : "small"} />
-              </IconButton>
-            )
-          )}
         </Box>
       </Box>
     </Box>

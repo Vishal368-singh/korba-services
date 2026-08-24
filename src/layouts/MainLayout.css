@@ -1,33 +1,102 @@
-.layout{
-    min-height:100vh;
-    background:#f5f7fa;
+/* ================================
+   MAIN LAYOUT
+   ================================ */
+
+.layout {
+  min-height: 100vh;
+  background: #f5f7fa;
 }
 
-/* .layout-body{
-    display:flex;
+
+/* ================================
+   NAVBAR SPACE
+   ================================ */
+
+/*
+   Navbar height:
+   Desktop / tablet = 70px
+   Mobile <= 480px = 65px
+*/
+
+
+/* ================================
+   LAYOUT BODY
+   ================================ */
+
+.layout-body {
+  display: flex;
+
+  /*
+   * Leave space for the 70px navbar.
+   */
+  min-height: calc(100vh - 70px);
+
+  width: 100%;
 }
 
-.layout-content{
-    flex:1;
-    padding:20px;
-    overflow-x:hidden;
-    background:#f5f7fa;
-} */
 
-.layout-body{
+/* ================================
+   MAIN CONTENT
+   ================================ */
 
-    display:flex;
+.layout-content {
+  flex: 1;
 
-    min-height:calc(100vh - 70px);
+  min-width: 0;
+
+  padding: 20px;
+
+  background: #f5f7fa;
+
+  overflow-x: hidden;
+
+  transition: margin-left 0.3s ease;
 }
 
-.layout-content{
 
-    flex:1;
+/* ================================
+   MOBILE
+   ================================ */
 
-    padding:20px;
+@media (max-width: 768px) {
 
-    overflow-x:hidden;
+  .layout-body {
+    /*
+     * Navbar is 70px at this breakpoint.
+     */
+    min-height: calc(100vh - 70px);
 
-    transition:all .3s ease;
+    display: block;
+  }
+
+  .layout-content {
+    width: 100%;
+
+    padding: 15px;
+
+    /*
+     * Sidebar is an overlay on mobile,
+     * so don't reserve 240px here.
+     */
+    margin-left: 0;
+  }
+}
+
+
+/* ================================
+   SMALL MOBILE
+   ================================ */
+
+@media (max-width: 480px) {
+
+  .layout-body {
+    /*
+     * Navbar becomes 65px.
+     */
+    min-height: calc(100vh - 65px);
+  }
+
+  .layout-content {
+    padding: 12px;
+  }
 }
