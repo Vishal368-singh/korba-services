@@ -8,7 +8,7 @@ import {
   useTheme,
   Grid,
 } from "@mui/material";
-import { Edit, Save, Cancel, Map, Image } from "@mui/icons-material";
+import { Edit, Save, Cancel, Map } from "@mui/icons-material";
 import PreviewField from "./PreviewField";
 import "../SectionCard.css";
 import "../SurveyPreview.css";
