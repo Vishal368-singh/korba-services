@@ -431,20 +431,20 @@ export const fetchRevenueBreakdown = async () => {
         totalCount: 187,
         segments: [
           {
-            label: "Zone 1 (High)",
+            label: "Zone 1",
             value: 69,
             percent: 36.9,
             color: "#7a1453",
           },
           {
-            label: "Zone 2 (Medium)",
+            label: "Zone 2",
             value: 57,
             percent: 30.5,
             color: "#a8306e",
           },
-          { label: "Zone 3 (Low)", value: 38, percent: 20.3, color: "#c96b98" },
+          { label: "Zone 3", value: 38, percent: 20.3, color: "#c96b98" },
           {
-            label: "Zone 4 (Very Low)",
+            label: "Zone 4",
             value: 23,
             percent: 12.3,
             color: "#e6b8cf",
