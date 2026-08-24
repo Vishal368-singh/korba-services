@@ -19,8 +19,8 @@
   transition:
     width 0.3s ease,
     transform 0.3s ease;
-
   overflow-x: hidden;
+  padding-top: 50px;
 }
 
 .sidebar.collapsed {
@@ -107,14 +107,12 @@
   z-index: 1001;
 }
 
-
 /* =====================================================
    TABLET / MOBILE
    Navbar height = 70px
    ===================================================== */
 
 @media (max-width: 768px) {
-
   .sidebar {
     position: fixed;
 
@@ -157,6 +155,7 @@
     overscroll-behavior: contain;
 
     transition: transform 0.3s ease;
+    padding-top: 0;
   }
 
   /* =========================
@@ -212,14 +211,12 @@
   }
 }
 
-
 /* =====================================================
    SMALL MOBILE
    Navbar height = 65px
    ===================================================== */
 
 @media (max-width: 480px) {
-
   .sidebar {
     /*
      * Your navbar becomes 65px here.

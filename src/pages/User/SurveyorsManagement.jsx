@@ -502,16 +502,16 @@ function SurveyorsManagement() {
           onVerify={handleVerify}
           email={emailForOTP}
           otp={otp}
-          setOtp = {setOtp}
+          setOtp={setOtp}
         />
       }
       {/* header */}
       <header className="app-header">
-        <h2>
-          <i className="fas fa-clipboard-list" style={{ color: "#7A1453"}}></i>
+        <h1 className="text-2xl sm:text-3xl  text-[#7a1453]">
           Surveyors Management
-          <span className="header-sub">Korba Nagar Nigam</span>
-        </h2>
+        </h1>
+
+        <span className="header-sub">Korba Nagar Nigam</span>
       </header>
 
       {/* stats */}

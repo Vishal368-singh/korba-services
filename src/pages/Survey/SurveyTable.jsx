@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { FaEye, FaCheck, FaTimes } from "react-icons/fa";
+import { FaEye, FaCheck, FaTimes, FaDownload } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import RejectModal from "../../components/Rejectmodal";
 import { approveSurveyAPI } from "../../services/api";
 import { updateSurveyStatus } from "../../services/api";
+import { fetchSurveyBySurveyID } from "../../services/api";
+import { generateSurveyPdf } from "../../utils/generateSurveyPdf";
 
 export default function SurveyTable({
   data = [],
@@ -13,6 +15,21 @@ export default function SurveyTable({
   const navigate = useNavigate();
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [selectedSurveyId, setSelectedSurveyId] = useState(null);
+  const [downloadingId, setDownloadingId] = useState(null);
+
+  const handleDownloadReport = async (surveyId) => {
+    try {
+      setDownloadingId(surveyId);
+      const response = await fetchSurveyBySurveyID(surveyId);
+      if (response.success) {
+        await generateSurveyPdf(response.survey);
+      }
+    } catch (error) {
+      console.error("Failed to generate survey report:", error);
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   const handlePreview = (surveyId) => {
     navigate(`/surveys/${surveyId}`);
@@ -117,7 +134,18 @@ export default function SurveyTable({
                     <FaEye />
                     Preview
                   </button>
-
+                  {activeTab === "All" && (
+                    <button
+                      className="preview-btn"
+                      onClick={() => handleDownloadReport(survey.survey_id)}
+                      disabled={downloadingId === survey.survey_id}
+                    >
+                      <FaDownload />
+                      {downloadingId === survey.survey_id
+                        ? "Generating..."
+                        : "Download"}
+                    </button>
+                  )}
                   {activeTab === "Pending" && (
                     <>
                       <button
