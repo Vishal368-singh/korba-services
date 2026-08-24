@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaArrowLeft, FaEdit, FaSave } from "react-icons/fa";
+import { FaArrowLeft, FaSave } from "react-icons/fa";
 import { fetchSurveyBySurveyID } from "../../services/api";
 import SurveyInformationCard from "./components/SurveyInformationCard.jsx";
 import OwnerDetailsCard from "./components/OwnerDetailsCard";
@@ -26,11 +26,7 @@ export default function SurveyPreview() {
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
-  useEffect(() => {
-    loadSurvey();
-  }, [surveyId]);
-
-  const loadSurvey = async () => {
+  const loadSurvey = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetchSurveyBySurveyID(surveyId);
@@ -42,7 +38,15 @@ export default function SurveyPreview() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [surveyId]);
+
+  useEffect(() => {
+    const loadSurveyAsync = async () => {
+      await loadSurvey();
+    };
+
+    loadSurveyAsync();
+  }, [loadSurvey]);
 
   // Update handler for each section
   const handleSectionUpdate = (sectionKey, updatedData) => {

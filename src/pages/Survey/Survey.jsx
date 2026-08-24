@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
-  FaClipboardList,
-  FaCheckCircle,
-  FaClock,
-  FaTimesCircle,
-  FaSearch,
-  FaEye,
+  // FaClipboardList,
+  // FaCheckCircle,
+  // FaClock,
+  // FaTimesCircle,
+  // FaSearch,
+  // FaEye,
   FaSyncAlt,
   FaFileExport,
 } from "react-icons/fa";
@@ -38,7 +38,7 @@ export default function Survey() {
     has_previous: false,
   });
 
-  const loadSurveyData = async () => {
+  const loadSurveyData = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -78,14 +78,19 @@ export default function Survey() {
     } finally {
       setLoading(false);
     }
-  };
-  useEffect(() => {
-    loadSurveyData();
   }, [activeTab, currentPage]);
-
   useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      loadSurveyData();
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
+  }, [loadSurveyData]);
+
+  const handleTabChange = (tab) => {
     setCurrentPage(1);
-  }, [activeTab]);
+    setActiveTab(tab);
+  };
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
@@ -104,11 +109,11 @@ export default function Survey() {
   };
 
   useEffect(() => {
-    loadSurveyData();
-  }, [activeTab]);
+    const timeoutId = setTimeout(() => {
+      loadStatistics();
+    }, 0);
 
-  useEffect(() => {
-    loadStatistics();
+    return () => clearTimeout(timeoutId);
   }, []);
 
   const handleActionComplete = (action) => {
@@ -155,7 +160,7 @@ export default function Survey() {
       {/* Tabs */}
       <SurveyTabs
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleTabChange}
         counts={optimisticCounts}
         loading={statsLoading}
       />

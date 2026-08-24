@@ -3,7 +3,7 @@ import "./SurveyorsManagement.css";
 import notify from "../../utils/toast";
 import { addSurveyorAPI, fetchSurveyorsList } from "../../services/api";
 import OTPModal from "./OtpModal/OTPModal";
-import { sendOTP, verifyOTP } from "../../services/api";
+// import { sendOTP, verifyOTP } from "../../services/api";
 
 function SurveyorsManagement() {
   // ---------- state ----------
@@ -31,11 +31,11 @@ function SurveyorsManagement() {
   const [statusFilter, setStatusFilter] = useState("");
   const [zoneFilter, setZoneFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
-  const [toast, setToast] = useState({
-    visible: false,
-    message: "",
-    type: "success",
-  });
+  // const [toast, setToast] = useState({
+  //   visible: false,
+  //   message: "",
+  //   type: "success",
+  // });
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10); // you can make this a dropdown later
@@ -44,11 +44,6 @@ function SurveyorsManagement() {
   const [otpValidationModal, setOtpValidationModal] = useState(false);
   const [emailForOTP, setEmailForOTP] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-
-  // Reset to first page when search/filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, statusFilter, zoneFilter]);
 
   // ---------- ref for toast timeout ----------
   const toastTimeout = useRef(null);
@@ -140,25 +135,25 @@ function SurveyorsManagement() {
   const validated = surveyors.filter(
     (s) => s.status.toLowerCase() === "validated",
   ).length;
-  const notValidated = surveyors.filter(
-    (s) => s.status === "not-validated",
-  ).length;
+  // const notValidated = surveyors.filter(
+  //   (s) => s.status === "not-validated",
+  // ).length;
 
   // ---------- toast ----------
-  const showToast = (message, type = "success") => {
-    if (toastTimeout.current) clearTimeout(toastTimeout.current);
-    setToast({ visible: true, message, type });
-    toastTimeout.current = setTimeout(() => {
-      setToast({ visible: false, message: "", type: "success" });
-    }, 3000);
-  };
+  // const showToast = (message, type = "success") => {
+  //   if (toastTimeout.current) clearTimeout(toastTimeout.current);
+  //   setToast({ visible: true, message, type });
+  //   toastTimeout.current = setTimeout(() => {
+  //     setToast({ visible: false, message: "", type: "success" });
+  //   }, 3000);
+  // };
 
   // ---------- CRUD operations (mock API) ----------
-  const apiCall = (method, endpoint, data = null) => {
-    return new Promise((resolve) => {
-      setTimeout(() => resolve({ success: true, data }), 300);
-    });
-  };
+  // const apiCall = (method, endpoint, data = null) => {
+  //   return new Promise((resolve) => {
+  //     setTimeout(() => resolve({ success: true, data }), 300);
+  //   });
+  // };
 
   // ---------- form handlers ----------
   const handleChange = (e) => {
@@ -170,7 +165,19 @@ function SurveyorsManagement() {
       sanitizedValue = value.replace(/\D/g, ""); // remove non-digits
     }
 
-    setFormData((prev) => ({ ...prev, [id]: sanitizedValue }));
+    setFormData((prev) => {
+      if (id === "surveyor_name") {
+        const firstName = sanitizedValue.trim().split(/\s+/)[0] || "";
+        return {
+          ...prev,
+          [id]: sanitizedValue,
+          username: firstName ? firstName.toLowerCase() : "",
+        };
+      }
+
+      return { ...prev, [id]: sanitizedValue };
+    });
+
     // Clear error for this field if it exists
     if (errors[id]) {
       setErrors((prev) => ({ ...prev, [id]: "" }));
@@ -424,7 +431,7 @@ function SurveyorsManagement() {
 
     return paginatedData.map((s, idx) => {
       const isActive = s.status?.toLowerCase() === "validated";
-      const displayStatus = isActive ? "validated" : "pending";
+     // const displayStatus = isActive ? "validated" : "pending";
 
       let statusBadge;
       if (isActive) {
@@ -797,13 +804,19 @@ function SurveyorsManagement() {
               type="text"
               placeholder="Search by name, ID, email..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
             />
           </div>
           <div className="filter-group">
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setCurrentPage(1);
+              }}
             >
               <option value="">All Status</option>
               <option value="validated">Validated</option>
@@ -811,7 +824,10 @@ function SurveyorsManagement() {
             </select>
             <select
               value={zoneFilter}
-              onChange={(e) => setZoneFilter(e.target.value)}
+              onChange={(e) => {
+                setZoneFilter(e.target.value);
+                setCurrentPage(1);
+              }}
             >
               <option value="">All Zones</option>
               <option value="Zone 1">Zone 1</option>
