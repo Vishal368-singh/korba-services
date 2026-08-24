@@ -196,7 +196,7 @@ function DocumentsSection({ data }) {
 
 export default function SurveyReportTemplate({ survey }) {
   if (!survey) return null;
-
+console.log(survey, "survey in report template");
   const info = survey.survey_information || {};
 
   return (
