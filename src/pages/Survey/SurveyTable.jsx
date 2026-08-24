@@ -132,7 +132,7 @@ export default function SurveyTable({
                     onClick={() => handlePreview(survey.survey_id)}
                   >
                     <FaEye />
-                    Preview
+                    View / Edit
                   </button>
                   {activeTab === "All" && (
                     <button

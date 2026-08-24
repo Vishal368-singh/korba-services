@@ -7,18 +7,19 @@ import {
   FaLock,
   FaPlusSquare,
   FaLayerGroup,
+  FaCity,
 } from "react-icons/fa";
+import { LandPlot } from "lucide-react";
 import { fetchKeyIndicators } from "../../services/api.js";
 
 const PRIMARY = "#7a1453";
 
 const ICON_MAP = {
   unique_parcels: FaMapMarkedAlt,
-  unique_properties: FaHome,
+  unique_properties: FaCity,
   total_plot_area: FaThLarge,
   total_builtup_area: FaBuilding,
-  vacant_properties: FaLock,
-
+  vacant_properties: LandPlot,
   new_construction: FaPlusSquare,
   additional_floor_constructed: FaLayerGroup,
 };
@@ -38,16 +39,15 @@ function IndicatorCard({ item }) {
         >
           <Icon />
         </div>
-        <p className="text-xs text-gray-500  leading-snug">
-          {item.label}
-        </p>
+        <p className="text-xs text-gray-500  leading-snug">{item.label}</p>
       </div>
 
       <div className="flex flex-col items-center gap-1">
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
           {formatValue(item.value)}
         </h2>
-        <p className="text-xs  text-gray-400 mb-10">{item.subtext}</p>
+
+        <p className="text-xs  text-[#7a1453] mb-10">{item.subtext}</p>
       </div>
     </div>
   );

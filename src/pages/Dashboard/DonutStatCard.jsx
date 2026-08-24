@@ -77,7 +77,7 @@ export default function DonutStatCard({ title, fetchFn }) {
           {title}
         </h3>
 
-        <FaEllipsisH className="text-gray-400 text-sm cursor-pointer mr-2 hover:text-black" />
+       
       </div>
 
       <div className="flex items-center w-full justify-between gap-2.5 ">

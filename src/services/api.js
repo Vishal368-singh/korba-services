@@ -356,21 +356,21 @@ export const fetchKeyIndicators = async () => {
         indicators: [
           {
             key: "unique_parcels",
-            label: "Unique Parcels",
+            label: "Land Parcels",
             value: 181,
-            subtext: "96.8% of Total Surveys",
+            // subtext: "96.8% of Total Surveys",
           },
           {
             key: "unique_properties",
             label: "Unique Properties",
             value: 187,
-            subtext: "100% of Total Surveys",
+            // subtext: "100% of Total Surveys",
           },
           {
             key: "total_plot_area",
-            label: "Total Plot Area (sq.ft.)",
+            label: "Total Parcel Area (sq.ft.)",
             value: 301355,
-            subtext: "100% of Total Surveys",
+            subtext: "100% of Total Parcels",
           },
           {
             key: "total_builtup_area",

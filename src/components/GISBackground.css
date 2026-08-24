@@ -1,0 +1,118 @@
+.gis-background {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
+  background: #4b1223;
+
+  z-index: 0;
+
+  pointer-events: none;
+}
+
+
+/* Canvas */
+
+.gis-canvas {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  display: block;
+}
+
+
+/* Dark overlay */
+
+.gis-background .map-overlay {
+  position: absolute;
+  inset: 0;
+
+  background: radial-gradient(
+    circle at 50% 45%,
+    rgba(20, 5, 10, 0.08),
+    rgba(20, 5, 10, 0.42) 78%
+  );
+
+  z-index: 2;
+
+  pointer-events: none;
+}
+
+
+/* Scanline */
+
+.gis-background .scanline {
+  position: absolute;
+
+  left: 0;
+  right: 0;
+
+  height: 2px;
+
+  background: rgba(255, 255, 255, 0.025);
+
+  animation: scanMove 12s linear infinite;
+
+  pointer-events: none;
+
+  z-index: 4;
+}
+
+
+@keyframes scanMove {
+  0% {
+    top: -5%;
+  }
+
+  100% {
+    top: 105%;
+  }
+}
+
+
+/* Labels */
+
+.gis-background .map-label {
+  position: absolute;
+
+  color: rgba(255, 255, 255, 0.22);
+
+  font-size: 10px;
+
+  letter-spacing: 2px;
+
+  text-transform: uppercase;
+
+  z-index: 3;
+
+  pointer-events: none;
+}
+
+
+.gis-background .label-a {
+  top: 16%;
+  left: 12%;
+}
+
+
+.gis-background .label-b {
+  top: 68%;
+  left: 74%;
+}
+
+
+.gis-background .label-c {
+  top: 31%;
+  left: 58%;
+}
+
+
+.gis-background .label-d {
+  top: 78%;
+  left: 22%;
+}

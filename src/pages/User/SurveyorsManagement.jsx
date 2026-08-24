@@ -511,7 +511,7 @@ function SurveyorsManagement() {
           Surveyors Management
         </h1>
 
-        <span className="header-sub">Korba Nagar Nigam</span>
+       
       </header>
 
       {/* stats */}

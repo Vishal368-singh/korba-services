@@ -24,7 +24,6 @@ export default function GeographicOverview() {
         <h3 className="text-sm font-semibold text-[#7a1453] mt-1 ml-2">
           Geographic Overview
         </h3>
-        <FaEllipsisH className="text-gray-400 text-sm cursor-pointer mr-2 hover:text-black"/>
       </div>
 
       {/* Explicit responsive height instead of flex-1/h-full, prevents Leaflet sizing glitches */}
