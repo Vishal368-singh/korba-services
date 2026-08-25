@@ -62,7 +62,7 @@ const CustomTooltip = ({ active, payload }) => {
     const seg = payload[0].payload;
     console.log("**********", seg);
     return (
-      <div className="bg-white border border-gray-200 rounded-lg shadow-md  gap-0 px-3 py-2  min-w-[130px] text-xs">
+      <div className="bg-white border border-gray-200 rounded-lg shadow-md  gap-0 px-3 py-2  min-w-32.5 text-xs">
         <div className="flex items-center justify-center gap-2 mb-2">
           <p className="text-xs font-semibold text-gray-800">{seg.label}</p>
         </div>
