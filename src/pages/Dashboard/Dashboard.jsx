@@ -270,7 +270,7 @@ export default function Dashboard() {
 
       <DashboardCharts data = {dashboardData} />
       <PropertyBreakdowns  data = {dashboardData} />
-      <DataCompletenes />
+       <DataCompletenes data={dashboardData?.data_completeness} />
     </div>
   );
 }
