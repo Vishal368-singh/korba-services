@@ -21,6 +21,10 @@ const formatDate = (value) => {
 };
 
 
+/* =========================================================
+   DISPLAY VALUE
+========================================================= */
+
 const displayValue = (value) => {
   if (
     value === null ||
@@ -34,7 +38,20 @@ const displayValue = (value) => {
     return value ? "Yes" : "No";
   }
 
+  if (typeof value === "string") {
+    const lower = value.toLowerCase().trim();
+
+    if (lower === "true") return "Yes";
+    if (lower === "false") return "No";
+  }
+
   if (typeof value === "object") {
+    if (Array.isArray(value)) {
+      return value.length
+        ? `${value.length} file(s)`
+        : "—";
+    }
+
     if (value.text !== undefined) {
       return String(value.text);
     }
@@ -51,10 +68,89 @@ const displayValue = (value) => {
       return String(value.name);
     }
 
+    if (value.url !== undefined) {
+      return String(value.url);
+    }
+
     return "—";
   }
 
   return String(value);
+};
+
+
+/* =========================================================
+   CHECKED VALUE
+========================================================= */
+
+const isChecked = (value) => {
+  if (value === true) {
+    return true;
+  }
+
+  if (typeof value === "string") {
+    const normalized =
+      value.toLowerCase().trim();
+
+    return (
+      normalized === "true" ||
+      normalized === "yes" ||
+      normalized === "1" ||
+      normalized === "checked"
+    );
+  }
+
+  if (typeof value === "number") {
+    return value === 1;
+  }
+
+  return false;
+};
+
+
+/* =========================================================
+   IMAGE SOURCE
+========================================================= */
+
+const getImageSrc = (value) => {
+  if (!value) {
+    return null;
+  }
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  if (
+    typeof value === "object" &&
+    value.url
+  ) {
+    return value.url;
+  }
+
+  return null;
+};
+
+
+/* =========================================================
+   FLOOR SUMMARY
+========================================================= */
+
+const getFloorSummary = (floorDetail) => {
+  if (
+    !Array.isArray(floorDetail) ||
+    floorDetail.length === 0
+  ) {
+    return "—";
+  }
+
+  const floors = floorDetail
+    .map((item) => item?.floor)
+    .filter(Boolean);
+
+  return floors.length
+    ? floors.join(", ")
+    : "—";
 };
 
 
@@ -71,35 +167,37 @@ function Section({
   return (
     <section
       className={`
-        mb-[5px]
         w-full
-        break-inside-avoid
         overflow-hidden
-        rounded-[2px]
+        rounded-[1px]
         border
-        border-[#bdbdbd]
+        border-[#b7b7b7]
+        bg-white
         ${className}
       `}
+      style={{
+        boxSizing: "border-box",
+        marginBottom: "2.2mm",
+      }}
     >
-
-      {/* SECTION TITLE */}
+      {/* SECTION HEADER */}
 
       <div
         className="
           border-b
-          border-[#bdbdbd]
-          bg-[#f7f7f7]
+          border-[#b7b7b7]
+          bg-[#f4f4f4]
           px-[7px]
-          py-[4px]
+          py-[3px]
         "
       >
         <h2
           className="
             m-0
-            text-[9px]
+            text-[8px]
             font-bold
             leading-none
-            text-[#222222]
+            text-[#222]
           "
         >
           {number}. {title}
@@ -108,17 +206,21 @@ function Section({
 
       {/* SECTION CONTENT */}
 
-      <div className="px-[7px] py-[5px]">
+      <div
+        className="
+          px-[7px]
+          py-[3.5px]
+        "
+      >
         {children}
       </div>
-
     </section>
   );
 }
 
 
 /* =========================================================
-   ALIGNED FIELD
+   FIELD
 ========================================================= */
 
 function Field({
@@ -129,107 +231,145 @@ function Field({
   return (
     <div
       className="
-        grid
-        min-w-0
-        grid-cols-[42%_58%]
+        flex
         items-start
+        gap-[5px]
         border-b
-        border-[#e4e4e4]
-        py-[2px]
+        border-[#e1e1e1]
+        py-[1.5px]
       "
+      style={{
+        minHeight: "5mm",
+        boxSizing: "border-box",
+      }}
     >
-
       {/* LABEL */}
 
       <span
         className="
+          w-[47%]
+          shrink-0
           pr-1
-          text-[7.8px]
+          text-[7px]
           font-bold
           leading-[1.25]
-          text-[#333333]
+          text-[#333]
         "
       >
         {label}
       </span>
-
 
       {/* VALUE */}
 
       <span
         className="
           min-w-0
+          flex-1
           break-words
-          text-[7.8px]
+          text-[7px]
           leading-[1.25]
-          text-[#444444]
+          text-[#444]
         "
       >
         {date
           ? formatDate(value)
           : displayValue(value)}
       </span>
-
     </div>
   );
 }
 
 
 /* =========================================================
-   VERIFICATION ITEM
+   CHECK ITEM
 ========================================================= */
 
-function VerificationItem({
+function CheckItem({
   label,
   checked,
+  widthClass = "w-1/4",
 }) {
+  const active = isChecked(checked);
+
   return (
     <div
-      className="
+      className={`
+        ${widthClass}
+        box-border
         flex
-        min-h-[20px]
         items-center
-        gap-[5px]
+        gap-[7px]
         border-b
         border-r
-        border-[#d5d5d5]
+        border-[#bcbcbc]
         px-[6px]
         py-[3px]
-      "
+      `}
+      style={{
+        minHeight: "8mm",
+        boxSizing: "border-box",
+      }}
     >
+      {/* CHECKBOX */}
 
       <span
-        className={`
-          flex
-          h-[10px]
-          w-[10px]
-          shrink-0
-          items-center
-          justify-center
-          border
-          text-[7px]
-          font-bold
-          leading-none
-          ${
-            checked
-              ? "border-[#333333] bg-[#333333] text-white"
-              : "border-[#888888] bg-white text-[#666666]"
-          }
-        `}
+        style={{
+          width: "13px",
+          height: "13px",
+          minWidth: "13px",
+          minHeight: "13px",
+
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+
+          boxSizing: "border-box",
+
+          border: active
+            ? "1.8px solid #111"
+            : "1.5px solid #555",
+
+          backgroundColor: active
+            ? "#111"
+            : "#fff",
+
+          color: active
+            ? "#fff"
+            : "transparent",
+
+          fontSize: "10px",
+          fontWeight: "900",
+
+          lineHeight: "1",
+
+          fontFamily:
+            "Arial, Helvetica, sans-serif",
+
+          flexShrink: 0,
+        }}
       >
-        {checked ? "✓" : ""}
+        {active ? "✓" : ""}
       </span>
 
+      {/* LABEL */}
+
       <span
-        className="
-          text-[7px]
-          leading-tight
-          text-[#444444]
-        "
+        style={{
+          minWidth: 0,
+          flex: 1,
+
+          fontSize: "6.8px",
+          lineHeight: "1.2",
+
+          color: "#222",
+
+          fontWeight: 500,
+
+          overflowWrap: "break-word",
+        }}
       >
         {label}
       </span>
-
     </div>
   );
 }
@@ -242,70 +382,88 @@ function VerificationItem({
 function DocumentItem({
   label,
   uploaded,
+  count,
 }) {
   return (
     <div
       className="
-        grid
-        min-h-[20px]
-        grid-cols-[7px_1fr_auto]
+        box-border
+        flex
+        w-1/2
         items-center
         gap-[5px]
         border-b
         border-r
-        border-[#d5d5d5]
+        border-[#bcbcbc]
         px-[6px]
-        py-[3px]
+        py-[2.5px]
       "
+      style={{
+        minHeight: "7.2mm",
+      }}
     >
+      {/* STATUS DOT */}
 
       <span
-        className={`
-          h-[6px]
-          w-[6px]
-          rounded-full
-          ${
+        style={{
+          width: "7px",
+          height: "7px",
+          minWidth: "7px",
+
+          borderRadius: "50%",
+
+          backgroundColor:
             uploaded
-              ? "bg-[#333333]"
-              : "bg-[#aaa]"
-          }
-        `}
+              ? "#222"
+              : "#b5b5b5",
+
+          flexShrink: 0,
+        }}
       />
+
+      {/* LABEL */}
 
       <span
         className="
           min-w-0
-          text-[7px]
+          flex-1
+          text-[6.7px]
           leading-tight
-          text-[#444444]
+          text-[#333]
         "
       >
         {label}
       </span>
 
+      {/* STATUS */}
+
       <strong
         className="
+          shrink-0
           whitespace-nowrap
-          text-[6.5px]
+          text-[6.1px]
           font-semibold
-          text-[#555555]
+          text-[#555]
         "
       >
         {uploaded
-          ? "Uploaded"
-          : "N/A"}
+          ? `Uploaded${
+              count
+                ? ` (${count})`
+                : ""
+            }`
+          : "Not Uploaded"}
       </strong>
-
     </div>
   );
 }
 
 
 /* =========================================================
-   MEDIA BOX
+   IMAGE BOX
 ========================================================= */
 
-function MediaBox({
+function ImageBox({
   src,
   title,
 }) {
@@ -313,18 +471,21 @@ function MediaBox({
     <div
       className="
         flex
-        h-[32mm]
         min-w-0
+        flex-1
         flex-col
         overflow-hidden
-        rounded-[2px]
+        rounded-[1px]
         border
-        border-[#c8c8c8]
+        border-[#b5b5b5]
         bg-white
       "
+      style={{
+        height: "34mm",
+        boxSizing: "border-box",
+      }}
     >
-
-      {/* IMAGE */}
+      {/* IMAGE AREA */}
 
       <div
         className="
@@ -341,6 +502,7 @@ function MediaBox({
           <img
             src={src}
             alt={title}
+            crossOrigin="anonymous"
             className="
               h-full
               w-full
@@ -350,16 +512,15 @@ function MediaBox({
         ) : (
           <span
             className="
-              text-[8px]
+              text-[7px]
               font-semibold
-              text-[#999999]
+              text-[#999]
             "
           >
-            PHOTO / MAP
+            NO IMAGE
           </span>
         )}
       </div>
-
 
       {/* TITLE */}
 
@@ -371,26 +532,94 @@ function MediaBox({
           items-center
           justify-center
           border-t
-          border-[#c8c8c8]
+          border-[#b5b5b5]
           bg-white
           px-1
           text-center
-          text-[7px]
+          text-[6.5px]
           font-bold
           leading-none
-          text-[#333333]
+          text-[#333]
         "
       >
         {title}
       </div>
-
     </div>
   );
 }
 
 
 /* =========================================================
-   MAIN COMPONENT
+   QUICK INFO
+========================================================= */
+
+function QuickInfoStrip({
+  items,
+}) {
+  return (
+    <div
+      className="
+        mb-[2.2mm]
+        flex
+        overflow-hidden
+        rounded-[1px]
+        border
+        border-[#555]
+      "
+      style={{
+        minHeight: "11mm",
+      }}
+    >
+      {items.map(
+        ([label, value], index) => (
+          <div
+            key={label}
+            className={`
+              min-w-0
+              flex-1
+              px-[6px]
+              py-[2.5px]
+              ${
+                index !==
+                items.length - 1
+                  ? "border-r border-[#555]"
+                  : ""
+              }
+            `}
+          >
+            <div
+              className="
+                truncate
+                text-[6px]
+                font-semibold
+                uppercase
+                tracking-wide
+                text-[#777]
+              "
+            >
+              {label}
+            </div>
+
+            <div
+              className="
+                truncate
+                text-[7.5px]
+                font-bold
+                text-[#222]
+              "
+            >
+              {displayValue(value)}
+            </div>
+          </div>
+        )
+      )}
+    </div>
+  );
+}
+
+
+/* =========================================================
+   MAIN REPORT
 ========================================================= */
 
 export default function SurveyReportTemplate({
@@ -400,9 +629,8 @@ export default function SurveyReportTemplate({
     return null;
   }
 
-
   /* =======================================================
-     DATA
+     API DATA
   ======================================================= */
 
   const info =
@@ -423,15 +651,47 @@ export default function SurveyReportTemplate({
   const utility =
     survey.utility_connections || {};
 
+  const gis =
+    survey.gis_information || {};
+
   const verification =
     survey.verification || {};
 
   const documents =
     survey.documents_collected || {};
 
+  const remarks =
+    survey.surveyor_remarks
+      ?.surveyor_remarks ??
+    survey.surveyor_remarks;
+
 
   /* =======================================================
-     VERIFICATION
+     GIS FIELDS
+  ======================================================= */
+
+  const gisFields = [
+    [
+      "GIS Property Polygon",
+      "gis_property_polygon_available",
+    ],
+    [
+      "Boundary Verified",
+      "property_boundary_verified",
+    ],
+    [
+      "Geo Tag Completed",
+      "geo_tag_completed",
+    ],
+    [
+      "Property Photo Captured",
+      "property_photo_captured",
+    ],
+  ];
+
+
+  /* =======================================================
+     VERIFICATION FIELDS
   ======================================================= */
 
   const verificationFields = [
@@ -471,56 +731,66 @@ export default function SurveyReportTemplate({
 
 
   /* =======================================================
-     DOCUMENTS
+     DOCUMENT FIELDS
   ======================================================= */
 
   const documentFields = [
     [
       "Aadhaar Copy",
       "aadhaar_copy",
+      "aadhaar_copy_files",
     ],
     [
       "Electricity Bill",
       "electricity_bill",
+      "electricity_bill_files",
     ],
     [
       "Water Bill",
       "water_bill",
+      "water_bill_files",
     ],
     [
       "Sale Deed",
       "sale_deed",
+      "sale_deed_files",
     ],
     [
       "Property Tax Receipt",
       "property_tax_receipt",
+      "property_tax_receipt_files",
     ],
     [
       "Building Permission",
       "building_permission",
+      "building_permission_files",
     ],
     [
       "Other Documents",
       "other_documents",
+      "other_documents_files",
     ],
   ];
 
 
   /* =======================================================
-     MEDIA
+     IMAGE FIELDS
   ======================================================= */
 
-  const propertyPhoto =
-    survey.property_photo ||
-    survey.propertyPhoto;
-
-  const propertyMap =
-    survey.property_map ||
-    survey.propertyMap;
-
-  const areaChart =
-    survey.area_chart ||
-    survey.areaChart;
+  const imageFields = [
+    [
+      "Front Elevation",
+      gis.front_elevation_photo_path,
+    ],
+    [
+      "Name Plate",
+      gis.name_plate_photo_path,
+    ],
+    [
+      "Property Photo",
+      gis.property_photo_path,
+    ],
+  ];
 
 
   /* =======================================================
@@ -530,86 +800,126 @@ export default function SurveyReportTemplate({
   return (
     <div
       id="survey-report"
-      className="
-        mx-auto
-        box-border
-        w-[196mm]
-        bg-white
-        font-sans
-        text-[#333333]
-        print:m-0
-        print:w-[196mm]
-      "
+      style={{
+        width: "202mm",
+        margin: "0 auto",
+        padding: "4mm",
+
+        boxSizing: "border-box",
+
+        backgroundColor: "#fff",
+
+        fontFamily:
+          "Arial, Helvetica, sans-serif",
+
+        color: "#333",
+      }}
     >
 
-      {/* ===================================================
+      {/* =================================================
           HEADER
-      =================================================== */}
+      ================================================= */}
 
       <header
-        className="
-          mb-[5px]
-          border-b-2
-          border-[#444444]
-          pb-[5px]
-          text-center
-        "
-      >
+        style={{
+          textAlign: "center",
 
+          borderBottom:
+            "1.5px solid #444",
+
+          paddingBottom: "2.5mm",
+
+          marginBottom: "2.2mm",
+        }}
+      >
         <h1
-          className="
-            m-0
-            text-[12px]
-            font-bold
-            leading-tight
-          "
+          style={{
+            margin: 0,
+
+            fontSize: "11px",
+
+            fontWeight: 700,
+
+            lineHeight: 1.15,
+
+            color: "#222",
+          }}
         >
           OFFICE OF THE MUNICIPAL CORPORATION /
           MUNICIPAL COUNCIL / MUNICIPALITY
         </h1>
 
         <p
-          className="
-            mt-[2px]
-            text-[8px]
-            font-bold
-            leading-tight
-          "
+          style={{
+            margin:
+              "1mm 0 0",
+
+            fontSize: "7px",
+
+            fontWeight: 700,
+
+            lineHeight: 1.1,
+          }}
         >
-          KORBA NAGAR NIGAM, KORBA (CHHATTISGARH)
+          KORBA NAGAR NIGAM, KORBA
+          (CHHATTISGARH)
         </p>
 
         <p
-          className="
-            mt-[2px]
-            text-[7px]
-            text-[#555555]
-          "
-        >
-          Property Survey & Assessment Report
-        </p>
+          style={{
+            margin:
+              "0.8mm 0 0",
 
+            fontSize: "6px",
+
+            color: "#666",
+
+            lineHeight: 1.1,
+          }}
+        >
+          Property Survey &amp;
+          Assessment Report
+        </p>
       </header>
 
 
-      {/* ===================================================
-          1. GENERAL PROPERTY INFORMATION
-      =================================================== */}
+      {/* =================================================
+          QUICK INFO
+      ================================================= */}
+
+      <QuickInfoStrip
+        items={[
+          [
+            "Survey ID",
+            info.survey_id,
+          ],
+          [
+            "Property ID",
+            info.property_id,
+          ],
+          [
+            "Parcel No.",
+            info.parcel_no,
+          ],
+          [
+            "Surveyor",
+            info.surveyor_name,
+          ],
+        ]}
+      />
+
+
+      {/* =================================================
+          1. SURVEY INFORMATION
+      ================================================= */}
 
       <Section
         number="1"
-        title="GENERAL PROPERTY INFORMATION"
+        title="SURVEY INFORMATION"
       >
+        <div className="flex gap-x-[7px]">
 
-        <div
-          className="
-            grid
-            grid-cols-3
-            gap-x-[10px]
-          "
-        >
-
-          <div>
+          <div className="min-w-0 flex-1">
             <Field
               label="Survey ID"
               value={info.survey_id}
@@ -627,181 +937,194 @@ export default function SurveyReportTemplate({
             />
 
             <Field
-              label="Colony / Locality"
-              value={info.colony_locality}
+              label="Zone"
+              value={info.zone}
             />
           </div>
 
 
-          <div>
+          <div className="min-w-0 flex-1">
             <Field
               label="Property ID"
               value={info.property_id}
             />
 
             <Field
-              label="Surveyor"
-              value={info.surveyor_name}
+              label="Existing Property ID"
+              value={
+                info.existing_property_id
+              }
             />
 
             <Field
-              label="Zone"
-              value={info.zone}
-            />
-
-            <Field
-              label="Property Location"
-              value={info.property_location}
-            />
-          </div>
-
-
-          <div>
-            <Field
-              label="Parcel No."
+              label="Parcel Number"
               value={info.parcel_no}
             />
 
             <Field
+              label="Colony / Locality"
+              value={
+                info.colony_locality
+              }
+            />
+          </div>
+
+
+          <div className="min-w-0 flex-1">
+            <Field
+              label="Surveyor Name"
+              value={
+                info.surveyor_name
+              }
+            />
+
+            <Field
               label="Surveyor ID"
-              value={info.surveyor_id}
+              value={
+                info.surveyor_id
+              }
             />
 
             <Field
               label="Tax Rate Zone"
-              value={info.tax_rate_zone}
+              value={
+                info.tax_rate_zone
+              }
             />
 
             <Field
-              label="Existing Property ID"
-              value={info.existing_property_id}
+              label="Property Location"
+              value={
+                info.property_location
+              }
+            />
+          </div>
+
+
+          <div className="min-w-0 flex-1">
+            <Field
+              label="GPS Latitude"
+              value={
+                info.gps_latitude
+              }
+            />
+
+            <Field
+              label="GPS Longitude"
+              value={
+                info.gps_longitude
+              }
             />
           </div>
 
         </div>
-
       </Section>
 
 
-      {/* ===================================================
-          2. OWNER
-      =================================================== */}
+      {/* =================================================
+          2 + 3
+      ================================================= */}
 
-      <Section
-        number="2"
-        title="PROPERTY OWNER INFORMATION"
+      <div
+        className="flex gap-[5px]"
+        style={{
+          marginBottom: "2.2mm",
+        }}
       >
 
-        <div
-          className="
-            grid
-            grid-cols-2
-            gap-x-[12px]
-          "
+        <Section
+          number="2"
+          title="OWNER DETAILS"
+          className="mb-0 min-w-0 flex-1"
         >
+          <Field
+            label="Owner Name"
+            value={
+              owner.owner_name
+            }
+          />
 
-          <div>
+          <Field
+            label="Father / Husband Name"
+            value={
+              owner.father_husband_name
+            }
+          />
 
-            <Field
-              label="Owner Name"
-              value={owner.owner_name}
-            />
+          <Field
+            label="Mobile Number"
+            value={
+              owner.mobile_number
+            }
+          />
 
-            <Field
-              label="Father / Husband Name"
-              value={
-                owner.father_husband_name
-              }
-            />
-
-            <Field
-              label="Mobile Number"
-              value={
-                owner.mobile_number
-              }
-            />
-
-          </div>
-
-
-          <div>
-
-            <Field
-              label="Correspondence Address"
-              value={
-                owner.correspondence_address
-              }
-            />
-
-            <Field
-              label="Property Ownership"
-              value={
-                property.property_ownership
-              }
-            />
-
-            <Field
-              label="Property Status"
-              value={
-                property.property_status
-              }
-            />
-
-          </div>
-
-        </div>
-
-      </Section>
+          <Field
+            label="Correspondence Address"
+            value={
+              owner.correspondence_address
+            }
+          />
+        </Section>
 
 
-      {/* ===================================================
-          3. USE & CONSTRUCTION
-      =================================================== */}
+        <Section
+          number="3"
+          title="PROPERTY DETAILS"
+          className="mb-0 min-w-0 flex-1"
+        >
+          <Field
+            label="Property Status"
+            value={
+              property.property_status
+            }
+          />
+
+          <Field
+            label="Building Permission Available"
+            value={
+              property.building_permission_available
+            }
+          />
+
+          <Field
+            label="Property Ownership"
+            value={
+              property.property_ownership
+            }
+          />
+        </Section>
+
+      </div>
+
+
+      {/* =================================================
+          4. LAND & BUILDING
+      ================================================= */}
 
       <Section
-        number="3"
-        title="PROPERTY USE & CONSTRUCTION INFORMATION"
+        number="4"
+        title="LAND & BUILDING INFORMATION"
       >
+        <div className="flex gap-x-[7px]">
 
-        <div
-          className="
-            grid
-            grid-cols-3
-            gap-x-[10px]
-          "
-        >
-
-          <div>
-
+          <div className="min-w-0 flex-1">
             <Field
-              label="Primary Use"
-              value={usage.primary_use}
-            />
-
-            <Field
-              label="Building Permission"
+              label="Plot Area (Sq. Ft.)"
               value={
-                property.building_permission_available
+                land.plot_area
               }
             />
 
             <Field
-              label="Number of Families"
+              label="Plinth Area"
               value={
-                usage.number_of_families
+                land.plinth_area
               }
             />
-
           </div>
 
 
-          <div>
-
-            <Field
-              label="Mixed Use"
-              value={usage.mixed_use}
-            />
-
+          <div className="min-w-0 flex-1">
             <Field
               label="Year of Construction"
               value={
@@ -810,322 +1133,120 @@ export default function SurveyReportTemplate({
             />
 
             <Field
-              label="Number of Shops"
+              label="Building Age"
               value={
-                usage.number_of_shops
+                land.building_age
+                  ? `${land.building_age} Year(s)`
+                  : land.building_age
               }
             />
-
           </div>
 
 
-          <div>
-
+          <div className="min-w-0 flex-1">
             <Field
-              label="Occupancy"
-              value={usage.occupancy}
-            />
-
-            <Field
-              label="Building Age"
-              value={land.building_age}
+              label="Total Built-up Area"
+              value={
+                land.total_builtup_area
+              }
             />
 
             <Field
               label="Floor Details"
-              value={land.floor_details}
+              value={
+                getFloorSummary(
+                  land.floor_detail
+                )
+              }
             />
-
           </div>
 
         </div>
-
       </Section>
 
 
-      {/* ===================================================
-          4. AREA & BUILDING
-      =================================================== */}
+      {/* =================================================
+          5 + 6
+      ================================================= */}
 
-      <Section
-        number="4"
-        title="AREA & BUILDING DETAILS"
+      <div
+        className="flex gap-[5px]"
+        style={{
+          marginBottom: "2.2mm",
+        }}
       >
 
-        {/* AREA SUMMARY */}
-
-        <div
-          className="
-            grid
-            grid-cols-4
-            gap-x-[8px]
-            border-b
-            border-[#d5d5d5]
-            pb-[4px]
-          "
+        <Section
+          number="5"
+          title="USAGE DETAILS"
+          className="mb-0 min-w-0 flex-1"
         >
+          <div className="flex gap-x-[7px]">
 
-          <Field
-            label="Plot Area (Sq. Ft.)"
-            value={land.plot_area}
-          />
+            <div className="min-w-0 flex-1">
 
-          <Field
-            label="Plinth Area"
-            value={land.plinth_area}
-          />
+              <Field
+                label="Primary Use"
+                value={
+                  usage.primary_use
+                }
+              />
 
-          <Field
-            label="Built-up Area"
-            value={
-              land.total_builtup_area
-            }
-          />
+              <Field
+                label="Mixed Use"
+                value={
+                  usage.mixed_use
+                }
+              />
 
-          <Field
-            label="Construction Year"
-            value={
-              land.year_of_construction
-            }
-          />
+              <Field
+                label="Occupancy"
+                value={
+                  usage.occupancy
+                }
+              />
 
-        </div>
+            </div>
 
 
-        {/* TABLE */}
+            <div className="min-w-0 flex-1">
 
-        <div
-          className="
-            mt-[5px]
-            overflow-hidden
-            border
-            border-[#bdbdbd]
-          "
+              <Field
+                label="No. of Families"
+                value={
+                  usage.number_of_families
+                }
+              />
+
+              <Field
+                label="No. of Shops"
+                value={
+                  usage.number_of_shops
+                }
+              />
+
+            </div>
+
+          </div>
+        </Section>
+
+
+        <Section
+          number="6"
+          title="UTILITY CONNECTIONS"
+          className="mb-0 min-w-0 flex-1"
         >
-
-          <table
-            className="
-              w-full
-              table-fixed
-              border-collapse
-              text-center
-            "
-          >
-
-            <colgroup>
-
-              <col className="w-[16%]" />
-
-              <col className="w-[12%]" />
-              <col className="w-[12%]" />
-
-              <col className="w-[12%]" />
-              <col className="w-[12%]" />
-
-              <col className="w-[12%]" />
-              <col className="w-[12%]" />
-
-              <col className="w-[12%]" />
-
-            </colgroup>
-
-
-            <thead>
-
-              <tr>
-
-                <th
-                  rowSpan={2}
-                  className="
-                    border
-                    border-[#bdbdbd]
-                    bg-[#f7f7f7]
-                    px-[3px]
-                    py-[4px]
-                    text-[7px]
-                    font-bold
-                  "
-                >
-                  FLOOR
-                </th>
-
-                <th
-                  colSpan={2}
-                  className="
-                    border
-                    border-[#bdbdbd]
-                    bg-[#f7f7f7]
-                    px-[3px]
-                    py-[4px]
-                    text-[7px]
-                    font-bold
-                  "
-                >
-                  RESIDENTIAL
-                </th>
-
-                <th
-                  colSpan={2}
-                  className="
-                    border
-                    border-[#bdbdbd]
-                    bg-[#f7f7f7]
-                    px-[3px]
-                    py-[4px]
-                    text-[7px]
-                    font-bold
-                  "
-                >
-                  COMMERCIAL
-                </th>
-
-                <th
-                  colSpan={2}
-                  className="
-                    border
-                    border-[#bdbdbd]
-                    bg-[#f7f7f7]
-                    px-[3px]
-                    py-[4px]
-                    text-[7px]
-                    font-bold
-                  "
-                >
-                  OTHER
-                </th>
-
-                <th
-                  rowSpan={2}
-                  className="
-                    border
-                    border-[#bdbdbd]
-                    bg-[#f7f7f7]
-                    px-[3px]
-                    py-[4px]
-                    text-[7px]
-                    font-bold
-                  "
-                >
-                  TOTAL
-                </th>
-
-              </tr>
-
-
-              <tr>
-
-                {[
-                  "SELF USE",
-                  "RENT",
-                  "SELF USE",
-                  "RENT",
-                  "SELF USE",
-                  "RENT",
-                ].map((item, index) => (
-                  <th
-                    key={index}
-                    className="
-                      border
-                      border-[#bdbdbd]
-                      bg-[#fafafa]
-                      px-[2px]
-                      py-[4px]
-                      text-[6.5px]
-                      font-bold
-                    "
-                  >
-                    {item}
-                  </th>
-                ))}
-
-              </tr>
-
-            </thead>
-
-
-            <tbody>
-
-              <tr>
-
-                <td
-                  className="
-                    border
-                    border-[#bdbdbd]
-                    px-[3px]
-                    py-[6px]
-                    text-[7px]
-                    font-bold
-                  "
-                >
-                  GROUND
-                  <br />
-                  FLOOR
-                </td>
-
-
-                {[
-                  land.ground_floor_residential_self,
-                  land.ground_floor_residential_rent,
-                  land.ground_floor_commercial_self,
-                  land.ground_floor_commercial_rent,
-                  land.ground_floor_other_self,
-                  land.ground_floor_other_rent,
-                  land.ground_floor_total ||
-                    land.plinth_area,
-                ].map((value, index) => (
-                  <td
-                    key={index}
-                    className="
-                      border
-                      border-[#bdbdbd]
-                      px-[3px]
-                      py-[6px]
-                      text-[7px]
-                    "
-                  >
-                    {displayValue(value)}
-                  </td>
-                ))}
-
-              </tr>
-
-            </tbody>
-
-          </table>
-
-        </div>
-
-      </Section>
-
-
-      {/* ===================================================
-          5. UTILITIES
-      =================================================== */}
-
-      <Section
-        number="5"
-        title="UTILITY CONNECTIONS"
-      >
-
-        <div
-          className="
-            grid
-            grid-cols-3
-            gap-x-[10px]
-          "
-        >
-
-          <Field
-            label="Electricity Connection"
-            value={
-              utility.electricity_connection
-            }
-          />
-
           <Field
             label="Sewer Connection"
             value={
               utility.sewer_connection
+            }
+          />
+
+          <Field
+            label="Electricity Connection"
+            value={
+              utility.is_electricity_connection
             }
           />
 
@@ -1135,165 +1256,207 @@ export default function SurveyReportTemplate({
               utility.gas_connection
             }
           />
+        </Section>
 
-        </div>
-
-      </Section>
+      </div>
 
 
-      {/* ===================================================
-          6. VERIFICATION
-      =================================================== */}
+      {/* =================================================
+          7. GIS
+      ================================================= */}
 
       <Section
-        number="6"
-        title="VERIFICATION"
+        number="7"
+        title="GIS INFORMATION"
       >
-
         <div
           className="
-            grid
-            grid-cols-4
+            flex
+            flex-wrap
+            overflow-hidden
             border-l
             border-t
-            border-[#d5d5d5]
+            border-[#bcbcbc]
           "
         >
-
-          {verificationFields.map(
+          {gisFields.map(
             ([label, key]) => (
-              <VerificationItem
+              <CheckItem
                 key={key}
                 label={label}
                 checked={
-                  !!verification[key]
+                  gis[key]
                 }
               />
             )
           )}
-
         </div>
-
       </Section>
 
 
-      {/* ===================================================
-          7. DOCUMENTS
-      =================================================== */}
+      {/* =================================================
+          8. PROPERTY IMAGES
+      ================================================= */}
 
       <Section
-        number="7"
-        title="DOCUMENTS"
+        number="8"
+        title="PROPERTY IMAGES"
       >
-
         <div
           className="
-            grid
-            grid-cols-2
-            border-l
-            border-t
-            border-[#d5d5d5]
+            flex
+            gap-[7px]
           "
         >
+          {imageFields.map(
+            ([title, url]) => (
+              <ImageBox
+                key={title}
+                title={title}
+                src={
+                  getImageSrc(url)
+                }
+              />
+            )
+          )}
+        </div>
+      </Section>
 
-          {documentFields.map(
+
+      {/* =================================================
+          9. VERIFICATION
+      ================================================= */}
+
+      <Section
+        number="9"
+        title="VERIFICATION"
+      >
+        <div
+          className="
+            flex
+            flex-wrap
+            overflow-hidden
+            border-l
+            border-t
+            border-[#bcbcbc]
+          "
+        >
+          {verificationFields.map(
             ([label, key]) => (
+              <CheckItem
+                key={key}
+                label={label}
+                checked={
+                  verification[key]
+                }
+              />
+            )
+          )}
+        </div>
+      </Section>
+
+
+      {/* =================================================
+          10. DOCUMENTS
+      ================================================= */}
+
+      <Section
+        number="10"
+        title="DOCUMENTS"
+      >
+        <div
+          className="
+            flex
+            flex-wrap
+            overflow-hidden
+            border-l
+            border-t
+            border-[#bcbcbc]
+          "
+        >
+          {documentFields.map(
+            ([
+              label,
+              key,
+              filesKey,
+            ]) => (
               <DocumentItem
                 key={key}
                 label={label}
                 uploaded={
-                  !!documents[key]
+                  isChecked(
+                    documents[key]
+                  ) ||
+                  (
+                    documents[key] !==
+                      undefined &&
+                    documents[key] !==
+                      null &&
+                    documents[key] !==
+                      "" &&
+                    documents[key] !==
+                      "No" &&
+                    documents[key] !==
+                      "false"
+                  )
+                }
+                count={
+                  Array.isArray(
+                    documents[
+                      filesKey
+                    ]
+                  )
+                    ? documents[
+                        filesKey
+                      ].length
+                    : 0
                 }
               />
             )
           )}
-
         </div>
-
       </Section>
 
 
-      {/* ===================================================
-          8. PHOTO / LOCATION
-      =================================================== */}
+      {/* =================================================
+          11. REMARKS
+      ================================================= */}
 
       <Section
-        number="8"
-        title="PROPERTY PHOTOGRAPH & LOCATION"
+        number="11"
+        title="SURVEYOR REMARKS"
+        className="mb-0"
       >
-
         <div
-          className="
-            grid
-            grid-cols-3
-            gap-[8px]
-          "
+          style={{
+            minHeight: "8mm",
+
+            fontSize: "7px",
+
+            lineHeight: 1.35,
+
+            color: "#444",
+
+            overflowWrap:
+              "break-word",
+          }}
         >
-
-          <MediaBox
-            src={propertyPhoto}
-            title="Property Photograph"
-          />
-
-          <MediaBox
-            src={areaChart}
-            title="Area Summary"
-          />
-
-          <MediaBox
-            src={propertyMap}
-            title="GIS Map"
-          />
-
+          {displayValue(remarks)}
         </div>
-
-
-        {/* GPS */}
-
-        <div
-          className="
-            mt-[5px]
-            grid
-            grid-cols-3
-            gap-x-[10px]
-          "
-        >
-
-          <Field
-            label="GPS Latitude"
-            value={info.gps_latitude}
-          />
-
-          <Field
-            label="GPS Longitude"
-            value={info.gps_longitude}
-          />
-
-          <Field
-            label="Surveyor Remarks"
-            value={
-              survey.surveyor_remarks
-            }
-          />
-
-        </div>
-
       </Section>
 
 
-      {/* ===================================================
+      {/* =================================================
           SIGNATURES
-      =================================================== */}
+      ================================================= */}
 
       <div
         className="
-          mt-[5px]
-          grid
-          grid-cols-3
-          gap-[10px]
+          mt-[2.5mm]
+          flex
+          gap-[8px]
         "
       >
-
         {[
           "Chief Municipal Officer",
           "Revenue Officer Signature",
@@ -1303,68 +1466,80 @@ export default function SurveyReportTemplate({
             key={label}
             className="
               flex
-              h-[25px]
+              min-w-0
+              flex-1
               items-end
               justify-center
               border
-              border-[#bdbdbd]
-              pb-[4px]
+              border-[#b7b7b7]
+              pb-[3px]
               text-center
-              text-[7px]
+              text-[6.5px]
               font-bold
               leading-none
             "
+            style={{
+              height: "17mm",
+
+              boxSizing:
+                "border-box",
+            }}
           >
             {label}
           </div>
         ))}
-
       </div>
 
 
-      {/* ===================================================
+      {/* =================================================
           NOTE
-      =================================================== */}
+      ================================================= */}
 
       <div
-        className="
-          mt-[5px]
-          border-t
-          border-dashed
-          border-[#777777]
-          pt-[4px]
-          text-[6.5px]
-          leading-snug
-        "
+        style={{
+          marginTop: "2mm",
+
+          paddingTop: "1.5mm",
+
+          borderTop:
+            "1px dashed #777",
+
+          fontSize: "5.8px",
+
+          lineHeight: 1.35,
+
+          color: "#555",
+        }}
       >
-
-        <strong>Note:</strong>{" "}
-        This report has been prepared based on the
-        information recorded in the property survey
-        system. This document is not a final proof of
-        property ownership.
-
+        <strong>
+          Note:
+        </strong>{" "}
+        This report has been prepared
+        based on the information recorded
+        in the property survey system.
+        This document is not a final proof
+        of property ownership.
       </div>
 
 
-      {/* ===================================================
+      {/* =================================================
           FOOTER
-      =================================================== */}
+      ================================================= */}
 
       <footer
         className="
-          mt-[4px]
+          mt-[1.5mm]
           flex
           items-center
           justify-between
           gap-4
-          text-[6px]
-          text-[#666666]
+          text-[5.5px]
+          text-[#666]
         "
       >
-
         <span>
-          System Generated Property Survey Report
+          System Generated Property Survey
+          Report
         </span>
 
         <span>
@@ -1373,7 +1548,6 @@ export default function SurveyReportTemplate({
             new Date().toISOString()
           )}
         </span>
-
       </footer>
 
     </div>
