@@ -4,8 +4,8 @@ import {
   FaChevronLeft,
   FaChevronRight,
 } from "react-icons/fa";
-
-import { ChartSpline } from "lucide-react";
+import { LuChartNetwork } from "react-icons/lu";
+// import { ChartSpline } from "lucide-react";
 
 import { NavLink } from "react-router-dom";
 import "./Sidebar.css";
@@ -14,7 +14,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
   const menus = [
     {
       name: "Dashboard",
-      icon: <ChartSpline size={25} strokeWidth={1.75} />,
+      icon: <LuChartNetwork />,
       path: "/dashboard",
     },
     {

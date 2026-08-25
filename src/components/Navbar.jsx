@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { FaBars, FaUserCircle, FaSignOutAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import "./Navbar.css";
-import logo from "../assets/logo.png";
+import logo from "../assets/KorbaLogo.png";
 import { logout } from "../services/api";
 
 export default function Navbar( { collapsed, setCollapsed } ) {
@@ -76,7 +76,7 @@ export default function Navbar( { collapsed, setCollapsed } ) {
               onClick={handlelogout}
             >
               <FaSignOutAlt />
-              Logout
+              Log Out
             </button>
 
           </div>

@@ -2,10 +2,10 @@ import { useState } from "react";
 import "./Login.css";
 
 import { login } from "../../services/api";
-import logo from "../../assets/logo.png";
+import logo from "../../assets/Korbalogo.png";
 import { useNavigate } from "react-router-dom";
+import GISBackground from "../../components/GISBackground.jsx";
 
-import GISBackground from "../../components/GISBackground";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -36,9 +36,8 @@ export default function Login() {
 
   return (
     <div className="login-page">
-
-      {/* Animated GIS background */}
-      <GISBackground />
+       <GISBackground/>
+      
 
       {/* Login card */}
       <div className="login-content">
@@ -49,10 +48,10 @@ export default function Login() {
             <img src={logo} alt="Logo" />
           </div>
 
-          <h1>Property Survey</h1>
+          <h1>Municipal Corporation, Korba</h1>
 
           <p className="subtitle">
-            Municipal Corporation, Korba
+            GIS Based Property Survey
           </p>
 
           <form onSubmit={handleSubmit}>
@@ -93,7 +92,7 @@ export default function Login() {
               type="submit"
               className="login-btn"
             >
-              Login
+              Log In
             </button>
 
           </form>
