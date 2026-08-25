@@ -41,6 +41,7 @@ export default function OwnerDetailsCard({ data, onUpdate }) {
   // ----------------------------------
   const handleEdit = () => {
     setFormData(data);
+    setValidationErrors({});
     setIsEditing(true);
   };
 
@@ -81,7 +82,7 @@ export default function OwnerDetailsCard({ data, onUpdate }) {
   const handleCancel = () => {
     // Restore original data
     setFormData(data);
-
+    setValidationErrors({});
     setIsEditing(false);
   };
 
@@ -89,6 +90,16 @@ export default function OwnerDetailsCard({ data, onUpdate }) {
   // FIELDS
   // ----------------------------------
   const fields = [
+    {
+      key: "Name of Respondent",
+      label: "Enter Name of Respondent",
+      type: "text",
+    },
+    {
+      key: "Relationship of Respondent with Property Owner",
+      label: "Relationship of Respondent with Property Owner Selected",
+      type: "DROPDOWN",
+    },
     {
       key: "owner_name",
       label: "Owner Name",
@@ -105,8 +116,65 @@ export default function OwnerDetailsCard({ data, onUpdate }) {
       type: "tel",
     },
     {
+      key: "Alternate Mobile Number",
+      label: "Alternate Mobile Number",
+      type: "tel",
+    },
+    {
+      key: "Adhar Number",
+      label: "Adhar Number",
+      type: "tel",
+    },
+    {
+      key: "Email ID",
+      label: "Email ID",
+      type: "email",
+    },
+    {
       key: "correspondence_address",
       label: "Correspondence Address",
+      type: "text",
+    },
+    {
+      key: "Pincode",
+      label: "Pincode",
+      type: "text",
+    },
+
+    // New fields
+    {
+      key: "owner_type",
+      label: "Owner Type",
+      type: "DROPDOWN",
+    },
+    {
+      key: "gender",
+      label: "Gender",
+      type: "DROPDOWN",
+    },
+    {
+      key: "occupation",
+      label: "Occupation",
+      type: "text",
+    },
+    {
+      key: "pan_number",
+      label: "PAN Number",
+      type: "text",
+    },
+    {
+      key: "village",
+      label: "Village",
+      type: "text",
+    },
+    {
+      key: "district",
+      label: "District",
+      type: "text",
+    },
+    {
+      key: "state",
+      label: "State",
       type: "text",
     },
   ];
@@ -205,18 +273,18 @@ export default function OwnerDetailsCard({ data, onUpdate }) {
         >
           {/* EDIT */}
           {!isEditing ? (
-            <RoleBased allowedRoles={["MLAdmin", "admin"]}> 
-            <Button
-              variant="contained"
-              startIcon={<Edit />}
-              onClick={handleEdit}
-              sx={{
-                ...buttonStyles,
-                width: isMobile ? "100%" : "auto",
-              }}
-            >
-              Edit Section
-            </Button>
+            <RoleBased allowedRoles={["MLAdmin", "admin"]}>
+              <Button
+                variant="contained"
+                startIcon={<Edit />}
+                onClick={handleEdit}
+                sx={{
+                  ...buttonStyles,
+                  width: isMobile ? "100%" : "auto",
+                }}
+              >
+                Edit Section
+              </Button>
             </RoleBased>
           ) : (
             <>
