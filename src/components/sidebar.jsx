@@ -1,21 +1,20 @@
 import {
-  FaHome,
   FaClipboardList,
   FaUsers,
-  FaCog,
   FaChevronLeft,
   FaChevronRight,
 } from "react-icons/fa";
 
+import { ChartSpline } from "lucide-react";
+
 import { NavLink } from "react-router-dom";
-import { useState } from "react";
 import "./Sidebar.css";
 
 export default function Sidebar({ collapsed, setCollapsed }) {
   const menus = [
     {
       name: "Dashboard",
-      icon: <FaHome />,
+      icon: <ChartSpline size={25} strokeWidth={1.75} />,
       path: "/dashboard",
     },
     {
@@ -28,11 +27,6 @@ export default function Sidebar({ collapsed, setCollapsed }) {
       icon: <FaUsers />,
       path: "/users",
     },
-    // {
-    //   name: "Settings",
-    //   icon: <FaCog />,
-    //   path: "/settings",
-    // },
   ];
 
   return (
@@ -51,9 +45,19 @@ export default function Sidebar({ collapsed, setCollapsed }) {
               to={item.path}
               className={({ isActive }) => (isActive ? "menu active" : "menu")}
             >
-              <span className="icon">{item.icon}</span>
+              {({ isActive }) => (
+                <>
+                  <span
+                    className={`icon ${
+                      item.name === "Dashboard" ? "dashboard-svg-icon" : ""
+                    } ${isActive ? "active-icon" : ""}`}
+                  >
+                    {item.icon}
+                  </span>
 
-              {!collapsed && <span className="title">{item.name}</span>}
+                  {!collapsed && <span className="title">{item.name}</span>}
+                </>
+              )}
             </NavLink>
           </li>
         ))}

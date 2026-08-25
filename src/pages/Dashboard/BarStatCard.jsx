@@ -222,7 +222,7 @@ export default function BarStatCard({ title, data, barColor = PRIMARY }) {
         <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>
           {title}
         </h3>
-        <FaEllipsisH className="text-gray-400 text-sm mr-2 cursor-pointer hover:text-black" />
+        
       </div>
 {/* 
       <p className="text-xs text-gray-400 mt-2 ml-2">

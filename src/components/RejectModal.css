@@ -88,7 +88,7 @@
 }
 
 .form-error {
-  color: #e53935;
+  /* color: #e53935; */
   font-size: 13px;
   margin: 0;
 }
@@ -101,18 +101,22 @@
   border-top: 1px solid #eee;
 }
 
-.cancel-btn {
+.close-btn {
   padding: 8px 16px;
-  border: 1px solid #ccc;
-  background: #fff;
+  border: 1px solid;
+  background:white;
   border-radius: 6px;
   cursor: pointer;
+  
+}
+.close-btn:hover{
+ background-color: ;
 }
 
 .reject-confirm-btn {
   padding: 8px 16px;
   border: none;
-  background: #e53935;
+  background: #7a1453;
   color: #fff;
   border-radius: 6px;
   cursor: pointer;

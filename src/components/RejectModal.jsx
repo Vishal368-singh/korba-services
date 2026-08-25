@@ -79,8 +79,8 @@ export default function RejectModal({ isOpen, onClose, onSubmit, surveyId }) {
           {error && <p className="form-error">{error}</p>}
         </div>
         <div className="modal-footer">
-          <button className="cancel-btn" onClick={handleClose}>
-            Cancel
+          <button className="close-btn" onClick={handleClose}>
+            Close
           </button>
           <button className="reject-confirm-btn" onClick={handleSubmit}>
             Reject

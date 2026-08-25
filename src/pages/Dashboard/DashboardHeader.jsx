@@ -14,7 +14,7 @@ export default function DashboardHeader({
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-4">
       <div>
         <h1 className="text-2xl sm:text-3xl  text-[#7a1453]">
-          Survey KPI Dashboard
+          KPI Dashboard
         </h1>
         <p className="text-[#666]  mt-1">
           Overview of surveyed data and key performance indicators

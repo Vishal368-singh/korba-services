@@ -1,14 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import {
-  // FaClipboardList,
-  // FaCheckCircle,
-  // FaClock,
-  // FaTimesCircle,
-  // FaSearch,
-  // FaEye,
-  FaSyncAlt,
-  FaFileExport,
-} from "react-icons/fa";
+import { FaSyncAlt, FaFileExport } from "react-icons/fa";
 
 import "./Survey.css";
 import {
@@ -137,8 +128,12 @@ export default function Survey() {
       {/* Header */}
       <div className="page-header">
         <div>
-          <h2 className="text-2xl sm:text-3xl  text-[#7a1453]">Survey Management</h2>
-          <p className="text-[#666]  mt-1">Manage and review property survey records.</p>
+          <h2 className="text-2xl sm:text-3xl  text-[#7a1453]">
+            Survey Management
+          </h2>
+          <p className="text-[#666]  mt-1">
+            Manage and review property survey records.
+          </p>
         </div>
 
         <div className="header-actions">

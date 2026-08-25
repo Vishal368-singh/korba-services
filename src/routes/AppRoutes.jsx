@@ -13,7 +13,6 @@ import SurveyorsManagement from "../pages/User/SurveyorsManagement";
 export default function AppRoutes() {
   return (
     <Routes>
-
       {/* Login Pages */}
       <Route element={<AuthLayout />}>
         <Route path="/" element={<Login />} />
@@ -24,10 +23,7 @@ export default function AppRoutes() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/survey" element={<Survey />} />
         <Route path="/users" element={<SurveyorsManagement />} />
-        <Route
-    path="/surveys/:surveyId"
-    element={<SurveyPreview />}
-/>
+        <Route path="/surveys/:surveyId" element={<SurveyPreview />} />
       </Route>
 
       {/* <Route path="*" element={<NotFound />} /> */}

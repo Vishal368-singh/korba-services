@@ -52,8 +52,8 @@ export default function Navbar( { collapsed, setCollapsed } ) {
         <img src={logo} alt="logo" className="logo" />
 
         <div>
-          <h2>Property Survey</h2>
-          <span>Korba Nagar Nigam</span>
+          <h2>Municipal Corporation, Korba</h2>
+          <span>GIS Based Property Survey</span>
         </div>
       </div>
 

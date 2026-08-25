@@ -181,9 +181,6 @@ export default function GeographicOverview({ data }) {
         <h3 className="text-sm font-semibold text-[#7a1453] mt-1 ml-2">
           Geographic Overview
         </h3>
-        <span className="text-xs text-gray-400 mr-2">
-          {locations.length} locations
-        </span>
       </div>
 
       {/* Map container with responsive height */}
