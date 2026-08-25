@@ -431,20 +431,20 @@ export const fetchRevenueBreakdown = async () => {
         totalCount: 187,
         segments: [
           {
-            label: "Zone 1 (High)",
+            label: "Zone 1",
             value: 69,
             percent: 36.9,
             color: "#7a1453",
           },
           {
-            label: "Zone 2 (Medium)",
+            label: "Zone 2",
             value: 57,
             percent: 30.5,
             color: "#a8306e",
           },
-          { label: "Zone 3 (Low)", value: 38, percent: 20.3, color: "#c96b98" },
+          { label: "Zone 3", value: 38, percent: 20.3, color: "#c96b98" },
           {
-            label: "Zone 4 (Very Low)",
+            label: "Zone 4",
             value: 23,
             percent: 12.3,
             color: "#e6b8cf",
@@ -616,4 +616,47 @@ export const fetchDataCompleteness = async () => {
       });
     }, 300);
   });
+};
+
+// Dashboard API calls
+export const fetchDashboardData = async (startDate, endDate) => {
+  
+  const token = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user")).access_token
+    : null;
+
+  if (!token) {
+    notify.error("No token found. Please log in first.");
+    throw new Error("No token found. Please log in first.");
+  }
+
+  // Format dates for API
+  const formatDate = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    return d.toISOString().split("T")[0];
+  };
+
+  const params = new URLSearchParams();
+  if (startDate) {
+    params.append("start_date", formatDate(startDate));
+  }
+  if (endDate) {
+    params.append("end_date", formatDate(endDate));
+  }
+
+  const url = `/api/dashboard/all${params.toString() ? `?${params.toString()}` : ""}`;
+
+  const response = await api.get(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+console.log("Dashboard API response:", response);
+  if (response.status !== 200) {
+    notify.error("Failed to fetch dashboard data");
+    throw new Error("Failed to fetch dashboard data");
+  }
+
+  return response.data;
 };
