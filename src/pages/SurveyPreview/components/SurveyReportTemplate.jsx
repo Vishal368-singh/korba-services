@@ -69,18 +69,61 @@ const isChecked = (value) => {
   return false;
 };
 
+/* =========================================================
+   IMAGE URL
+   Converts weather.mlinfomap.com URLs to the Vite proxy
+========================================================= */
+
 const getImageSrc = (value) => {
   if (!value) return null;
 
+  let url = null;
+
   if (typeof value === "string") {
-    return value;
+    url = value;
+  } else if (typeof value === "object" && value.url) {
+    url = value.url;
   }
 
-  if (typeof value === "object" && value.url) {
-    return value.url;
+  if (!url) return null;
+
+  /*
+    Remote URL:
+
+    https://weather.mlinfomap.com/documents/gis/456789/456/photo.jpg
+
+    becomes:
+
+    /gis-images/documents/gis/456789/456/photo.jpg
+
+    Vite then proxies it to weather.mlinfomap.com
+  */
+
+  if (url.startsWith("https://weather.mlinfomap.com/")) {
+    return url.replace("https://weather.mlinfomap.com", "/gis-images");
   }
 
-  return null;
+  /*
+    Also handle http URLs if the API ever returns them.
+  */
+
+  if (url.startsWith("http://weather.mlinfomap.com/")) {
+    return url.replace("http://weather.mlinfomap.com", "/gis-images");
+  }
+
+  /*
+    Already proxied URL.
+  */
+
+  if (url.startsWith("/gis-images/")) {
+    return url;
+  }
+
+  /*
+    Relative/local URL.
+  */
+
+  return url;
 };
 
 const getFloorSummary = (floorDetail) => {
@@ -301,30 +344,108 @@ function DocumentItem({ label, uploaded, count }) {
 ========================================================= */
 
 function ImageBox({ src, title }) {
+  const handleImageLoad = () => {
+    console.log(
+      `[Survey Report] ${title} loaded successfully`,
+      src
+    );
+  };
+
+  const handleImageError = (event) => {
+    console.error(
+      `[Survey Report] Failed to load ${title}:`,
+      src
+    );
+
+    /*
+      Hide broken image icon.
+    */
+
+    event.currentTarget.style.display = "none";
+  };
+
   return (
     <div
-      className="flex min-w-0 flex-1 flex-col overflow-hidden border border-[#b5b5b5] bg-white"
+      className="
+        flex
+        min-w-0
+        flex-1
+        flex-col
+        overflow-hidden
+        border
+        border-[#b5b5b5]
+        bg-white
+      "
       style={{
         height: "37mm",
         boxSizing: "border-box",
       }}
     >
-      {/* IMAGE AREA */}
-      <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-[#fafafa]">
+      {/* =================================================
+          IMAGE AREA
+      ================================================= */}
+
+      <div
+        className="
+          flex
+          min-h-0
+          flex-1
+          items-center
+          justify-center
+          overflow-hidden
+          bg-[#fafafa]
+        "
+        style={{
+          position: "relative",
+        }}
+      >
         {src ? (
           <img
             src={src}
             alt={title}
-            crossOrigin="anonymous"
-            className="h-full w-full object-cover"
+            className="
+              h-full
+              w-full
+              object-cover
+            "
+            onLoad={handleImageLoad}
+            onError={handleImageError}
           />
         ) : (
-          <span className="text-[7px] font-semibold text-[#999]">NO IMAGE</span>
+          <span
+            className="
+              text-[7px]
+              font-semibold
+              text-[#999]
+            "
+          >
+            NO IMAGE
+          </span>
         )}
       </div>
 
-      {/* IMAGE TITLE */}
-      <div className="flex h-[5mm] shrink-0 items-center justify-center border-t border-[#b5b5b5] bg-white px-1 text-center text-[6.5px] font-bold leading-none text-[#333]">
+      {/* =================================================
+          IMAGE TITLE
+      ================================================= */}
+
+      <div
+        className="
+          flex
+          h-[5mm]
+          shrink-0
+          items-center
+          justify-center
+          border-t
+          border-[#b5b5b5]
+          bg-white
+          px-1
+          text-center
+          text-[6.5px]
+          font-bold
+          leading-none
+          text-[#333]
+        "
+      >
         {title}
       </div>
     </div>
@@ -369,10 +490,7 @@ function QuickInfoStrip({ items }) {
 
             padding: "2.2mm 2.5mm 2.5mm 2.5mm",
 
-            borderRight:
-              index !== items.length - 1
-                ? "1px solid #555"
-                : "none",
+            borderRight: index !== items.length - 1 ? "1px solid #555" : "none",
 
             display: "flex",
             flexDirection: "column",
