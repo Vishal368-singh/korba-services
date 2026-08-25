@@ -55,7 +55,7 @@ export default function Dashboard() {
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
-        debugger
+       
         setLoading(true);
         setError(null);
 
@@ -67,7 +67,7 @@ export default function Dashboard() {
           setError("Failed to fetch dashboard data");
         }
       } catch (err) {
-        console.error("Error loading dashboard data:", err);
+      //  console.error("Error loading dashboard data:", err);
         setError(err.message || "An error occurred while fetching data");
       } finally {
         setLoading(false);
@@ -256,7 +256,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 mt-[70px]">
+    <div className="px-4 sm:px-6 lg:px-8 mt-17.5">
       <DashboardHeader
         startDate={startDate}
         endDate={endDate}

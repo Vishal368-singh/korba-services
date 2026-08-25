@@ -620,7 +620,7 @@ export const fetchDataCompleteness = async () => {
 
 // Dashboard API calls
 export const fetchDashboardData = async (startDate, endDate) => {
-  debugger
+  
   const token = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user")).access_token
     : null;
@@ -652,7 +652,7 @@ export const fetchDashboardData = async (startDate, endDate) => {
       Authorization: `Bearer ${token}`,
     },
   });
-
+console.log("Dashboard API response:", response);
   if (response.status !== 200) {
     notify.error("Failed to fetch dashboard data");
     throw new Error("Failed to fetch dashboard data");
