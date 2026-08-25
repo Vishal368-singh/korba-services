@@ -617,3 +617,46 @@ export const fetchDataCompleteness = async () => {
     }, 300);
   });
 };
+
+// Dashboard API calls
+export const fetchDashboardData = async (startDate, endDate) => {
+  debugger
+  const token = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user")).access_token
+    : null;
+
+  if (!token) {
+    notify.error("No token found. Please log in first.");
+    throw new Error("No token found. Please log in first.");
+  }
+
+  // Format dates for API
+  const formatDate = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    return d.toISOString().split("T")[0];
+  };
+
+  const params = new URLSearchParams();
+  if (startDate) {
+    params.append("start_date", formatDate(startDate));
+  }
+  if (endDate) {
+    params.append("end_date", formatDate(endDate));
+  }
+
+  const url = `/api/dashboard/all${params.toString() ? `?${params.toString()}` : ""}`;
+
+  const response = await api.get(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (response.status !== 200) {
+    notify.error("Failed to fetch dashboard data");
+    throw new Error("Failed to fetch dashboard data");
+  }
+
+  return response.data;
+};

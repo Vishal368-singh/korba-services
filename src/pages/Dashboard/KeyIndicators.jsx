@@ -38,9 +38,7 @@ function IndicatorCard({ item }) {
         >
           <Icon />
         </div>
-        <p className="text-xs text-gray-500  leading-snug">
-          {item.label}
-        </p>
+        <p className="text-xs text-gray-500  leading-snug">{item.label}</p>
       </div>
 
       <div className="flex flex-col items-center gap-1">
@@ -53,34 +51,128 @@ function IndicatorCard({ item }) {
   );
 }
 
-export default function KeyIndicators() {
-  const [indicators, setIndicators] = useState([]);
+export default function KeyIndicators({ data }) {
+  const [indicators, setIndicators] = useState([
+    {
+      key: "unique_parcels",
+      label: "Unique Parcels",
+      value: 181,
+      subtext: "96.8% of Total Surveys",
+    },
+    {
+      key: "unique_properties",
+      label: "Unique Properties",
+      value: 187,
+      subtext: "100% of Total Surveys",
+    },
+    {
+      key: "total_plot_area",
+      label: "Total Plot Area (sq.ft.)",
+      value: 301355,
+      subtext: "100% of Total Surveys",
+    },
+    {
+      key: "total_builtup_area",
+      label: "Total Built-up Area (sq.ft.)",
+      value: 248853,
+      subtext: "82.6% of Plot Area",
+    },
+    {
+      key: "vacant_properties",
+      label: "Vacant Properties",
+      value: 26,
+      subtext: "13.9% of Total Properties",
+    },
+    {
+      key: "new_construction",
+      label: "New Construction",
+      value: 12,
+      subtext: "6.4% of Total Properties",
+    },
+    {
+      key: "additional_floor_constructed",
+      label: "Additional Floor Constructed",
+      value: 15,
+      subtext: "8.0% of Total Properties",
+    },
+  ]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadIndicators();
-  }, []);
+    if (data) {
+      const mappedIndicators = [
+        {
+          key: "unique_parcels",
+          label: "Unique Parcels",
+          value: data.unique_parcels?.value || 0,
+          subtext: `${data.unique_parcels?.percentage || 0}% of Total Surveys`,
+        },
+        {
+          key: "unique_properties",
+          label: "Unique Properties",
+          value: data.unique_properties?.value || 0,
+          subtext: `${data.unique_properties?.percentage || 0}% of Total Surveys`,
+        },
+        {
+          key: "total_plot_area",
+          label: "Total Plot Area (sq.ft.)",
+          value: data.total_plot_area?.value || 0,
+          subtext: `${data.total_plot_area?.percentage || 0}% of Total Surveys`,
+        },
+        {
+          key: "total_builtup_area",
+          label: "Total Built-up Area (sq.ft.)",
+          value: data.total_builtup_area?.value || 0,
+          subtext: `${data.total_builtup_area?.percentage || 0}% of Plot Area`,
+        },
+        {
+          key: "vacant_properties",
+          label: "Vacant Properties",
+          value: data.vacant_properties?.value || 0,
+          subtext: `${data.vacant_properties?.percentage || 0}% of Total Properties`,
+        },
+        {
+          key: "new_construction",
+          label: "New Construction",
+          value: data.new_construction?.value || 0,
+          subtext: `${data.new_construction?.percentage || 0}% of Total Properties`,
+        },
+        {
+          key: "additional_floor",
+          label: "Additional Floor Constructed",
+          value: data.additional_floor?.value || 0,
+          subtext: `${data.additional_floor?.percentage || 0}% of Total Properties`,
+        },
+      ];
 
-  const loadIndicators = async () => {
-    try {
-      setLoading(true);
-      const response = await fetchKeyIndicators();
-      setIndicators(response.indicators || []);
-    } catch (error) {
-      console.error("Error fetching key indicators:", error);
-      setIndicators([]);
-    } finally {
-      setLoading(false);
+      setIndicators(mappedIndicators);
     }
-  };
+  }, [data]);
 
-  if (loading) {
-    return (
-      <div className="py-6">
-        <p className="text-gray-400 text-sm">Loading key indicators...</p>
-      </div>
-    );
-  }
+  // useEffect(() => {
+  //   loadIndicators();
+  // }, []);
+
+  // const loadIndicators = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const response = await fetchKeyIndicators();
+  //     setIndicators(response.indicators || []);
+  //   } catch (error) {
+  //     console.error("Error fetching key indicators:", error);
+  //     setIndicators([]);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // if (loading) {
+  //   return (
+  //     <div className="py-6">
+  //       <p className="text-gray-400 text-sm">Loading key indicators...</p>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div>

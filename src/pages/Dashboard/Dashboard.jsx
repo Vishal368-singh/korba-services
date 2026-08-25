@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import DashboardHeader from "./DashboardHeader";
@@ -14,6 +14,7 @@ import {
   fetchSessionsTrend,
   fetchPropertyBreakdowns,
   fetchDataCompleteness,
+  fetchDashboardData
 } from "../../services/api";
 
 const PRIMARY = [122, 20, 83];
@@ -44,6 +45,37 @@ export default function Dashboard() {
   );
   const [endDate, setEndDate] = useState(today);
   const [isDownloading, setIsDownLoading] = useState(false);
+
+  // State for dashboard data
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch dashboard data when date range changes
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        debugger
+        setLoading(true);
+        setError(null);
+
+        const response = await fetchDashboardData(startDate, endDate);
+
+        if (response.success) {
+          setDashboardData(response.data);
+        } else {
+          setError("Failed to fetch dashboard data");
+        }
+      } catch (err) {
+        console.error("Error loading dashboard data:", err);
+        setError(err.message || "An error occurred while fetching data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboardData();
+  }, [startDate, endDate]); // Re-fetch when date range changes
 
   const handleDateChange = (start, end) => {
     setStartDate(start);
@@ -135,7 +167,11 @@ export default function Dashboard() {
       y = addTable(
         doc,
         ["Zone", "Count", "Percentage"],
-        revenueRes.segments.map((s) => [s.label, String(s.value), `${s.percent}%`]),
+        revenueRes.segments.map((s) => [
+          s.label,
+          String(s.value),
+          `${s.percent}%`,
+        ]),
         y,
         THREE_COL,
       );
@@ -145,7 +181,11 @@ export default function Dashboard() {
       y = addTable(
         doc,
         ["Ward", "Count", "Percentage"],
-        usersRes.segments.map((s) => [s.label, String(s.value), `${s.percent}%`]),
+        usersRes.segments.map((s) => [
+          s.label,
+          String(s.value),
+          `${s.percent}%`,
+        ]),
         y,
         THREE_COL,
       );
@@ -176,7 +216,11 @@ export default function Dashboard() {
         y = addTable(
           doc,
           ["Category", "Count", "Percentage"],
-          chart.segments.map((s) => [s.label, String(s.value), `${s.percent}%`]),
+          chart.segments.map((s) => [
+            s.label,
+            String(s.value),
+            `${s.percent}%`,
+          ]),
           y,
           THREE_COL,
         );
@@ -192,7 +236,12 @@ export default function Dashboard() {
             completenessRes.total > 0
               ? ((m.completed / completenessRes.total) * 100).toFixed(1)
               : "0";
-          return [m.label, String(m.completed), String(completenessRes.total), `${percent}%`];
+          return [
+            m.label,
+            String(m.completed),
+            String(completenessRes.total),
+            `${percent}%`,
+          ];
         }),
         y,
         FOUR_COL,
@@ -216,12 +265,13 @@ export default function Dashboard() {
         isDownloading={isDownloading}
       />
       <div className="mt-6">
-        <KeyIndicators />
+        <KeyIndicators data={dashboardData?.key_indicators} />
       </div>
 
-      <DashboardCharts />
-      <PropertyBreakdowns />
+      <DashboardCharts data = {dashboardData} />
+      <PropertyBreakdowns  data = {dashboardData} />
       <DataCompletenes />
     </div>
   );
 }
+
