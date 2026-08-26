@@ -14,7 +14,7 @@ import {
   fetchSessionsTrend,
   fetchPropertyBreakdowns,
   fetchDataCompleteness,
-  fetchDashboardData
+  fetchDashboardData,
 } from "../../services/api";
 
 const PRIMARY = [122, 20, 83];
@@ -50,12 +50,17 @@ export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedFilter, setSelectedFilter] = useState(null);
 
+  const handleSegmentClick = (label, uids) => {
+    setSelectedFilter((prev) =>
+      prev?.label === label ? null : { label, uids: uids || [] },
+    );
+  };
   // Fetch dashboard data when date range changes
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
-       
         setLoading(true);
         setError(null);
 
@@ -67,7 +72,7 @@ export default function Dashboard() {
           setError("Failed to fetch dashboard data");
         }
       } catch (err) {
-      //  console.error("Error loading dashboard data:", err);
+        //  console.error("Error loading dashboard data:", err);
         setError(err.message || "An error occurred while fetching data");
       } finally {
         setLoading(false);
@@ -256,7 +261,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 mt-17.5">
+     <div className="px-4 sm:px-6 lg:px-8 mt-17.5">
       <DashboardHeader
         startDate={startDate}
         endDate={endDate}
@@ -268,10 +273,22 @@ export default function Dashboard() {
         <KeyIndicators data={dashboardData?.key_indicators} />
       </div>
 
-      <DashboardCharts data = {dashboardData} />
-      <PropertyBreakdowns  data = {dashboardData} />
-       <DataCompletenes data={dashboardData?.data_completeness} />
+      <DashboardCharts
+        data={dashboardData}
+        selectedFilter={selectedFilter}
+        onSegmentClick={handleSegmentClick}
+        onClearFilter={() => setSelectedFilter(null)}
+      />
+      <PropertyBreakdowns
+        data={dashboardData}
+        selectedFilter={selectedFilter}
+        onSegmentClick={handleSegmentClick}
+      />
+      <DataCompletenes
+        data={dashboardData?.data_completeness}
+        selectedKey={selectedFilter?.label}
+        onSegmentClick={handleSegmentClick}
+      />
     </div>
   );
 }
-

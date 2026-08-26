@@ -109,7 +109,7 @@ export default function DonutStatCard({ title, data, selectedKey, onSegmentClick
                   <Cell
                     key={idx}
                     fill={seg.color}
-                    opacity={!selectedKey || selectedKey === seg.label ? 1 : 0.3}
+                    //opacity={!selectedKey || selectedKey === seg.label ? 1 : 0.3}
                     stroke={selectedKey === seg.label ? "#facc15" : "none"}
                     strokeWidth={selectedKey === seg.label ? 2 : 0}
                     cursor={isInteractive ? "pointer" : "default"}
@@ -127,9 +127,7 @@ export default function DonutStatCard({ title, data, selectedKey, onSegmentClick
             <div
               key={seg.label}
               onClick={() => handleClick(seg)}
-              className={`flex gap-2 text-xs ${isInteractive ? "cursor-pointer" : ""} ${
-                selectedKey && selectedKey !== seg.label ? "opacity-40" : ""
-              }`}
+              className={`flex gap-2 text-xs ${isInteractive ? "cursor-pointer" : ""}`}
             >
               <span className="w-2 h-2 rounded-full shrink-0 mt-1" style={{ backgroundColor: seg.color }} />
               <span className="text-gray-600 truncate">{seg.label}</span>
