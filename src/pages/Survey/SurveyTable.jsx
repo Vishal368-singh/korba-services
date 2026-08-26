@@ -6,6 +6,7 @@ import { approveSurveyAPI } from "../../services/api";
 import { updateSurveyStatus } from "../../services/api";
 import { fetchSurveyBySurveyID } from "../../services/api";
 import { generateSurveyPdf } from "../../utils/generateSurveyPdf";
+import { canManageSurveys } from "../../utils/roleUtils";
 
 export default function SurveyTable({
   data = [],
@@ -16,6 +17,7 @@ export default function SurveyTable({
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [selectedSurveyId, setSelectedSurveyId] = useState(null);
   const [downloadingId, setDownloadingId] = useState(null);
+  const canManage = canManageSurveys();
 
   const handleDownloadReport = async (surveyId) => {
     try {
@@ -127,13 +129,15 @@ export default function SurveyTable({
 
               <td>
                 <div className="action-buttons">
-                  <button
-                    className="preview-btn"
-                    onClick={() => handlePreview(survey.survey_id)}
-                  >
-                    <FaEye />
-                    View / Edit
-                  </button>
+                  {activeTab === "All" && canManage && (
+                    <button
+                      className="preview-btn"
+                      onClick={() => handlePreview(survey.survey_id)}
+                    >
+                      <FaEye />
+                      View / Edit
+                    </button>
+                  )}
                   {activeTab === "All" && (
                     <button
                       className="preview-btn"
@@ -146,8 +150,15 @@ export default function SurveyTable({
                         : "Download"}
                     </button>
                   )}
-                  {activeTab === "Pending" && (
+                  {activeTab === "Pending" && canManage && (
                     <>
+                      <button
+                        className="preview-btn"
+                        onClick={() => handlePreview(survey.survey_id)}
+                      >
+                        <FaEye />
+                        View / Edit
+                      </button>
                       <button
                         className="approve-btn"
                         onClick={() => handleApprove(survey.survey_id)}

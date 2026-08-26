@@ -44,8 +44,11 @@ export default function PropertyDonutCard({ title,  segments, selectedKey, onSeg
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow">
-      <h3 className="text-sm font-bold mb-4 text-left ml-2 mt-0.5" style={{ color: "#7a1453" }}>
+    <div className="flex flex-col items-center bg-white rounded-2xl border border-gray-200 shadow-sm p-5 cursor-pointer hover:shadow-md transition-shadow">
+      <h3
+        className="text-sm font-bold mb-4 text-left ml-2 mt-0.5"
+        style={{ color: "#7a1453" }}
+      >
         {title}
         {selectedKey && sortedSegments.some((s) => s.label === selectedKey) && (
           <span className="text-xs font-normal text-gray-400 ml-2">({selectedKey})</span>

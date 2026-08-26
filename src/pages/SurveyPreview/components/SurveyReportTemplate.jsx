@@ -701,24 +701,10 @@ export default function SurveyReportTemplate({ survey }) {
             textAlign: "center",
           }}
         >
-          OFFICE OF THE MUNICIPAL CORPORATION / MUNICIPAL COUNCIL / MUNICIPALITY
+           KORBA NAGAR NIGAM, KORBA (CHHATTISGARH)
         </h1>
 
-        <p
-          style={{
-            margin: "1mm 0 0",
-
-            fontSize: "7.5px",
-            fontWeight: 700,
-            lineHeight: "1.1",
-
-            color: "#222",
-
-            textAlign: "center",
-          }}
-        >
-          KORBA NAGAR NIGAM, KORBA (CHHATTISGARH)
-        </p>
+      
 
         <p
           style={{

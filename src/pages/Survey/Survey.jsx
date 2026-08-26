@@ -55,13 +55,13 @@ export default function Survey() {
           response = response.pending;
           break;
       }
-
+      const paginationSource = response.pagination || response;
       setSurveyData(response.surveys || []);
       setPagination({
-        total_surveys: response.total_surveys ?? 0,
-        total_pages: response.total_pages ?? 1,
-        has_next: response.has_next ?? false,
-        has_previous: response.has_previous ?? false,
+        total_surveys: paginationSource.total_surveys ?? 0,
+        total_pages: paginationSource.total_pages ?? 1,
+        has_next: paginationSource.has_next ?? false,
+        has_previous: paginationSource.has_previous ?? false,
       });
     } catch (error) {
       console.error("Error fetching survey data:", error);
