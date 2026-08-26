@@ -63,7 +63,7 @@
 }
 
 .menu.active {
-  background: white;
+  background: #F5F7FA;
   color: #7a1453;
 
   border-left: 5px solid gold;

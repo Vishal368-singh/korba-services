@@ -61,7 +61,7 @@ export default function PropertyDonutCard({ title, total, segments }) {
   const calculatedTotal = total || sortedSegments.reduce((sum, seg) => sum + seg.value, 0);
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 cursor-pointer hover:shadow-md transition-shadow">
+    <div className="flex flex-col items-center bg-white rounded-2xl border border-gray-200 shadow-sm p-5 cursor-pointer hover:shadow-md transition-shadow">
       <h3
         className="text-sm font-bold mb-4 text-left ml-2 mt-0.5"
         style={{ color: "#7a1453" }}
@@ -90,20 +90,6 @@ export default function PropertyDonutCard({ title, total, segments }) {
               <Tooltip content={<CustomTooltip />} />
             </PieChart>
           </ResponsiveContainer>
-        </div>
-
-        {/* Legend with color dots, labels and percentages */}
-        <div className="flex-1 flex flex-col gap-1.5">
-          {sortedSegments.map((seg, idx) => (
-            <div key={idx} className="flex items-center gap-2 text-xs">
-              <span
-                className="w-2.5 h-2.5 rounded-full shrink-0"
-                style={{ backgroundColor: seg.color }}
-              />
-              <span className="text-gray-700 flex-1">{seg.label}</span>
-             
-            </div>
-          ))}
         </div>
       </div>
 
