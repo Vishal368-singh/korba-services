@@ -345,17 +345,11 @@ function DocumentItem({ label, uploaded, count }) {
 
 function ImageBox({ src, title }) {
   const handleImageLoad = () => {
-    console.log(
-      `[Survey Report] ${title} loaded successfully`,
-      src
-    );
+    console.log(`[Survey Report] ${title} loaded successfully`, src);
   };
 
   const handleImageError = (event) => {
-    console.error(
-      `[Survey Report] Failed to load ${title}:`,
-      src
-    );
+    console.error(`[Survey Report] Failed to load ${title}:`, src);
 
     /*
       Hide broken image icon.
@@ -451,7 +445,57 @@ function ImageBox({ src, title }) {
     </div>
   );
 }
+/* =========================================================
+  Residential type checkbox
+========================================================= */
+function UsageTypeCheckbox({ label, checked }) {
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "1.2mm",
+        height: "100%",
+        whiteSpace: "nowrap",
+        fontSize: "6.5px",
+        lineHeight: "1",
+        color: "#333",
+        fontWeight: 400,
+      }}
+    >
+      <span
+        style={{
+          width: "2.8mm",
+          height: "2.8mm",
+          minWidth: "2.8mm",
+          minHeight: "2.8mm",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxSizing: "border-box",
+          border: checked ? "1px solid #333" : "0.8px solid #777",
+          backgroundColor: checked ? "#333" : "#fff",
+          color: "#fff",
+          fontSize: "5px",
+          fontWeight: 700,
+          lineHeight: 1,
+        }}
+      >
+        {checked ? "✓" : ""}
+      </span>
 
+      <span
+        style={{
+          display: "inline-block",
+          lineHeight: "1",
+        }}
+      >
+        {label}
+      </span>
+    </span>
+  );
+}
 /* =========================================================
    QUICK INFO STRIP
    Fixed: values were getting vertically clipped
@@ -683,7 +727,7 @@ export default function SurveyReportTemplate({ survey }) {
 
           paddingBottom: "2.5mm",
 
-          marginBottom: "2.5mm",
+          marginBottom: "4mm",
         }}
       >
         <h1
@@ -701,25 +745,25 @@ export default function SurveyReportTemplate({ survey }) {
             textAlign: "center",
           }}
         >
-           KORBA NAGAR NIGAM, KORBA (CHHATTISGARH)
+          OFFICE OF THE MUNICIPAL CORPORATION / KORBA (CHHATTISGARH)
         </h1>
-
-      
-
-        <p
+        <h1
           style={{
-            margin: "0.8mm 0 0",
+            margin: 0,
+            padding: 0,
 
-            fontSize: "6.5px",
-            lineHeight: "1.1",
+            fontSize: "12px",
+            fontWeight: 700,
+            lineHeight: "1.15",
 
-            color: "#666",
+            color: "#111",
 
+            whiteSpace: "nowrap",
             textAlign: "center",
           }}
         >
           Property Survey &amp; Assessment Report
-        </p>
+        </h1>
       </header>
 
       {/* ===================================================
@@ -739,7 +783,7 @@ export default function SurveyReportTemplate({ survey }) {
           1. SURVEY INFORMATION
       =================================================== */}
 
-      <Section number="1" title="SURVEY INFORMATION">
+      <Section number="1" title="PROPERTY INFORMATION">
         <div
           className="flex w-full"
           style={{
@@ -753,13 +797,11 @@ export default function SurveyReportTemplate({ survey }) {
               width: "25%",
             }}
           >
-            <Field label="Survey ID" value={info.survey_id} />
+            <Field label="Tax Rate Zone" value={info.tax_rate_zone} />
 
-            <Field label="Survey Date" value={info.survey_date} date />
+            <Field label="Parcel Number" value={info.parcel_no} />
 
-            <Field label="Ward No." value={info.ward_no} />
-
-            <Field label="Zone" value={info.zone} />
+            <Field label="Electricity Bill CA NO." value={"NA"} />
           </div>
 
           {/* COLUMN 2 */}
@@ -769,16 +811,10 @@ export default function SurveyReportTemplate({ survey }) {
               width: "25%",
             }}
           >
+            <Field label="Zone" value={info.zone} />
+
             <Field label="Property ID" value={info.property_id} />
-
-            <Field
-              label="Existing Property ID"
-              value={info.existing_property_id}
-            />
-
-            <Field label="Parcel Number" value={info.parcel_no} />
-
-            <Field label="Colony / Locality" value={info.colony_locality} />
+            <Field label="Gas Connection" value={utility.gas_connection} />
           </div>
 
           {/* COLUMN 3 */}
@@ -788,87 +824,140 @@ export default function SurveyReportTemplate({ survey }) {
               width: "25%",
             }}
           >
-            <Field label="Surveyor Name" value={info.surveyor_name} />
+            <Field label="Ward No." value={info.ward_no} />
 
-            <Field label="Surveyor ID" value={info.surveyor_id} />
-
-            <Field label="Tax Rate Zone" value={info.tax_rate_zone} />
-
-            <Field label="Property Location" value={info.property_location} />
+            <Field
+              label="Existing Property ID"
+              value={info.existing_property_id}
+            />
+            <Field
+              label="Property Ownership"
+              value={property.property_ownership}
+            />
           </div>
-
-          {/* COLUMN 4 */}
+        </div>
+      </Section>
+      {/* ===================================================
+          2. PROPERTY OWNER DETAILS
+      =================================================== */}
+      <Section number="2" title="PROPERTY OWNER DETAILS">
+        <div
+          className="flex w-full"
+          style={{
+            gap: "5px",
+          }}
+        >
+          {/* COLUMN 1 */}
           <div
             className="min-w-0 flex-1"
             style={{
               width: "25%",
             }}
           >
-            <Field label="GPS Latitude" value={info.gps_latitude} />
+            <Field label="Owner Name" value={owner.owner_name} />
 
-            <Field label="GPS Longitude" value={info.gps_longitude} />
+            <Field label="Mobile Number" value={owner.mobile_number} />
+
+            <Field
+              label="Property Tax NO."
+              value={owner.correspondence_address}
+            />
+          </div>
+
+          {/* COLUMN 2 */}
+          <div
+            className="min-w-0 flex-1"
+            style={{
+              width: "25%",
+            }}
+          >
+            <Field
+              label="Father / Husband Name"
+              value={owner.father_husband_name}
+            />
+
+            <Field label="AADHAR NO." value={documents.aadhaar_number} />
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                width: "100%",
+                minHeight: "5.8mm",
+                paddingLeft: "1mm",
+                boxSizing: "border-box",
+                borderBottom: "1px solid #dedede",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {/* LABEL */}
+              <span
+                style={{
+                  fontSize: "7.1px",
+                  fontWeight: 700,
+                  lineHeight: "1",
+                  color: "#292929",
+                  marginRight: "3mm",
+                  flexShrink: 0,
+                }}
+              >
+                Usage Type:
+              </span>
+
+              {/* OPTIONS */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4mm",
+                  height: "100%",
+                }}
+              >
+                <UsageTypeCheckbox
+                  label="Residential"
+                  checked={
+                    usage.primary_use === "Residential" && !usage.mixed_use
+                  }
+                />
+
+                <UsageTypeCheckbox
+                  label="Commercial"
+                  checked={
+                    usage.primary_use === "Commercial" && !usage.mixed_use
+                  }
+                />
+
+                <UsageTypeCheckbox label="Both" checked={!!usage.mixed_use} />
+              </div>
+            </div>
+          </div>
+
+          {/* COLUMN 3 */}
+          <div
+            className="min-w-0 flex-1"
+            style={{
+              width: "25%",
+            }}
+          >
+            <Field
+              label="Correspondence Address"
+              value={owner.correspondence_address}
+            />
+
+            <Field label="Email" value={"ashir0845@gmail.com"} />
+            <Field
+              label="Total Built-up Area"
+              value={land.total_builtup_area}
+            />
           </div>
         </div>
       </Section>
 
       {/* ===================================================
-          2 + 3
-      =================================================== */}
-
-      <div
-        className="flex gap-[5px]"
-        style={{
-          marginBottom: "2.8mm",
-        }}
-      >
-        {/* 2. OWNER DETAILS */}
-
-        <Section
-          number="2"
-          title="OWNER DETAILS"
-          className="mb-0 min-w-0 flex-1"
-        >
-          <Field label="Owner Name" value={owner.owner_name} />
-
-          <Field
-            label="Father / Husband Name"
-            value={owner.father_husband_name}
-          />
-
-          <Field label="Mobile Number" value={owner.mobile_number} />
-
-          <Field
-            label="Correspondence Address"
-            value={owner.correspondence_address}
-          />
-        </Section>
-
-        {/* 3. PROPERTY DETAILS */}
-
-        <Section
-          number="3"
-          title="PROPERTY DETAILS"
-          className="mb-0 min-w-0 flex-1"
-        >
-          <Field label="Property Status" value={property.property_status} />
-
-          <Field
-            label="Building Permission Available"
-            value={property.building_permission_available}
-          />
-
-          <Field
-            label="Property Ownership"
-            value={property.property_ownership}
-          />
-        </Section>
-      </div>
-
-      {/* ===================================================
           4. LAND & BUILDING
       =================================================== */}
 
-      <Section number="4" title="LAND & BUILDING INFORMATION">
+      <Section number="3" title="LAND & BUILDING INFORMATION">
         <div className="flex gap-x-[7px]">
           {/* COLUMN 1 */}
 
@@ -925,7 +1014,7 @@ export default function SurveyReportTemplate({ survey }) {
         {/* 5. USAGE DETAILS */}
 
         <Section
-          number="5"
+          number="4"
           title="USAGE DETAILS"
           className="mb-0 min-w-0 flex-1"
         >
@@ -953,7 +1042,7 @@ export default function SurveyReportTemplate({ survey }) {
         {/* 6. UTILITY CONNECTIONS */}
 
         <Section
-          number="6"
+          number="5"
           title="UTILITY CONNECTIONS"
           className="mb-0 min-w-0 flex-1"
         >
