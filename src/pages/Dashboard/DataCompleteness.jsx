@@ -22,7 +22,10 @@ export default function DataCompletenes({ data, selectedKey, onSegmentClick }) {
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 mt-6">
-      <h3 className="text-lg mt-1 ml-2 font-bold mb-6" style={{ color: "#7a1453" }}>
+      <h3
+        className="text-lg mt-1 ml-2 font-bold mb-6"
+        style={{ color: "#7a1453" }}
+      >
         Data Completeness
       </h3>
 
@@ -37,18 +40,18 @@ export default function DataCompletenes({ data, selectedKey, onSegmentClick }) {
             <div
               key={key}
               onClick={
-                isInteractive ? () => onSegmentClick(label, metric.property_uids) : undefined
+                isInteractive
+                  ? () => onSegmentClick(label, metric.property_uids)
+                  : undefined
               }
               className={`rounded-xl transition-all ${
                 isInteractive ? "cursor-pointer hover:bg-gray-50" : ""
-              } ${isSelected ? "ring-2 ring-[#facc15] bg-gray-50" : ""} ${
-                selectedKey && !isSelected ? "opacity-40" : ""
-              } py-1`}
+              } ${isSelected ? "ring-2 ring-[#facc15] bg-gray-50" : ""} py-1`}
             >
               <GaugeChart
                 label={label}
                 completed={metric.completed}
-                total={metric.total} // <-- each metric's OWN total, not a shared one
+                total={metric.total}
               />
             </div>
           );
