@@ -12,10 +12,11 @@ import GISCard from "./components/GISCard";
 import VerificationCard from "./components/VerificationCard";
 import DocumentsCard from "./components/DocumentsCard";
 import RemarksCard from "./components/RemarksCard";
-import {  Cancel } from "@mui/icons-material";
+import { Cancel } from "@mui/icons-material";
 import { updateSurvey } from "../../services/api";
 import "./SurveyPreview.css";
 import notify from "../../utils/toast.js";
+import { canManageSurveys } from "../../utils/roleUtils.js";
 
 export default function SurveyPreview() {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ export default function SurveyPreview() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
-
+  const canManage = canManageSurveys();
   const loadSurvey = useCallback(async () => {
     try {
       setLoading(true);
@@ -50,7 +51,6 @@ export default function SurveyPreview() {
 
   // Update handler for each section
   const handleSectionUpdate = (sectionKey, updatedData) => {
-    ;
     setSurvey((prev) => ({
       ...prev,
       [sectionKey]: updatedData,
@@ -98,7 +98,9 @@ export default function SurveyPreview() {
       }
     } catch (error) {
       console.error("Error saving survey:", error);
-      notify.error(error.message || "Failed to save changes. Please try again.");
+      notify.error(
+        error.message || "Failed to save changes. Please try again.",
+      );
     } finally {
       setSaving(false);
     }
@@ -106,7 +108,6 @@ export default function SurveyPreview() {
 
   // Cancel all changes and reload
   const handleCancelChanges = async () => {
-    
     if (hasChanges) {
       if (
         window.confirm(
@@ -144,15 +145,18 @@ export default function SurveyPreview() {
           {hasChanges && (
             <span className="unsaved-indicator">• Unsaved changes</span>
           )}
-          <button
-            className={`save-all-btn ${hasChanges ? "has-changes" : ""}`}
-            onClick={handleSaveAll}
-            disabled={saving || !hasChanges}
-          >
-            <FaSave />
-            {saving ? "Saving..." : "Save All"}
-          </button>
-          {hasChanges && (
+          {canManage && (
+            <button
+              className={`save-all-btn ${hasChanges ? "has-changes" : ""}`}
+              onClick={handleSaveAll}
+              disabled={saving || !hasChanges}
+            >
+              <FaSave />
+              {saving ? "Saving..." : "Save All"}
+            </button>
+          )}
+
+          {canManage && hasChanges && (
             <button
               className="cancel-btn"
               onClick={handleCancelChanges}

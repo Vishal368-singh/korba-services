@@ -6,6 +6,9 @@ import { approveSurveyAPI } from "../../services/api";
 import { updateSurveyStatus } from "../../services/api";
 import { fetchSurveyBySurveyID } from "../../services/api";
 import { generateSurveyPdf } from "../../utils/generateSurveyPdf";
+import { canManageSurveys } from "../../utils/roleUtils";
+
+
 
 export default function SurveyTable({
   data = [],
@@ -16,6 +19,7 @@ export default function SurveyTable({
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [selectedSurveyId, setSelectedSurveyId] = useState(null);
   const [downloadingId, setDownloadingId] = useState(null);
+  const canManage=canManageSurveys();
 
   const handleDownloadReport = async (surveyId) => {
     try {
@@ -146,7 +150,7 @@ export default function SurveyTable({
                         : "Download"}
                     </button>
                   )}
-                  {activeTab === "Pending" && (
+                  {activeTab === "Pending" && canManage && (
                     <>
                       <button
                         className="approve-btn"

@@ -27,3 +27,7 @@ export const hasRole = (allowedRoles = []) => {
 
   return allowedRoles.includes(role);
 };
+
+export const canManageSurveys=()=>{
+ return hasRole(["supervisor","officer"]);
+};
