@@ -1,19 +1,16 @@
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import {
+  MAP_LOCATION_COLORS as LOCATION_COLORS,
+  MAP_ZONE_COLORS as ZONE_COLORS,
+  MAP_DEFAULT_MARKER_COLOR,
+  HIGHLIGHT_COLOR,
+  DIM_MARKER_OPACITY,
+  DIM_MARKER_FILL_OPACITY,
+} from "../../theme/colors";
 
-const LOCATION_COLORS = {
-  "Main Road": "#7a1453",
-  "Market": "#a8306e",
-  "Others": "#c96b98",
-};
 
-const ZONE_COLORS = {
-  "Zone 1": "#7a1453",
-  "Zone 2": "#a8306e",
-  "Zone 3": "#c96b98",
-  "Zone 4": "#e6b8cf",
-};
 
 function FitBounds({ points }) {
   const map = useMap();
@@ -69,49 +66,43 @@ function deconflictOverlaps(rawLocations) {
   return result;
 }
 
+function mapApiDataToLocations(mapData, statusLookup) {
+  if (!mapData || !Array.isArray(mapData)) return [];
+  return mapData
+    .filter((loc) => loc.latitude && loc.longitude)
+    .map((loc) => {
+      let color = MAP_DEFAULT_MARKER_COLOR;
+      if (loc.property_location) {
+        const locationKey = Object.keys(LOCATION_COLORS).find((key) =>
+          loc.property_location.toLowerCase().includes(key.toLowerCase())
+        );
+        if (locationKey) color = LOCATION_COLORS[locationKey];
+      } else if (loc.tax_rate_zone) {
+        color = ZONE_COLORS[loc.tax_rate_zone] || MAP_DEFAULT_MARKER_COLOR;
+      }
+      return {
+        name: loc.parcel_no || loc.property_id || loc.property_uid,
+        lat: parseFloat(loc.latitude),
+        lng: parseFloat(loc.longitude),
+        color,
+        property_uid: loc.property_uid,
+        parcel_no: loc.parcel_no,
+        property_id: loc.property_id,
+        property_location: loc.property_location,
+        tax_rate_zone: loc.tax_rate_zone,
+        status: statusLookup[loc.property_uid] || null,
+      };
+    });
+}
+
 export default function GeographicOverview({ data, selectedFilter, onClearFilter }) {
-  const [locations, setLocations] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (data?.map_locations) {
-      const statusLookup = buildStatusLookup(data.property_status);
-      const mapped = mapApiDataToLocations(data.map_locations, statusLookup);
-      setLocations(deconflictOverlaps(mapped));
-      setLoading(false);
-    } else {
-      setLoading(false);
-    }
+  const locations = useMemo(() => {
+    if (!data?.map_locations) return [];
+    const statusLookup = buildStatusLookup(data.property_status);
+    const mapped = mapApiDataToLocations(data.map_locations, statusLookup);
+    return deconflictOverlaps(mapped);
   }, [data]);
-
-  const mapApiDataToLocations = (mapData, statusLookup) => {
-    if (!mapData || !Array.isArray(mapData)) return [];
-    return mapData
-      .filter((loc) => loc.latitude && loc.longitude)
-      .map((loc) => {
-        let color = "#7a1453";
-        if (loc.property_location) {
-          const locationKey = Object.keys(LOCATION_COLORS).find((key) =>
-            loc.property_location.toLowerCase().includes(key.toLowerCase())
-          );
-          if (locationKey) color = LOCATION_COLORS[locationKey];
-        } else if (loc.tax_rate_zone) {
-          color = ZONE_COLORS[loc.tax_rate_zone] || "#7a1453";
-        }
-        return {
-          name: loc.parcel_no || loc.property_id || loc.property_uid,
-          lat: parseFloat(loc.latitude),
-          lng: parseFloat(loc.longitude),
-          color,
-          property_uid: loc.property_uid, // <-- the join key
-          parcel_no: loc.parcel_no,
-          property_id: loc.property_id,
-          property_location: loc.property_location,
-          tax_rate_zone: loc.tax_rate_zone,
-          status: statusLookup[loc.property_uid] || null,
-        };
-      });
-  };
+  const loading = !data;
 
   const defaultCenter = [22.7196, 75.8577];
   const mapCenter = locations.length > 0 ? [locations[0].lat, locations[0].lng] : defaultCenter;
@@ -158,10 +149,10 @@ export default function GeographicOverview({ data, selectedFilter, onClearFilter
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-[#7a1453] mt-1 ml-2">
           Geographic Overview
-          <span className="text-xs font-normal text-gray-400 ml-2">
+          {/* <span className="text-xs font-normal text-gray-400 ml-2">
             {highlighted.length} propert{highlighted.length === 1 ? "y" : "ies"}
             {selectedFilter ? " matched" : " on map"}
-          </span>
+          </span> */}
         </h3>
         {selectedFilter && (
           <button
@@ -173,19 +164,12 @@ export default function GeographicOverview({ data, selectedFilter, onClearFilter
         )}
       </div>
 
-      <div className="relative z-0 w-full h-65 sm:h-80 lg:h-110 rounded-xl overflow-hidden">
-        <MapContainer
-          center={mapCenter}
-          zoom={13}
-          scrollWheelZoom={true}
-          zoomControl={true}
-          style={{ height: "100%", width: "100%" }}
-        >
+      <div className="relative z-0 w-full mt-2 h-65 sm:h-80 lg:h-110 rounded-xl overflow-hidden">
+        <MapContainer center={mapCenter} zoom={13} scrollWheelZoom zoomControl style={{ height: "100%", width: "100%" }}>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-
           <FitBounds points={selectedFilter ? highlighted : locations} />
 
           {dimmed.map((loc, index) => (
@@ -193,17 +177,17 @@ export default function GeographicOverview({ data, selectedFilter, onClearFilter
               key={`dim-${loc.property_uid || index}`}
               center={[loc.lat, loc.lng]}
               radius={6}
-              pathOptions={{ color: "#fff", weight: 1, fillColor: loc.color, fillOpacity: 0.15, opacity: 0.3 }}
+              pathOptions={{ color: "#fff", weight: 1, fillColor: loc.color, fillOpacity: DIM_MARKER_FILL_OPACITY, opacity: DIM_MARKER_OPACITY }}
             />
           ))}
 
-          {highlighted.map((loc, index) => (
+            {highlighted.map((loc, index) => (
             <CircleMarker
               key={loc.property_uid || index}
               center={[loc.lat, loc.lng]}
               radius={selectedFilter ? 11 : 9}
               pathOptions={{
-                color: selectedFilter ? "#facc15" : "#fff",
+                color: selectedFilter ? HIGHLIGHT_COLOR : "#fff",
                 weight: selectedFilter ? 3 : 2,
                 fillColor: loc.color,
                 fillOpacity: 1,
@@ -234,7 +218,7 @@ export default function GeographicOverview({ data, selectedFilter, onClearFilter
         </p>
       )}
 
-      <div className="flex flex-wrap gap-3 mt-3 px-2">
+      <div className="flex flex-wrap m-2  gap-3  px-4">
         {Object.entries(LOCATION_COLORS).map(([label, color]) => (
           <div key={label} className="flex items-center gap-1">
             <span className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />

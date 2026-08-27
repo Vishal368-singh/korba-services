@@ -1,28 +1,28 @@
 import { useMemo } from "react";
 import PropertyDonutCard from "./PropertyDonutCard";
-
-const COLORS = {
-  primary: ["#7a1453", "#a8306e", "#c96b98", "#e6b8cf", "#f5d6e6", "#fce4ec"],
-};
+import { CHART_THEMES } from "../../theme/colors";
 
 export default function PropertyBreakdowns({ data, selectedFilter, onSegmentClick }) {
   const charts = useMemo(() => {
     const landBuilding = data?.land_building_analysis || {};
+    const propertyStatus = data?.property_status || {};
+
     const chartConfigs = [
-      { key: "property_status", title: "Property Status", data: landBuilding.usage_factor },
-      { key: "usage_details", title: "Usage Details", data: landBuilding.usage_type },
-      { key: "construction_type", title: "Construction Type", data: landBuilding.construction_type },
-      { key: "roof_type", title: "Roof Type", data: landBuilding.roof_type },
+      { key: "property_status", title: "Property Status", themeKey: "property_status", data: propertyStatus.property_status },
+      { key: "building_permissions", title: "Building Permissions", themeKey: "building_permissions", data: propertyStatus.building_permission_available },
+      { key: "property_ownership", title: "Property Ownership", themeKey: "property_ownership", data: propertyStatus.property_ownership },
+      { key: "construction_type", title: "Construction Type", themeKey: "construction_type", data: landBuilding.construction_type },
     ];
 
     return chartConfigs
       .filter((config) => config.data && Object.keys(config.data).length > 0)
       .map((config) => {
+        const theme = CHART_THEMES[config.themeKey] || { shades: ["#6366f1"] };
         const segments = Object.keys(config.data).map((key, index) => ({
           label: key,
           value: config.data[key]?.count || 0,
           percent: config.data[key]?.percentage || 0,
-          color: COLORS.primary[index % COLORS.primary.length],
+          color: theme.shades[index % theme.shades.length],
           property_uids: config.data[key]?.property_uids || [],
         }));
 
@@ -47,7 +47,6 @@ export default function PropertyBreakdowns({ data, selectedFilter, onSegmentClic
         <PropertyDonutCard
           key={chart.key}
           title={chart.title}
-          total={chart.total}
           segments={chart.segments}
           selectedKey={selectedFilter?.label}
           onSegmentClick={onSegmentClick}

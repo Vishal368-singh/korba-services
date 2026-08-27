@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-
+import { CHART_THEMES, HIGHLIGHT_COLOR } from "../../theme/colors";
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
@@ -19,7 +19,7 @@ const CustomTooltip = ({ active, payload }) => {
   return null;
 };
 
-const renderValueLabel = ({ value, payload, cx, cy, midAngle, innerRadius, outerRadius }) => {
+const renderValueLabel = ({ payload, cx, cy, midAngle, innerRadius, outerRadius }) => {
   const RADIAN = Math.PI / 180;
   const radius = innerRadius + (outerRadius - innerRadius) * 0.55;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -31,21 +31,14 @@ const renderValueLabel = ({ value, payload, cx, cy, midAngle, innerRadius, outer
   );
 };
 
-const COLORS = ["#7a1453", "#a8306e", "#c96b98", "#e6b8cf", "#f5d6e6", "#fce4ec"];
+// themeKey: which CHART_THEMES entry to use, e.g. "tax_rate_zone", "property_location"
+export default function DonutStatCard({ title, data, themeKey, selectedKey, onSegmentClick }) {
+  const theme = useMemo(
+    () => CHART_THEMES[themeKey] || { shades: ["#6366f1", "#818cf8", "#a5b4fc", "#c7d2fe"] },
+    [themeKey],
+  );
 
-// selectedKey: label of currently-highlighted segment (string | null)
-// onSegmentClick(label, property_uids): fired when a slice or legend row is clicked
-export default function DonutStatCard({ title, data, selectedKey, onSegmentClick }) {
-  const [chartData, setChartData] = useState(null);
-
-  useEffect(() => {
-    if (data) {
-      const mappedData = mapApiDataToChart(data);
-      setChartData(mappedData);
-    }
-  }, [data]);
-
-  const mapApiDataToChart = (apiData) => {
+  function mapApiDataToChart(apiData) {
     if (!apiData) return null;
     const zoneKeys = Object.keys(apiData);
     const totalCount = zoneKeys.reduce((sum, key) => sum + apiData[key].count, 0);
@@ -54,18 +47,15 @@ export default function DonutStatCard({ title, data, selectedKey, onSegmentClick
       label: key,
       value: apiData[key].count || 0,
       percent: apiData[key].percentage || 0,
-      color: COLORS[index % COLORS.length],
+      color: theme.shades[index % theme.shades.length],
       property_uids: apiData[key].property_uids || [],
     }));
 
     segments.sort((a, b) => b.value - a.value);
+    return { totalCount, segments, compareLabel: `Total: ${totalCount} Properties` };
+  }
 
-    return {
-      totalCount,
-      segments,
-      compareLabel: `Total: ${totalCount} Properties`,
-    };
-  };
+  const chartData = useMemo(() => (data ? mapApiDataToChart(data) : null), [data, theme]);
 
   if (!chartData) {
     return (
@@ -82,16 +72,16 @@ export default function DonutStatCard({ title, data, selectedKey, onSegmentClick
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm pb-5">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-[#7a1453] mt-1 ml-2">
+      <div className="flex items-center justify-center">
+        <h3 className="text-sm font-semibold text-gray-800 mt-3">
           {title}
           {selectedKey && chartData.segments.some((s) => s.label === selectedKey) && (
-            <span className="text-xs font-normal text-gray-400 ml-2">({selectedKey})</span>
+            <span className="text-xs font-normal text-gray-400 ml-4">({selectedKey})</span>
           )}
         </h3>
       </div>
 
-      <div className="flex items-center w-full justify-between gap-2.5">
+      <div className="flex items-center w-full justify-center gap-4 mt-3">
         <div className="h-38 shrink-0 relative w-1/2">
           <ResponsiveContainer width="100%" height="100%" className="mt-1">
             <PieChart>
@@ -109,8 +99,7 @@ export default function DonutStatCard({ title, data, selectedKey, onSegmentClick
                   <Cell
                     key={idx}
                     fill={seg.color}
-                    //opacity={!selectedKey || selectedKey === seg.label ? 1 : 0.3}
-                    stroke={selectedKey === seg.label ? "#facc15" : "none"}
+                    stroke={selectedKey === seg.label ? HIGHLIGHT_COLOR : "none"}
                     strokeWidth={selectedKey === seg.label ? 2 : 0}
                     cursor={isInteractive ? "pointer" : "default"}
                     onClick={() => handleClick(seg)}
@@ -120,19 +109,6 @@ export default function DonutStatCard({ title, data, selectedKey, onSegmentClick
               <Tooltip content={<CustomTooltip />} />
             </PieChart>
           </ResponsiveContainer>
-        </div>
-
-        <div className="flex w-1/2 flex-col gap-2 mt-3">
-          {chartData.segments.map((seg) => (
-            <div
-              key={seg.label}
-              onClick={() => handleClick(seg)}
-              className={`flex gap-2 text-xs ${isInteractive ? "cursor-pointer" : ""}`}
-            >
-              <span className="w-2 h-2 rounded-full shrink-0 mt-1" style={{ backgroundColor: seg.color }} />
-              <span className="text-gray-600 truncate">{seg.label}</span>
-            </div>
-          ))}
         </div>
       </div>
     </div>
