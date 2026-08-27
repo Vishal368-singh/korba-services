@@ -954,48 +954,115 @@ export default function SurveyReportTemplate({ survey }) {
       </Section>
 
       {/* ===================================================
-          4. LAND & BUILDING
+          3. LAND & BUILDING
       =================================================== */}
 
-      <Section number="3" title="LAND & BUILDING INFORMATION">
-        <div className="flex gap-x-[7px]">
+      <Section number="3" title="PROPERTY OWNER DETAILS">
+        <div
+          className="flex w-full"
+          style={{
+            gap: "5px",
+          }}
+        >
           {/* COLUMN 1 */}
-
-          <div className="min-w-0 flex-1">
-            <Field label="Plot Area (Sq. Ft.)" value={land.plot_area} />
-
-            <Field label="Plinth Area" value={land.plinth_area} />
+          <div
+            className="min-w-0 flex-1"
+            style={{
+              width: "25%",
+            }}
+          >
+            <Field label="Property Ownership" value={owner.owner_type} />
+            <Field label="Property Use" value={owner.mobile_number} />
+            <Field
+              label="Property Tax NO."
+              value={owner.correspondence_address}
+            />
           </div>
 
           {/* COLUMN 2 */}
-
-          <div className="min-w-0 flex-1">
+          <div
+            className="min-w-0 flex-1"
+            style={{
+              width: "25%",
+            }}
+          >
             <Field
-              label="Year of Construction"
-              value={land.year_of_construction}
+              label="Father / Husband Name"
+              value={owner.father_husband_name}
             />
 
-            <Field
-              label="Building Age"
-              value={
-                land.building_age
-                  ? `${land.building_age} Year(s)`
-                  : land.building_age
-              }
-            />
+            <Field label="AADHAR NO." value={documents.aadhaar_number} />
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                width: "100%",
+                minHeight: "5.8mm",
+                paddingLeft: "1mm",
+                boxSizing: "border-box",
+                borderBottom: "1px solid #dedede",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {/* LABEL */}
+              <span
+                style={{
+                  fontSize: "7.1px",
+                  fontWeight: 700,
+                  lineHeight: "1",
+                  color: "#292929",
+                  marginRight: "3mm",
+                  flexShrink: 0,
+                }}
+              >
+                Usage Type:
+              </span>
+
+              {/* OPTIONS */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4mm",
+                  height: "100%",
+                }}
+              >
+                <UsageTypeCheckbox
+                  label="Residential"
+                  checked={
+                    usage.primary_use === "Residential" && !usage.mixed_use
+                  }
+                />
+
+                <UsageTypeCheckbox
+                  label="Commercial"
+                  checked={
+                    usage.primary_use === "Commercial" && !usage.mixed_use
+                  }
+                />
+
+                <UsageTypeCheckbox label="Both" checked={!!usage.mixed_use} />
+              </div>
+            </div>
           </div>
 
           {/* COLUMN 3 */}
+          <div
+            className="min-w-0 flex-1"
+            style={{
+              width: "25%",
+            }}
+          >
+            <Field
+              label="Correspondence Address"
+              value={owner.correspondence_address}
+            />
 
-          <div className="min-w-0 flex-1">
+            <Field label="Email" value={"ashir0845@gmail.com"} />
             <Field
               label="Total Built-up Area"
               value={land.total_builtup_area}
-            />
-
-            <Field
-              label="Floor Details"
-              value={getFloorSummary(land.floor_detail)}
             />
           </div>
         </div>
