@@ -129,7 +129,7 @@ export default function SurveyTable({
 
               <td>
                 <div className="action-buttons">
-                  {activeTab === "All" && canManage && (
+                  {activeTab === "All" && (
                     <button
                       className="preview-btn"
                       onClick={() => handlePreview(survey.survey_id)}

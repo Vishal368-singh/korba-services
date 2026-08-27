@@ -1,5 +1,3 @@
-import React from "react";
-
 /* =========================================================
    HELPERS
 ========================================================= */
@@ -71,7 +69,6 @@ const isChecked = (value) => {
 
 /* =========================================================
    IMAGE URL
-   Converts weather.mlinfomap.com URLs to the Vite proxy
 ========================================================= */
 
 const getImageSrc = (value) => {
@@ -90,11 +87,11 @@ const getImageSrc = (value) => {
   /*
     Remote URL:
 
-    https://weather.mlinfomap.com/documents/gis/456789/456/photo.jpg
+    https://weather.mlinfomap.com/dev-documents/gis/456789/456/photo.jpg
 
     becomes:
 
-    /gis-images/documents/gis/456789/456/photo.jpg
+    /gis-images/dev-documents/gis/456789/456/photo.jpg
 
     Vite then proxies it to weather.mlinfomap.com
   */
@@ -102,10 +99,6 @@ const getImageSrc = (value) => {
   if (url.startsWith("https://weather.mlinfomap.com/")) {
     return url.replace("https://weather.mlinfomap.com", "/gis-images");
   }
-
-  /*
-    Also handle http URLs if the API ever returns them.
-  */
 
   if (url.startsWith("http://weather.mlinfomap.com/")) {
     return url.replace("http://weather.mlinfomap.com", "/gis-images");
@@ -126,12 +119,18 @@ const getImageSrc = (value) => {
   return url;
 };
 
+/* =========================================================
+   FLOOR SUMMARY
+========================================================= */
+
 const getFloorSummary = (floorDetail) => {
   if (!Array.isArray(floorDetail) || floorDetail.length === 0) {
     return "—";
   }
 
-  const floors = floorDetail.map((item) => item?.floor).filter(Boolean);
+  const floors = floorDetail
+    .map((item) => item?.floor)
+    .filter(Boolean);
 
   return floors.length ? floors.join(", ") : "—";
 };
@@ -259,25 +258,17 @@ function CheckItem({ label, checked, widthClass = "w-1/4" }) {
           height: "12px",
           minWidth: "12px",
           minHeight: "12px",
-
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-
           boxSizing: "border-box",
-
           border: active ? "1.8px solid #111" : "1.4px solid #555",
-
           backgroundColor: active ? "#111" : "#fff",
-
           color: active ? "#fff" : "transparent",
-
           fontSize: "9px",
           fontWeight: 900,
           lineHeight: 1,
-
           fontFamily: "Arial, Helvetica, sans-serif",
-
           flexShrink: 0,
         }}
       >
@@ -333,7 +324,9 @@ function DocumentItem({ label, uploaded, count }) {
 
       {/* STATUS */}
       <strong className="shrink-0 whitespace-nowrap text-[6.1px] font-semibold text-[#555]">
-        {uploaded ? `Uploaded${count ? ` (${count})` : ""}` : "Not Uploaded"}
+        {uploaded
+          ? `Uploaded${count ? ` (${count})` : ""}`
+          : "Not Uploaded"}
       </strong>
     </div>
   );
@@ -345,15 +338,17 @@ function DocumentItem({ label, uploaded, count }) {
 
 function ImageBox({ src, title }) {
   const handleImageLoad = () => {
-    console.log(`[Survey Report] ${title} loaded successfully`, src);
+    console.log(
+      `[Survey Report] ${title} loaded successfully`,
+      src
+    );
   };
 
   const handleImageError = (event) => {
-    console.error(`[Survey Report] Failed to load ${title}:`, src);
-
-    /*
-      Hide broken image icon.
-    */
+    console.error(
+      `[Survey Report] Failed to load ${title}:`,
+      src
+    );
 
     event.currentTarget.style.display = "none";
   };
@@ -375,10 +370,7 @@ function ImageBox({ src, title }) {
         boxSizing: "border-box",
       }}
     >
-      {/* =================================================
-          IMAGE AREA
-      ================================================= */}
-
+      {/* IMAGE AREA */}
       <div
         className="
           flex
@@ -418,10 +410,7 @@ function ImageBox({ src, title }) {
         )}
       </div>
 
-      {/* =================================================
-          IMAGE TITLE
-      ================================================= */}
-
+      {/* IMAGE TITLE */}
       <div
         className="
           flex
@@ -445,9 +434,11 @@ function ImageBox({ src, title }) {
     </div>
   );
 }
+
 /* =========================================================
-  Residential type checkbox
+   USAGE TYPE CHECKBOX
 ========================================================= */
+
 function UsageTypeCheckbox({ label, checked }) {
   return (
     <span
@@ -496,9 +487,9 @@ function UsageTypeCheckbox({ label, checked }) {
     </span>
   );
 }
+
 /* =========================================================
    QUICK INFO STRIP
-   Fixed: values were getting vertically clipped
 ========================================================= */
 
 function QuickInfoStrip({ items }) {
@@ -507,18 +498,11 @@ function QuickInfoStrip({ items }) {
       style={{
         display: "flex",
         width: "100%",
-
-        /* Don't force a very small height */
         minHeight: "14mm",
-
         boxSizing: "border-box",
-
         border: "1px solid #555",
-
         backgroundColor: "#fff",
-
         marginBottom: "2.5mm",
-
         overflow: "visible",
       }}
     >
@@ -527,20 +511,16 @@ function QuickInfoStrip({ items }) {
           key={label}
           style={{
             width: `${100 / items.length}%`,
-
             minWidth: 0,
-
             boxSizing: "border-box",
-
             padding: "2.2mm 2.5mm 2.5mm 2.5mm",
-
-            borderRight: index !== items.length - 1 ? "1px solid #555" : "none",
-
+            borderRight:
+              index !== items.length - 1
+                ? "1px solid #555"
+                : "none",
             display: "flex",
             flexDirection: "column",
-
             justifyContent: "center",
-
             overflow: "visible",
           }}
         >
@@ -549,19 +529,12 @@ function QuickInfoStrip({ items }) {
             style={{
               margin: 0,
               padding: 0,
-
               fontSize: "6.2px",
-
               fontWeight: 700,
-
               lineHeight: "2.8mm",
-
               color: "#666",
-
               textTransform: "uppercase",
-
               whiteSpace: "nowrap",
-
               overflow: "visible",
             }}
           >
@@ -572,29 +545,17 @@ function QuickInfoStrip({ items }) {
           <div
             style={{
               marginTop: "0.8mm",
-
               padding: 0,
-
               fontSize: "8px",
-
               fontWeight: 700,
-
               lineHeight: "3.5mm",
-
               color: "#222",
-
               minHeight: "3.5mm",
-
               whiteSpace: "nowrap",
-
               overflow: "visible",
-
               textOverflow: "clip",
-
               wordBreak: "normal",
-
               overflowWrap: "normal",
-
               boxSizing: "border-box",
             }}
           >
@@ -638,7 +599,116 @@ export default function SurveyReportTemplate({ survey }) {
   const documents = survey.documents_collected || {};
 
   const remarks =
-    survey.surveyor_remarks?.surveyor_remarks ?? survey.surveyor_remarks;
+    survey.surveyor_remarks?.surveyor_remarks ??
+    survey.surveyor_remarks;
+
+  /* =======================================================
+     DERIVED LAND & BUILDING DATA
+  ======================================================= */
+
+  /*
+    API response:
+
+    usage_details:
+      primary_use: "Residential"
+      mixed_use: true
+      occupancy: "Self"
+
+    floor_detail:
+      Basement      -> Rented / Commercial
+      Ground Floor  -> Rented / Industrial
+      First Floor   -> Self / Residential
+
+    Therefore:
+      Self = Yes
+      Rented = Yes
+      Residential = Yes
+      Commercial = Yes
+  */
+
+  const floorDetails = Array.isArray(land.floor_detail)
+    ? land.floor_detail
+    : [];
+
+  const hasSelfOccupiedFloor = floorDetails.some(
+    (floor) =>
+      String(floor?.usage_factor || "")
+        .toLowerCase()
+        .trim() === "self occupied"
+  );
+
+  const hasRentedFloor = floorDetails.some(
+    (floor) =>
+      String(floor?.usage_factor || "")
+        .toLowerCase()
+        .trim() === "rented"
+  );
+
+  const hasResidentialFloor = floorDetails.some(
+    (floor) =>
+      String(floor?.usage_type || "")
+        .toLowerCase()
+        .trim() === "residential"
+  );
+
+  const hasCommercialFloor = floorDetails.some(
+    (floor) =>
+      String(floor?.usage_type || "")
+        .toLowerCase()
+        .trim() === "commercial"
+  );
+
+  /*
+    Use usage_details as fallback when floor_detail
+    does not contain enough information.
+  */
+
+  const isSelf =
+    hasSelfOccupiedFloor ||
+    String(usage.occupancy || "")
+      .toLowerCase()
+      .trim() === "self";
+
+  const isRented =
+    hasRentedFloor ||
+    String(usage.occupancy || "")
+      .toLowerCase()
+      .trim() === "rented" ||
+    usage.mixed_use === true;
+
+  const isResidential =
+    hasResidentialFloor ||
+    String(usage.primary_use || "")
+      .toLowerCase()
+      .trim() === "residential" ||
+    usage.mixed_use === true;
+
+  const isCommercial =
+    hasCommercialFloor ||
+    String(usage.primary_use || "")
+      .toLowerCase()
+      .trim() === "commercial" ||
+    usage.mixed_use === true;
+
+  /*
+    "Other" should only display a value when the
+    property location is actually Other.
+
+    The current API does not provide a separate
+    property_location_other field, so we safely
+    display "—" when it is not available.
+  */
+
+  const isOtherLocation =
+    String(info.property_location || "")
+      .toLowerCase()
+      .trim() === "other";
+
+  const otherLocationValue =
+    info.property_location_other ||
+    info.other_property_location ||
+    info.property_location_other_details ||
+    "—";
 
   /* =======================================================
      GIS FIELDS
@@ -680,8 +750,16 @@ export default function SurveyReportTemplate({ survey }) {
       "property_tax_receipt",
       "property_tax_receipt_files",
     ],
-    ["Building Permission", "building_permission", "building_permission_files"],
-    ["Other Documents", "other_documents", "other_documents_files"],
+    [
+      "Building Permission",
+      "building_permission",
+      "building_permission_files",
+    ],
+    [
+      "Other Documents",
+      "other_documents",
+      "other_documents_files",
+    ],
   ];
 
   /* =======================================================
@@ -705,13 +783,9 @@ export default function SurveyReportTemplate({ survey }) {
         width: "204mm",
         margin: "0 auto",
         padding: "4mm",
-
         boxSizing: "border-box",
-
         backgroundColor: "#fff",
-
         fontFamily: "Arial, Helvetica, sans-serif",
-
         color: "#333",
       }}
     >
@@ -722,11 +796,8 @@ export default function SurveyReportTemplate({ survey }) {
       <header
         style={{
           textAlign: "center",
-
           borderBottom: "1.5px solid #333",
-
           paddingBottom: "2.5mm",
-
           marginBottom: "4mm",
         }}
       >
@@ -734,30 +805,25 @@ export default function SurveyReportTemplate({ survey }) {
           style={{
             margin: 0,
             padding: 0,
-
             fontSize: "12px",
             fontWeight: 700,
             lineHeight: "1.15",
-
             color: "#111",
-
             whiteSpace: "nowrap",
             textAlign: "center",
           }}
         >
           OFFICE OF THE MUNICIPAL CORPORATION / KORBA (CHHATTISGARH)
         </h1>
+
         <h1
           style={{
             margin: 0,
             padding: 0,
-
             fontSize: "12px",
             fontWeight: 700,
             lineHeight: "1.15",
-
             color: "#111",
-
             whiteSpace: "nowrap",
             textAlign: "center",
           }}
@@ -780,7 +846,7 @@ export default function SurveyReportTemplate({ survey }) {
       />
 
       {/* ===================================================
-          1. SURVEY INFORMATION
+          1. PROPERTY INFORMATION
       =================================================== */}
 
       <Section number="1" title="PROPERTY INFORMATION">
@@ -797,11 +863,20 @@ export default function SurveyReportTemplate({ survey }) {
               width: "25%",
             }}
           >
-            <Field label="Tax Rate Zone" value={info.tax_rate_zone} />
+            <Field
+              label="Tax Rate Zone"
+              value={info.tax_rate_zone}
+            />
 
-            <Field label="Parcel Number" value={info.parcel_no} />
+            <Field
+              label="Parcel Number"
+              value={info.parcel_no}
+            />
 
-            <Field label="Electricity Bill CA NO." value={"NA"} />
+            <Field
+              label="Electricity Bill CA NO."
+              value={utility.electricity_consumer_no || "NA"}
+            />
           </div>
 
           {/* COLUMN 2 */}
@@ -811,10 +886,20 @@ export default function SurveyReportTemplate({ survey }) {
               width: "25%",
             }}
           >
-            <Field label="Zone" value={info.zone} />
+            <Field
+              label="Zone"
+              value={info.zone}
+            />
 
-            <Field label="Property ID" value={info.property_id} />
-            <Field label="Gas Connection" value={utility.gas_connection} />
+            <Field
+              label="Property ID"
+              value={info.property_id}
+            />
+
+            <Field
+              label="Gas Connection"
+              value={utility.gas_connection}
+            />
           </div>
 
           {/* COLUMN 3 */}
@@ -824,12 +909,16 @@ export default function SurveyReportTemplate({ survey }) {
               width: "25%",
             }}
           >
-            <Field label="Ward No." value={info.ward_no} />
+            <Field
+              label="Ward No."
+              value={info.ward_no}
+            />
 
             <Field
               label="Existing Property ID"
               value={info.existing_property_id}
             />
+
             <Field
               label="Property Ownership"
               value={property.property_ownership}
@@ -837,9 +926,11 @@ export default function SurveyReportTemplate({ survey }) {
           </div>
         </div>
       </Section>
+
       {/* ===================================================
           2. PROPERTY OWNER DETAILS
       =================================================== */}
+
       <Section number="2" title="PROPERTY OWNER DETAILS">
         <div
           className="flex w-full"
@@ -854,13 +945,19 @@ export default function SurveyReportTemplate({ survey }) {
               width: "25%",
             }}
           >
-            <Field label="Owner Name" value={owner.owner_name} />
+            <Field
+              label="Owner Name"
+              value={owner.owner_name}
+            />
 
-            <Field label="Mobile Number" value={owner.mobile_number} />
+            <Field
+              label="Mobile Number"
+              value={owner.mobile_number}
+            />
 
             <Field
               label="Property Tax NO."
-              value={owner.correspondence_address}
+              value={survey.tax_related_information?.existing_property_tax_no}
             />
           </div>
 
@@ -876,7 +973,10 @@ export default function SurveyReportTemplate({ survey }) {
               value={owner.father_husband_name}
             />
 
-            <Field label="AADHAR NO." value={documents.aadhaar_number} />
+            <Field
+              label="AADHAR NO."
+              value={documents.aadhaar_number}
+            />
 
             <div
               style={{
@@ -890,7 +990,6 @@ export default function SurveyReportTemplate({ survey }) {
                 whiteSpace: "nowrap",
               }}
             >
-              {/* LABEL */}
               <span
                 style={{
                   fontSize: "7.1px",
@@ -904,7 +1003,6 @@ export default function SurveyReportTemplate({ survey }) {
                 Usage Type:
               </span>
 
-              {/* OPTIONS */}
               <div
                 style={{
                   display: "flex",
@@ -916,18 +1014,23 @@ export default function SurveyReportTemplate({ survey }) {
                 <UsageTypeCheckbox
                   label="Residential"
                   checked={
-                    usage.primary_use === "Residential" && !usage.mixed_use
+                    usage.primary_use === "Residential" &&
+                    !usage.mixed_use
                   }
                 />
 
                 <UsageTypeCheckbox
                   label="Commercial"
                   checked={
-                    usage.primary_use === "Commercial" && !usage.mixed_use
+                    usage.primary_use === "Commercial" &&
+                    !usage.mixed_use
                   }
                 />
 
-                <UsageTypeCheckbox label="Both" checked={!!usage.mixed_use} />
+                <UsageTypeCheckbox
+                  label="Both"
+                  checked={!!usage.mixed_use}
+                />
               </div>
             </div>
           </div>
@@ -944,7 +1047,11 @@ export default function SurveyReportTemplate({ survey }) {
               value={owner.correspondence_address}
             />
 
-            <Field label="Email" value={"ashir0845@gmail.com"} />
+            <Field
+              label="Email"
+              value={"ashir0845@gmail.com"}
+            />
+
             <Field
               label="Total Built-up Area"
               value={land.total_builtup_area}
@@ -957,184 +1064,139 @@ export default function SurveyReportTemplate({ survey }) {
           3. LAND & BUILDING
       =================================================== */}
 
-      <Section number="3" title="PROPERTY OWNER DETAILS">
+      <Section number="3" title="LAND & BUILDING">
         <div
           className="flex w-full"
           style={{
             gap: "5px",
           }}
         >
-          {/* COLUMN 1 */}
+          {/* =================================================
+              COLUMN 1
+          ================================================= */}
+
           <div
             className="min-w-0 flex-1"
             style={{
-              width: "25%",
+              width: "33.33%",
             }}
           >
-            <Field label="Property Ownership" value={owner.owner_type} />
-            <Field label="Property Use" value={owner.mobile_number} />
+            {/* ROW 1 */}
             <Field
-              label="Property Tax NO."
-              value={owner.correspondence_address}
+              label="Property Ownership"
+              value={property.property_ownership}
+            />
+
+            {/* ROW 2 */}
+            <Field
+              label="Property Use (Rented / Self / Both)"
+              value={isSelf && isRented ? "Both" : isSelf ? "Self" : isRented ? "Rented" : "—"}
+            />
+
+            {/* ROW 3 */}
+            <Field
+              label="Property Use (Residential / Commercial / Both)"
+              value={
+                isResidential && isCommercial
+                  ? "Both"
+                  : isResidential
+                  ? "Residential"
+                  : isCommercial
+                  ? "Commercial"
+                  : "—"
+              }
+            />
+
+            {/* ROW 4 */}
+            <Field
+              label="Building Year"
+              value={land.year_of_construction}
             />
           </div>
 
-          {/* COLUMN 2 */}
+          {/* =================================================
+              COLUMN 2
+          ================================================= */}
+
           <div
             className="min-w-0 flex-1"
             style={{
-              width: "25%",
+              width: "33.33%",
             }}
           >
+            {/* ROW 1 */}
             <Field
-              label="Father / Husband Name"
-              value={owner.father_husband_name}
+              label="Property Location (Main Road / Main Market / Other)"
+              value={info.property_location}
             />
 
-            <Field label="AADHAR NO." value={documents.aadhaar_number} />
+            {/* ROW 2 */}
+            <Field
+              label="Self"
+              value={isSelf ? "Yes" : "No"}
+            />
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                width: "100%",
-                minHeight: "5.8mm",
-                paddingLeft: "1mm",
-                boxSizing: "border-box",
-                borderBottom: "1px solid #dedede",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {/* LABEL */}
-              <span
-                style={{
-                  fontSize: "7.1px",
-                  fontWeight: 700,
-                  lineHeight: "1",
-                  color: "#292929",
-                  marginRight: "3mm",
-                  flexShrink: 0,
-                }}
-              >
-                Usage Type:
-              </span>
+            {/* ROW 3 */}
+            <Field
+              label="Residential"
+              value={isResidential ? "Yes" : "No"}
+            />
 
-              {/* OPTIONS */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4mm",
-                  height: "100%",
-                }}
-              >
-                <UsageTypeCheckbox
-                  label="Residential"
-                  checked={
-                    usage.primary_use === "Residential" && !usage.mixed_use
-                  }
-                />
-
-                <UsageTypeCheckbox
-                  label="Commercial"
-                  checked={
-                    usage.primary_use === "Commercial" && !usage.mixed_use
-                  }
-                />
-
-                <UsageTypeCheckbox label="Both" checked={!!usage.mixed_use} />
-              </div>
-            </div>
+            {/* ROW 4 */}
+            <Field
+              label="Building Age"
+              value={land.building_age}
+            />
           </div>
 
-          {/* COLUMN 3 */}
+          {/* =================================================
+              COLUMN 3
+          ================================================= */}
+
           <div
             className="min-w-0 flex-1"
             style={{
-              width: "25%",
+              width: "33.33%",
             }}
           >
+            {/* ROW 1 */}
             <Field
-              label="Correspondence Address"
-              value={owner.correspondence_address}
+              label="Other"
+              value={
+                isOtherLocation
+                  ? otherLocationValue
+                  : "—"
+              }
             />
 
-            <Field label="Email" value={"ashir0845@gmail.com"} />
+            {/* ROW 2 */}
             <Field
-              label="Total Built-up Area"
-              value={land.total_builtup_area}
+              label="Rented"
+              value={isRented ? "Yes" : "No"}
+            />
+
+            {/* ROW 3 */}
+            <Field
+              label="Commercial"
+              value={isCommercial ? "Yes" : "No"}
+            />
+
+            {/* ROW 4 */}
+            <Field
+              label=""
+              value=""
             />
           </div>
         </div>
       </Section>
 
       {/* ===================================================
-          5 + 6
+          4
       =================================================== */}
 
-      <div
-        className="flex gap-[5px]"
-        style={{
-          marginBottom: "2.8mm",
-        }}
-      >
-        {/* 5. USAGE DETAILS */}
 
-        <Section
-          number="4"
-          title="USAGE DETAILS"
-          className="mb-0 min-w-0 flex-1"
-        >
-          <div className="flex gap-x-[7px]">
-            {/* COLUMN 1 */}
 
-            <div className="min-w-0 flex-1">
-              <Field label="Primary Use" value={usage.primary_use} />
-
-              <Field label="Mixed Use" value={usage.mixed_use} />
-
-              <Field label="Occupancy" value={usage.occupancy} />
-            </div>
-
-            {/* COLUMN 2 */}
-
-            <div className="min-w-0 flex-1">
-              <Field label="No. of Families" value={usage.number_of_families} />
-
-              <Field label="No. of Shops" value={usage.number_of_shops} />
-            </div>
-          </div>
-        </Section>
-
-        {/* 6. UTILITY CONNECTIONS */}
-
-        <Section
-          number="5"
-          title="UTILITY CONNECTIONS"
-          className="mb-0 min-w-0 flex-1"
-        >
-          <Field label="Sewer Connection" value={utility.sewer_connection} />
-
-          <Field
-            label="Electricity Connection"
-            value={utility.is_electricity_connection}
-          />
-
-          <Field label="Gas Connection" value={utility.gas_connection} />
-        </Section>
-      </div>
-
-      {/* ===================================================
-          7. GIS INFORMATION
-      =================================================== */}
-
-      <Section number="7" title="GIS INFORMATION">
-        <div className="flex flex-wrap overflow-hidden border-l border-t border-[#bcbcbc]">
-          {gisFields.map(([label, key]) => (
-            <CheckItem key={key} label={label} checked={gis[key]} />
-          ))}
-        </div>
-      </Section>
+    
 
       {/* ===================================================
           8. PROPERTY IMAGES
@@ -1143,56 +1205,26 @@ export default function SurveyReportTemplate({ survey }) {
       <Section number="8" title="PROPERTY IMAGES">
         <div className="flex gap-[7px]">
           {imageFields.map(([title, url]) => (
-            <ImageBox key={title} title={title} src={getImageSrc(url)} />
-          ))}
-        </div>
-      </Section>
-
-      {/* ===================================================
-          9. VERIFICATION
-      =================================================== */}
-
-      <Section number="9" title="VERIFICATION">
-        <div className="flex flex-wrap overflow-hidden border-l border-t border-[#bcbcbc]">
-          {verificationFields.map(([label, key]) => (
-            <CheckItem key={key} label={label} checked={verification[key]} />
-          ))}
-        </div>
-      </Section>
-
-      {/* ===================================================
-          10. DOCUMENTS
-      =================================================== */}
-
-      <Section number="10" title="DOCUMENTS">
-        <div className="flex flex-wrap overflow-hidden border-l border-t border-[#bcbcbc]">
-          {documentFields.map(([label, key, filesKey]) => (
-            <DocumentItem
-              key={key}
-              label={label}
-              uploaded={
-                isChecked(documents[key]) ||
-                (documents[key] !== undefined &&
-                  documents[key] !== null &&
-                  documents[key] !== "" &&
-                  documents[key] !== "No" &&
-                  documents[key] !== "false")
-              }
-              count={
-                Array.isArray(documents[filesKey])
-                  ? documents[filesKey].length
-                  : 0
-              }
+            <ImageBox
+              key={title}
+              title={title}
+              src={getImageSrc(url)}
             />
           ))}
         </div>
       </Section>
 
+
+
       {/* ===================================================
           11. SURVEYOR REMARKS
       =================================================== */}
 
-      <Section number="11" title="SURVEYOR REMARKS" className="mb-0">
+      <Section
+        number="11"
+        title="SURVEYOR REMARKS"
+        className="mb-0"
+      >
         <div
           style={{
             minHeight: "8mm",
@@ -1208,11 +1240,6 @@ export default function SurveyReportTemplate({ survey }) {
 
       {/* ===================================================
           SIGNATURES
-          
-          IMPORTANT:
-          The labels are positioned inside each box using
-          absolute positioning. This prevents the dashed
-          NOTE border from passing through the text.
       =================================================== */}
 
       <div
@@ -1233,20 +1260,13 @@ export default function SurveyReportTemplate({ survey }) {
             key={label}
             style={{
               position: "relative",
-
               width: "calc((100% - 16px) / 3)",
-
               height: "18mm",
-
               minWidth: 0,
               flexShrink: 0,
-
               boxSizing: "border-box",
-
               border: "1px solid #b7b7b7",
-
               backgroundColor: "#fff",
-
               overflow: "hidden",
             }}
           >
@@ -1255,47 +1275,30 @@ export default function SurveyReportTemplate({ survey }) {
             <div
               style={{
                 position: "absolute",
-
                 left: 0,
                 right: 0,
-
                 bottom: "2.5mm",
-
                 height: "4mm",
-
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-
                 backgroundColor: "#fff",
-
                 padding: "0 2mm",
-
                 boxSizing: "border-box",
               }}
             >
               <span
                 style={{
                   display: "block",
-
                   width: "100%",
-
                   fontSize: "6.2px",
-
                   fontWeight: 700,
-
                   lineHeight: "4mm",
-
                   color: "#222",
-
                   textAlign: "center",
-
                   whiteSpace: "nowrap",
-
                   overflow: "hidden",
-
                   textOverflow: "ellipsis",
-
                   backgroundColor: "#fff",
                 }}
               >
@@ -1313,21 +1316,16 @@ export default function SurveyReportTemplate({ survey }) {
       <div
         style={{
           marginTop: "2.5mm",
-
           paddingTop: "1.5mm",
-
           borderTop: "1px dashed #777",
-
           fontSize: "5.8px",
-
           lineHeight: 1.35,
-
           color: "#555",
         }}
       >
         <strong>Note:</strong> This report has been prepared based on the
-        information recorded in the property survey system. This document is not
-        a final proof of property ownership.
+        information recorded in the property survey system. This document is
+        not a final proof of property ownership.
       </div>
 
       {/* ===================================================
@@ -1335,9 +1333,13 @@ export default function SurveyReportTemplate({ survey }) {
       =================================================== */}
 
       <footer className="mt-[1.5mm] flex items-center justify-between gap-4 text-[5.5px] text-[#666]">
-        <span>System Generated Property Survey Report</span>
+        <span>
+          System Generated Property Survey Report
+        </span>
 
-        <span>Generated on: {formatDate(new Date().toISOString())}</span>
+        <span>
+          Generated on: {formatDate(new Date().toISOString())}
+        </span>
       </footer>
     </div>
   );
