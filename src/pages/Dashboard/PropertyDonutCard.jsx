@@ -46,7 +46,7 @@ export default function PropertyDonutCard({ title,  segments, selectedKey, onSeg
   return (
     <div className="flex flex-col items-center bg-white rounded-2xl border border-gray-200 shadow-sm p-5 cursor-pointer hover:shadow-md transition-shadow">
       <h3
-        className="text-sm font-bold mb-4 text-left ml-2 mt-0.5"
+        className="text-sm font-bold mb-2 text-left  mt-2"
         style={{ color: "#7a1453" }}
       >
         {title}
@@ -87,7 +87,7 @@ export default function PropertyDonutCard({ title,  segments, selectedKey, onSeg
         </div>
 
         {/* Legend with color dots, labels and percentages */}
-        <div className="flex-1 flex flex-col gap-1.5">
+        {/* <div className="flex-1 flex flex-col gap-1.5">
           {sortedSegments.map((seg, idx) => (
             <div
               key={idx}
@@ -98,7 +98,7 @@ export default function PropertyDonutCard({ title,  segments, selectedKey, onSeg
               <span className="text-gray-700 flex-1">{seg.label}</span>
             </div>
           ))}
-        </div>
+        </div> */}
       </div>
     </div>
   );

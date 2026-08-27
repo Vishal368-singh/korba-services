@@ -1,59 +1,25 @@
 import { useMemo } from "react";
-import {
-  BarChart,
-  Bar,
-  Cell,
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
-  LabelList,
-  Label,
-} from "recharts";
+import { BarChart, Bar, Cell, XAxis, YAxis, ResponsiveContainer, LabelList, Label } from "recharts";
+import { CHART_THEMES, HIGHLIGHT_COLOR } from "../../theme/colors";
 
-const PRIMARY = "#7a1453";
+export default function BarStatCard({ title, data, themeKey, selectedKey, onBarClick }) {
+  const theme = CHART_THEMES[themeKey] || { base: "#6366f1" };
+  const barColor = theme.base;
 
-// selectedKey: label of currently-highlighted bar (string | null)
-// onBarClick(label, property_uids): fired when a bar is clicked
-export default function BarStatCard({
-  title,
-  data,
-  barColor = PRIMARY,
-  selectedKey,
-  onBarClick,
-}) {
   function mapApiDataToChart(apiData) {
     if (!apiData) return null;
-
-    if (
-      apiData.total_properties_with_utilities !== undefined &&
-      apiData.utilities
-    ) {
+    if (apiData.total_properties_with_utilities !== undefined && apiData.utilities) {
       return mapUtilitiesData(apiData);
     }
-
-    const ageKeys = [
-      "0-5 Years",
-      "6-10 Years",
-      "11-20 Years",
-      "21-30 Years",
-      "31+ Years",
-    ];
-    const hasAgeKeys = ageKeys.some((key) => apiData[key] !== undefined);
-    if (hasAgeKeys) {
+    const ageKeys = ["0-5 Years", "6-10 Years", "11-20 Years", "21-30 Years", "31+ Years"];
+    if (ageKeys.some((key) => apiData[key] !== undefined)) {
       return mapBuildingAgeData(apiData);
     }
-
     return mapGenericData(apiData);
   }
 
   const mapBuildingAgeData = (apiData) => {
-    const ageOrder = [
-      "0-5 Years",
-      "6-10 Years",
-      "11-20 Years",
-      "21-30 Years",
-      "31+ Years",
-    ];
+    const ageOrder = ["0-5 Years", "6-10 Years", "11-20 Years", "21-30 Years", "31+ Years"];
     const chartData = ageOrder.map((key) => ({
       label: key,
       value: apiData[key]?.count || 0,
@@ -67,13 +33,7 @@ export default function BarStatCard({
   const mapUtilitiesData = (apiData) => {
     const utilities = apiData.utilities || {};
     const totalProperties = apiData.total_properties_with_utilities || 0;
-    const utilityOrder = [
-      "water_supply",
-      "electricity",
-      "sewerage",
-      "drainage",
-      "solid_waste",
-    ];
+    const utilityOrder = ["water_supply", "electricity", "sewerage", "drainage", "solid_waste"];
     const utilityLabels = {
       water_supply: "Water Supply",
       electricity: "Electricity",
@@ -103,10 +63,7 @@ export default function BarStatCard({
     return { total, data: chartData, type: "generic" };
   };
 
-  const chartData = useMemo(
-    () => (data ? mapApiDataToChart(data) : null),
-    [data],
-  );
+  const chartData = useMemo(() => (data ? mapApiDataToChart(data) : null), [data]);
 
   if (!chartData || chartData.data.length === 0) {
     return (
@@ -120,54 +77,27 @@ export default function BarStatCard({
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 h-full">
-      <div className="flex items-center justify-between mt-1 ml-2">
-        <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>
-          {title}
-        </h3>
+      <div className="flex items-center justify-center mt-4">
+        <h3 className="text-sm font-bold text-gray-800">{title}</h3>
       </div>
 
-      <div className="h-38 mt-5">
+      <div className="mt-4 w-full h-[205px]">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={chartData.data}
-            margin={{ top: 5, right: 4, left: -20, bottom: 0 }}
-          >
-            <XAxis
-              dataKey="label"
-              tick={{ fontSize: 7, fill: "#9ca3af" }}
-              axisLine={true}
-              tickLine={false}
-              interval={0}
-            />
-            <YAxis
-              tick={{ fontSize: 10, fill: "#9ca3af" }}
-              axisLine={true}
-              tickLine={false}
-            >
-              <Label
-                position="insideLeft"
-                style={{ textAnchor: "middle", fontSize: 11, fill: "#6b7280" }}
-              />
+          <BarChart data={chartData.data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+            <XAxis dataKey="label" tick={{ fontSize: 7, fill: "#9ca3af" }} axisLine tickLine={false} interval={0} />
+            <YAxis tick={{ fontSize: 10, fill: "#9ca3af" }} axisLine tickLine={false}>
+              <Label position="insideLeft" style={{ textAnchor: "middle", fontSize: 11, fill: "#6b7280" }} />
             </YAxis>
             <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-              <LabelList
-                dataKey="value"
-                position="top"
-                style={{ fontSize: 11, fill: "#374151", fontWeight: 700 }}
-              />
+              <LabelList dataKey="value" position="top" style={{ fontSize: 11, fill: "#374151", fontWeight: 700 }} />
               {chartData.data.map((entry) => (
                 <Cell
                   key={entry.label}
                   fill={barColor}
-                  //opacity={!selectedKey || selectedKey === entry.label ? 1 : 0.3}
-                  stroke={selectedKey === entry.label ? "#facc15" : "none"}
+                  stroke={selectedKey === entry.label ? HIGHLIGHT_COLOR : "none"}
                   strokeWidth={selectedKey === entry.label ? 2 : 0}
                   cursor={isInteractive ? "pointer" : "default"}
-                  onClick={() =>
-                    isInteractive &&
-                    entry.value > 0 &&
-                    onBarClick(entry.label, entry.property_uids)
-                  }
+                  onClick={() => isInteractive && entry.value > 0 && onBarClick(entry.label, entry.property_uids)}
                 />
               ))}
             </Bar>
