@@ -46,6 +46,7 @@ function IndicatorCard({ item }) {
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
           {formatValue(item.value)}
         </h2>
+        <p className="text-xs text-gray-500 leading-snug">{item.subtext}</p>
       </div>
     </div>
   );
