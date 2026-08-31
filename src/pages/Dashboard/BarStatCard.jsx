@@ -67,7 +67,7 @@ export default function BarStatCard({ title, data, themeKey, selectedKey, onBarC
 
   if (!chartData || chartData.data.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 h-full flex items-center justify-center text-gray-400 text-sm">
+      <div className="bg-gray-50/60 rounded-2xl border border-gray-200 shadow-sm p-5 h-full flex items-center justify-center text-gray-400 text-sm">
         No Data Available
       </div>
     );
@@ -76,12 +76,22 @@ export default function BarStatCard({ title, data, themeKey, selectedKey, onBarC
   const isInteractive = typeof onBarClick === "function";
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 h-full">
+    <div
+      className="relative rounded-2xl border p-5 h-full overflow-hidden hover:shadow-md transition-shadow"
+      // style={{
+      //   backgroundColor: `${barColor}0D`, // ~5% tint
+      //   borderColor: `${barColor}0D`,     // ~20% border
+      // }}
+    >
+      {/* Accent bar on top edge */}
+      {/* <div className="absolute top-0 left-0 right-0 h-1" style={{ backgroundColor: barColor }} /> */}
+
       <div className="flex items-center justify-center mt-4">
         <h3 className="text-sm font-bold text-gray-800">{title}</h3>
       </div>
 
-      <div className="mt-4 w-full h-[205px]">
+      <div className="mt-4
+       w-full h-50">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData.data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
             <XAxis dataKey="label" tick={{ fontSize: 7, fill: "#9ca3af" }} axisLine tickLine={false} interval={0} />

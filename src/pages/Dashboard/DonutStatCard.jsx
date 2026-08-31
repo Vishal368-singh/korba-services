@@ -1,6 +1,7 @@
-import { useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import { CHART_THEMES, HIGHLIGHT_COLOR } from "../../theme/colors";
+import { CHART_THEMES, HIGHLIGHT_COLOR, CROSS_FILTER_DIM_OPACITY } from "../../theme/colors";
+
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
@@ -32,17 +33,18 @@ const renderValueLabel = ({ payload, cx, cy, midAngle, innerRadius, outerRadius 
 };
 
 // themeKey: which CHART_THEMES entry to use, e.g. "tax_rate_zone", "property_location"
-export default function DonutStatCard({ title, data, themeKey, selectedKey, onSegmentClick }) {
-  const theme = useMemo(
-    () => CHART_THEMES[themeKey] || { shades: ["#6366f1", "#818cf8", "#a5b4fc", "#c7d2fe"] },
-    [themeKey],
-  );
+export default function DonutStatCard({ title, data, themeKey, selectedFilter, onSegmentClick }) {
+  const [chartData, setChartData] = useState(null);
+  const theme = CHART_THEMES[themeKey] || { base: "#7076b0", shades: ["#7076b0"] };
 
-  function mapApiDataToChart(apiData) {
+  useEffect(() => {
+    if (data) setChartData(mapApiDataToChart(data));
+  }, [data]);
+
+  const mapApiDataToChart = (apiData) => {
     if (!apiData) return null;
     const zoneKeys = Object.keys(apiData);
     const totalCount = zoneKeys.reduce((sum, key) => sum + apiData[key].count, 0);
-
     const segments = zoneKeys.map((key, index) => ({
       label: key,
       value: apiData[key].count || 0,
@@ -50,16 +52,15 @@ export default function DonutStatCard({ title, data, themeKey, selectedKey, onSe
       color: theme.shades[index % theme.shades.length],
       property_uids: apiData[key].property_uids || [],
     }));
-
     segments.sort((a, b) => b.value - a.value);
     return { totalCount, segments, compareLabel: `Total: ${totalCount} Properties` };
-  }
+  };
 
-  const chartData = useMemo(() => (data ? mapApiDataToChart(data) : null), [data, theme]);
+  const selectedUidSet = useMemo(() => new Set(selectedFilter?.uids || []), [selectedFilter]);
 
   if (!chartData) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 h-full flex items-center justify-center text-gray-400 text-sm">
+      <div className="bg-gray-50/60 rounded-2xl border border-gray-200 shadow-sm p-5 h-full flex items-center justify-center text-gray-400 text-sm">
         Loading...
       </div>
     );
@@ -71,12 +72,17 @@ export default function DonutStatCard({ title, data, themeKey, selectedKey, onSe
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm pb-5">
+    <div
+      className="relative rounded-2xl border pb-5 overflow-hidden hover:shadow-md transition-shadow"
+      // style={{ backgroundColor: `${theme.base}0D`, borderColor: `${theme.base}33` }}
+    >
+      {/* <div className="absolute top-0 left-0 right-0 h-1" style={{ backgroundColor: theme.base }} /> */}
+
       <div className="flex items-center justify-center">
         <h3 className="text-sm font-semibold text-gray-800 mt-3">
           {title}
-          {selectedKey && chartData.segments.some((s) => s.label === selectedKey) && (
-            <span className="text-xs font-normal text-gray-400 ml-4">({selectedKey})</span>
+          {selectedFilter?.label && chartData.segments.some((s) => s.label === selectedFilter.label) && (
+            <span className="text-xs font-normal text-gray-400 ml-4">({selectedFilter.label})</span>
           )}
         </h3>
       </div>
@@ -95,16 +101,21 @@ export default function DonutStatCard({ title, data, themeKey, selectedKey, onSe
                 label={renderValueLabel}
                 labelLine={false}
               >
-                {chartData.segments.map((seg, idx) => (
-                  <Cell
-                    key={idx}
-                    fill={seg.color}
-                    stroke={selectedKey === seg.label ? HIGHLIGHT_COLOR : "none"}
-                    strokeWidth={selectedKey === seg.label ? 2 : 0}
-                    cursor={isInteractive ? "pointer" : "default"}
-                    onClick={() => handleClick(seg)}
-                  />
-                ))}
+                {chartData.segments.map((seg, idx) => {
+                  const isOwnSelection = selectedFilter?.label === seg.label;
+                  const hasOverlap = !selectedFilter || seg.property_uids.some((uid) => selectedUidSet.has(uid));
+                  return (
+                    <Cell
+                      key={idx}
+                      fill={seg.color}
+                      fillOpacity={hasOverlap ? 1 : CROSS_FILTER_DIM_OPACITY}
+                      stroke={isOwnSelection ? HIGHLIGHT_COLOR : "none"}
+                      strokeWidth={isOwnSelection ? 2 : 0}
+                      cursor={isInteractive ? "pointer" : "default"}
+                      onClick={() => handleClick(seg)}
+                    />
+                  );
+                })}
               </Pie>
               <Tooltip content={<CustomTooltip />} />
             </PieChart>
