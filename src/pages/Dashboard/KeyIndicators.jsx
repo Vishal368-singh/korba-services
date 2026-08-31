@@ -1,18 +1,17 @@
 import { useState, useEffect } from "react";
 import {
   FaMapMarkedAlt,
-  FaHome,
+
   FaThLarge,
   FaBuilding,
-  FaLock,
+ 
   FaPlusSquare,
   FaLayerGroup,
   FaCity,
 } from "react-icons/fa";
 import { LandPlot } from "lucide-react";
 import { fetchKeyIndicators } from "../../services/api.js";
-
-const PRIMARY = "#7a1453";
+import { KPI_COLORS, KPI_DEFAULT_COLOR } from "../../theme/colors";
 
 const ICON_MAP = {
   unique_parcels: FaMapMarkedAlt,
@@ -29,17 +28,30 @@ const formatValue = (value) =>
 
 function IndicatorCard({ item }) {
   const Icon = ICON_MAP[item.key] || FaThLarge;
+  const color = KPI_COLORS[item.key] || KPI_DEFAULT_COLOR;
 
-  return (
-    <div className="bg-white rounded-xl h-[100%] border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-200 p-5 flex flex-col gap-3 cursor-pointer">
+return (
+    <div
+      className="relative rounded-xl h-[100%] border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-200 p-5 flex flex-col gap-3 cursor-pointer overflow-hidden"
+      style={{
+        backgroundColor: `${color}0D`, // ~5% opacity tint of the theme color
+        borderColor: `${color}33`,     // ~20% opacity border
+      }}
+    >
+      {/* Accent bar on top edge */}
+      <div
+        className="absolute top-0 left-0 right-0 h-1"
+        style={{ backgroundColor: color }}
+      />
+
       <div className="flex flex-row items-center gap-3">
         <div
-          style={{ backgroundColor: PRIMARY }}
-          className="flex items-center mt-2 ml-2 justify-center w-11 h-11 rounded-lg text-white text-lg shrink-0"
+          style={{ backgroundColor: color }}
+          className="flex items-center mt-2 ml-2 justify-center w-11 h-11 rounded-lg text-white text-lg shrink-0 shadow-md"
         >
           <Icon />
         </div>
-        <p className="text-xs text-gray-500 leading-snug">{item.label}</p>
+        <p className="text-xs text-gray-600 leading-snug font-medium">{item.label}</p>
       </div>
 
       <div className="flex flex-col items-center gap-1">
@@ -51,26 +63,38 @@ function IndicatorCard({ item }) {
   );
 }
 
+
 export default function KeyIndicators() {
   const [indicators, setIndicators] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadIndicators();
-  }, []);
+    let cancelled = false;
 
-  const loadIndicators = async () => {
-    try {
-      setLoading(true);
-      const response = await fetchKeyIndicators();
-      setIndicators(response.indicators || []);
-    } catch (error) {
-      console.error("Error fetching key indicators:", error);
-      setIndicators([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const loadIndicators = async () => {
+      try {
+        const response = await fetchKeyIndicators();
+        if (!cancelled) {
+          setIndicators(response.indicators || []);
+        }
+      } catch (error) {
+        console.error("Error fetching key indicators:", error);
+        if (!cancelled) {
+          setIndicators([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadIndicators();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -82,7 +106,7 @@ export default function KeyIndicators() {
 
   return (
     <div>
-      <h3 className="text-2xl font-bold text-[#7a1453] mb-2">
+      <h3 className="text-2xl font-bold text-gray-800 mb-2">
         Key Indicators
       </h3>
 

@@ -17,7 +17,7 @@ export default function PropertyBreakdowns({ data, selectedFilter, onSegmentClic
     return chartConfigs
       .filter((config) => config.data && Object.keys(config.data).length > 0)
       .map((config) => {
-        const theme = CHART_THEMES[config.themeKey] || { shades: ["#6366f1"] };
+        const theme = CHART_THEMES[config.themeKey] || { shades: ["#6366f1"], base: "#6366f1" };
         const segments = Object.keys(config.data).map((key, index) => ({
           label: key,
           value: config.data[key]?.count || 0,
@@ -29,7 +29,7 @@ export default function PropertyBreakdowns({ data, selectedFilter, onSegmentClic
         segments.sort((a, b) => b.value - a.value);
         const total = segments.reduce((sum, seg) => sum + seg.value, 0);
 
-        return { key: config.key, title: config.title, total, segments };
+        return { key: config.key, title: config.title, total, segments, accentColor: theme.base };
       });
   }, [data]);
 
@@ -48,6 +48,7 @@ export default function PropertyBreakdowns({ data, selectedFilter, onSegmentClic
           key={chart.key}
           title={chart.title}
           segments={chart.segments}
+          accentColor={chart.accentColor}
           selectedKey={selectedFilter?.label}
           onSegmentClick={onSegmentClick}
         />
