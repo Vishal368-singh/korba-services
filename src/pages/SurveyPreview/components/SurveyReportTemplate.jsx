@@ -109,55 +109,48 @@ const getImageSrc = (value) => {
    WATER SUPPLY CONNECTION
 ========================================================= */
 
-function WaterSupplyConnectionSection({ survey }) {
+function UtilityConnectionsSection({ survey }) {
   const utility = survey?.utility_connections || {};
 
-  const waterSupplyProvided =
-    utility.water_supply_connection ??
-    utility.water_supply_connection_provided ??
-    utility.water_supply_provided ??
-    utility.municipal_water_supply ??
-    "";
+  const waterSupplyProvided = utility.water_connection_no ? "Yes" : "No";
+  const waterSupplyNumber = utility.water_connection_no ?? "";
 
-  const waterSupplyNumber =
-    utility.water_supply_connection_number ??
-    utility.water_supply_number ??
-    utility.water_connection_number ??
-    utility.connection_number ??
-    "";
+  const sewerageConnection = utility.sewer_connection;
+  const sewerageType = utility.sewerage_type ?? utility.sewer_type ?? "";
 
-  const waterSupplyDiameter =
-    utility.water_supply_connection_diameter ??
-    utility.water_supply_diameter ??
-    utility.water_connection_diameter ??
-    utility.connection_diameter ??
-    "";
-
-  const waterSupplyType =
-    utility.water_supply_type_of_use ??
-    utility.water_supply_use_type ??
-    utility.type_of_water_supply_connection ??
-    utility.water_supply_type ??
-    "";
-
-  const waterSupplyCharges =
-    utility.water_supply_charges ??
-    utility.water_connection_charges ??
-    utility.water_supply_charge ??
-    "";
-
-  const connectionId =
-    utility.water_supply_connection_id ??
-    utility.water_connection_id ??
-    utility.connection_id ??
-    "";
+  const doorToDoorCollection = utility.door_to_door_collection;
+  const doorToDoorCollectionType =
+    utility.door_to_door_collection_type ?? utility.waste_collection_type ?? "";
 
   const blankIfMissing = (value) => {
     if (value === null || value === undefined || value === "") {
-      return "";
+      return "—";
     }
-
+    if (typeof value === "boolean") {
+      return value ? "Yes" : "No";
+    }
     return String(value);
+  };
+
+  const rowStyle = {
+    display: "flex",
+    alignItems: "flex-start",
+    width: "100%",
+    minHeight: "3mm",
+    marginBottom: "2.5mm",
+    fontSize: "8px",
+    lineHeight: "1.4",
+    color: "#222",
+  };
+
+  const labelStyle = {
+    fontWeight: 700,
+  };
+
+  const valueStyle = {
+    marginLeft: "2mm",
+    fontWeight: 400,
+    whiteSpace: "nowrap",
   };
 
   return (
@@ -177,171 +170,48 @@ function WaterSupplyConnectionSection({ survey }) {
           width: "100%",
           gap: "18mm",
           boxSizing: "border-box",
-          left: 0,
         }}
       >
-        {/* =================================================
-            LEFT COLUMN
-        ================================================== */}
-
-        <div
-          style={{
-            width: "50%",
-            minWidth: 0,
-            boxSizing: "border-box",
-          }}
-        >
-          {/* WATER SUPPLY PROVIDED */}
-
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              width: "100%",
-              minHeight: "3mm",
-              marginBottom: "2.5mm",
-              fontSize: "8px",
-              lineHeight: "1.4",
-              color: "#222",
-            }}
-          >
-            <span
-              style={{
-                fontWeight: 700,
-              }}
-            >
-             1. Water Supply Connection provided by Municipal Council (Yes/No):
+        {/* LEFT COLUMN */}
+        <div style={{ width: "50%", minWidth: 0, boxSizing: "border-box" }}>
+          <div style={rowStyle}>
+            <span style={labelStyle}>
+              1. Water Supply Connection provided by Municipal Council (Yes/No):
             </span>
-
-            <span
-              style={{
-                marginLeft: "2mm",
-                fontWeight: 400,
-                whiteSpace: "nowrap",
-              }}
-            >
-              {blankIfMissing(waterSupplyProvided)}
-            </span>
+            <span style={valueStyle}>{waterSupplyProvided}</span>
           </div>
 
-          {/* TYPE OF USE AND CHARGES */}
+          <div style={rowStyle}>
+            <span style={labelStyle}>2. Sewerage Connection (Yes/No):</span>
+            <span style={valueStyle}>{blankIfMissing(sewerageConnection)}</span>
+          </div>
 
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              width: "100%",
-              minHeight: "3mm",
-              fontSize: "8px",
-              lineHeight: "1.4",
-              color: "#222",
-            }}
-          >
-            <span
-              style={{
-                fontWeight: 700,
-              }}
-            >
-              Type of use and charges of water supply connection:
-            </span>
-
-            <span
-              style={{
-                marginLeft: "2mm",
-                fontWeight: 400,
-              }}
-            >
-              {blankIfMissing(waterSupplyType)}
-
-              {waterSupplyType && waterSupplyCharges !== ""
-                ? ` / ${blankIfMissing(waterSupplyCharges)}`
-                : waterSupplyCharges !== ""
-                  ? blankIfMissing(waterSupplyCharges)
-                  : ""}
+          <div style={{ ...rowStyle, marginBottom: 0 }}>
+            <span style={labelStyle}>3. Door to Door Collection (Yes/No):</span>
+            <span style={valueStyle}>
+              {blankIfMissing(doorToDoorCollection)}
             </span>
           </div>
         </div>
 
-        {/* =================================================
-            RIGHT COLUMN
-        ================================================== */}
-
-        <div
-          style={{
-            width: "50%",
-            minWidth: 0,
-            boxSizing: "border-box",
-          }}
-        >
-          {/* CONNECTION NUMBER + DIAMETER */}
-
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              width: "100%",
-              minHeight: "3mm",
-              marginBottom: "2.5mm",
-              fontSize: "8px",
-              lineHeight: "1.4",
-              color: "#222",
-            }}
-          >
-            <span
-              style={{
-                fontWeight: 700,
-              }}
-            >
+        {/* RIGHT COLUMN */}
+        <div style={{ width: "50%", minWidth: 0, boxSizing: "border-box" }}>
+          <div style={rowStyle}>
+            <span style={labelStyle}>
               If yes, water supply connection number :
             </span>
-
-            <span
-              style={{
-                marginLeft: "2mm",
-                fontWeight: 400,
-              }}
-            >
-              {waterSupplyNumber !== "" && waterSupplyDiameter !== ""
-                ? `${blankIfMissing(waterSupplyNumber)} / ${blankIfMissing(
-                    waterSupplyDiameter,
-                  )}`
-                : waterSupplyNumber !== ""
-                  ? blankIfMissing(waterSupplyNumber)
-                  : waterSupplyDiameter !== ""
-                    ? blankIfMissing(waterSupplyDiameter)
-                    : ""}
-            </span>
+            <span style={valueStyle}>{blankIfMissing(waterSupplyNumber)}</span>
           </div>
 
-          {/* CONNECTION ID */}
+          <div style={rowStyle}>
+            <span style={labelStyle}>If yes, Sewerage Type:</span>
+            <span style={valueStyle}>{blankIfMissing(sewerageType)}</span>
+          </div>
 
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              width: "100%",
-              minHeight: "3mm",
-              fontSize: "8px",
-              lineHeight: "1.4",
-              color: "#222",
-            }}
-          >
-            <span
-              style={{
-                fontWeight: 700,
-              }}
-            >
-              Connection ID Number:
-            </span>
-
-            <span
-              style={{
-                marginLeft: "2mm",
-                fontWeight: 400,
-                whiteSpace: "nowrap",
-              }}
-            >
-              {blankIfMissing(connectionId)}
+          <div style={{ ...rowStyle, marginBottom: 0 }}>
+            <span style={labelStyle}>If yes, Collection Type:</span>
+            <span style={valueStyle}>
+              {blankIfMissing(doorToDoorCollectionType)}
             </span>
           </div>
         </div>
@@ -433,7 +303,8 @@ function Section({ number, title, children, className = "" }) {
       >
         <h2
           style={{
-            margin: 0,
+            marginBottom: "2.5mm",
+            marginRight: "2.5mm",
             padding: 0,
             fontSize: "8px",
             fontWeight: 700,
@@ -464,7 +335,7 @@ function Section({ number, title, children, className = "" }) {
 function Field({ label, value, date = false }) {
   return (
     <div
-      className="flex w-full items-center border-b border-[#dedede]"
+      className="flex w-full items-center "
       style={{
         minHeight: "5.8mm",
         boxSizing: "border-box",
@@ -472,25 +343,28 @@ function Field({ label, value, date = false }) {
     >
       <div
         style={{
-          width: "48%",
+          flex: "0 0 auto",
+          maxWidth: "42%",
           minWidth: 0,
-          paddingRight: "2mm",
+          paddingRight: "1.5mm",
           paddingLeft: "1mm",
           fontSize: "7.1px",
           fontWeight: 700,
           lineHeight: "1.15",
           color: "#292929",
           boxSizing: "border-box",
+          overflowWrap: "break-word",
+          wordBreak: "break-word",
         }}
       >
-        {label}
+        {label} :
       </div>
 
       <div
         style={{
-          width: "52%",
+          flex: "1 1 auto",
           minWidth: 0,
-          paddingLeft: "1.5mm",
+          paddingLeft: "1mm",
           paddingRight: "1mm",
           fontSize: "7.1px",
           fontWeight: 400,
@@ -929,77 +803,6 @@ function LocationBox({ latitude, longitude, locationName }) {
 }
 
 /* =========================================================
-   USAGE TYPE CHECKBOX
-========================================================= */
-
-function UsageTypeCheckbox({ label, checked }) {
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "1.2mm",
-        height: "100%",
-        whiteSpace: "nowrap",
-        fontSize: "6.5px",
-        lineHeight: "1",
-        color: "#333",
-        fontWeight: 400,
-        flexShrink: 0,
-      }}
-    >
-      <span
-        style={{
-          width: "2.8mm",
-          height: "2.8mm",
-          minWidth: "2.8mm",
-          minHeight: "2.8mm",
-          maxWidth: "2.8mm",
-          maxHeight: "2.8mm",
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          boxSizing: "border-box",
-          border: checked ? "1px solid #333" : "0.8px solid #777",
-          backgroundColor: checked ? "#333" : "#fff",
-          flexShrink: 0,
-          overflow: "hidden",
-        }}
-      >
-        {checked && (
-          <svg
-            width="6"
-            height="6"
-            viewBox="0 0 16 16"
-            style={{ display: "block" }}
-          >
-            <path
-              d="M2 8.5L6 12.5L14 3.5"
-              stroke="#fff"
-              strokeWidth="2.5"
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        )}
-      </span>
-
-      <span
-        style={{
-          display: "inline-block",
-          lineHeight: "1",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {label}
-      </span>
-    </span>
-  );
-}
-
-/* =========================================================
    QUICK INFO STRIP
 ========================================================= */
 
@@ -1148,7 +951,6 @@ function FloorAreaTable({ floorDetails = [] }) {
         normalizeUsageType(item.usage_type) === usageType &&
         normalizeOccupancy(item.usage_factor) === occupancy,
     );
-
     return match ? toNumber(match.area) : 0;
   };
 
@@ -1167,7 +969,6 @@ function FloorAreaTable({ floorDetails = [] }) {
 
   const getFloorTotal = (floor) => {
     let total = 0;
-
     CONSTRUCTION_COLUMNS.forEach((constructionType) => {
       USAGE_TYPES.forEach((usageType) => {
         OCCUPANCY_TYPES.forEach((occupancy) => {
@@ -1175,17 +976,14 @@ function FloorAreaTable({ floorDetails = [] }) {
         });
       });
     });
-
     return total;
   };
 
   const getColumnTotal = (constructionType, usageType, occupancy) => {
     let total = 0;
-
     floorNames.forEach((floor) => {
       total += getCellValue(floor, constructionType, usageType, occupancy);
     });
-
     return total;
   };
 
@@ -1201,48 +999,67 @@ function FloorAreaTable({ floorDetails = [] }) {
   const CONSTRUCTION_WIDTH = "27%";
   const USAGE_GROUP_WIDTH = "13.5%";
 
+  // ✅ Reduced row height — this is the main size reduction
+  const ROW_HEIGHT = "4.5mm";
+  const HEADER_ROW1_HEIGHT = "5mm";
+  const HEADER_ROW_HEIGHT = "4mm";
+
+  const cellContentStyle = {
+    width: "100%",
+    height: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center",
+    boxSizing: "border-box",
+    lineHeight: "1",
+    margin: 0,
+    padding: 0,
+  };
+
   const thStyle = {
     border: "1px solid #b7b7b7",
-    padding: "1.2mm 0.2mm",
+    padding: 0,
     fontWeight: 700,
-    fontSize: "5px",
-    lineHeight: "1.3",
+    fontSize: "4.6px",
+    lineHeight: "1",
     backgroundColor: "#f2f2f2",
     color: "#222",
     boxSizing: "border-box",
     textAlign: "center",
-    verticalAlign: "middle",
     overflow: "hidden",
     whiteSpace: "normal",
     wordBreak: "break-word",
     overflowWrap: "anywhere",
+    height: "100%",
   };
 
   const tdStyle = {
     border: "1px solid #b7b7b7",
-    padding: "1.2mm 0.2mm",
-    fontSize: "5px",
-    lineHeight: "1.3",
+    padding: 0,
+    fontSize: "4.6px",
+    lineHeight: "1",
     color: "#333",
     boxSizing: "border-box",
     textAlign: "center",
-    verticalAlign: "middle",
     overflow: "hidden",
     whiteSpace: "nowrap",
     textOverflow: "clip",
+    // height: ROW_HEIGHT, // ✅ reduced from 7mm
   };
 
   const totalThStyle = {
     ...thStyle,
-    backgroundColor: "#e5d3dd",
-    borderLeft: "2px solid #7a1453",
+    backgroundColor: "#f2f2f2",
+    borderLeft: "1px solid #b7b7b7",
+    textAlign: "center",
   };
 
   const totalTdStyle = {
     ...tdStyle,
-    backgroundColor: "#faf3f7",
-    borderLeft: "2px solid #7a1453",
+    borderLeft: "1px solid #b7b7b7",
     fontWeight: 700,
+    textAlign: "center",
   };
 
   const detailCellStyle = {
@@ -1250,6 +1067,7 @@ function FloorAreaTable({ floorDetails = [] }) {
     width: DETAIL_WIDTH,
     minWidth: 0,
     maxWidth: DETAIL_WIDTH,
+    textAlign: "center",
   };
 
   const detailHeaderStyle = {
@@ -1257,6 +1075,7 @@ function FloorAreaTable({ floorDetails = [] }) {
     width: DETAIL_WIDTH,
     minWidth: 0,
     maxWidth: DETAIL_WIDTH,
+    textAlign: "center",
   };
 
   if (floorNames.length === 0) {
@@ -1287,6 +1106,7 @@ function FloorAreaTable({ floorDetails = [] }) {
         marginTop: "1.5mm",
         boxSizing: "border-box",
         overflow: "hidden",
+        textAlign: "center",
       }}
     >
       <table
@@ -1307,16 +1127,14 @@ function FloorAreaTable({ floorDetails = [] }) {
       >
         <colgroup>
           <col style={{ width: FLOOR_WIDTH }} />
-
           {Array.from({ length: 12 }).map((_, index) => (
             <col key={index} style={{ width: DETAIL_WIDTH }} />
           ))}
-
           <col style={{ width: TOTAL_WIDTH }} />
         </colgroup>
 
         <thead>
-          <tr>
+          <tr style={{ height: HEADER_ROW1_HEIGHT }}>
             <th
               rowSpan={4}
               style={{
@@ -1324,11 +1142,20 @@ function FloorAreaTable({ floorDetails = [] }) {
                 width: FLOOR_WIDTH,
                 minWidth: 0,
                 maxWidth: FLOOR_WIDTH,
-                fontSize: "5px",
+                fontSize: "4.6px",
                 textTransform: "uppercase",
+                textAlign: "center",
               }}
             >
-              Floor
+              <div
+                style={{
+                  ...cellContentStyle,
+                  minHeight: "16mm",
+                  fontWeight: 700,
+                }}
+              >
+                Floor
+              </div>
             </th>
 
             <th
@@ -1338,12 +1165,21 @@ function FloorAreaTable({ floorDetails = [] }) {
                 width: DETAILS_GROUP_WIDTH,
                 minWidth: 0,
                 maxWidth: DETAILS_GROUP_WIDTH,
-                fontSize: "4.8px",
+                fontSize: "4.6px",
                 letterSpacing: "0.05px",
                 textTransform: "uppercase",
+                textAlign: "center",
               }}
             >
-              Details of Constructed Area of Property
+              <div
+                style={{
+                  ...cellContentStyle,
+                  minHeight: "5mm",
+                  fontWeight: 700,
+                }}
+              >
+                Details of Constructed Area of Property
+              </div>
             </th>
 
             <th
@@ -1353,15 +1189,24 @@ function FloorAreaTable({ floorDetails = [] }) {
                 width: TOTAL_WIDTH,
                 minWidth: 0,
                 maxWidth: TOTAL_WIDTH,
-                fontSize: "5px",
+                fontSize: "4.6px",
                 textTransform: "uppercase",
+                textAlign: "center",
               }}
             >
-              Total
+              <div
+                style={{
+                  ...cellContentStyle,
+                  minHeight: "16mm",
+                  fontWeight: 700,
+                }}
+              >
+                Total
+              </div>
             </th>
           </tr>
 
-          <tr>
+          <tr style={{ height: HEADER_ROW_HEIGHT }}>
             {CONSTRUCTION_COLUMNS.map((constructionType) => (
               <th
                 key={constructionType}
@@ -1371,16 +1216,21 @@ function FloorAreaTable({ floorDetails = [] }) {
                   width: CONSTRUCTION_WIDTH,
                   minWidth: 0,
                   maxWidth: CONSTRUCTION_WIDTH,
-                  fontSize: "4.8px",
+                  fontSize: "4.4px",
                   textTransform: "uppercase",
+                  textAlign: "center",
                 }}
               >
-                {constructionType}
+                <div
+                  style={{ ...cellContentStyle, minHeight: HEADER_ROW_HEIGHT }}
+                >
+                  {constructionType}
+                </div>
               </th>
             ))}
           </tr>
 
-          <tr>
+          <tr style={{ height: HEADER_ROW_HEIGHT }}>
             {CONSTRUCTION_COLUMNS.map((constructionType) => (
               <React.Fragment key={constructionType}>
                 <th
@@ -1390,11 +1240,19 @@ function FloorAreaTable({ floorDetails = [] }) {
                     width: USAGE_GROUP_WIDTH,
                     minWidth: 0,
                     maxWidth: USAGE_GROUP_WIDTH,
-                    fontSize: "4.6px",
+                    fontSize: "4.3px",
                     textTransform: "uppercase",
+                    textAlign: "center",
                   }}
                 >
-                  Residential
+                  <div
+                    style={{
+                      ...cellContentStyle,
+                      minHeight: HEADER_ROW_HEIGHT,
+                    }}
+                  >
+                    Residential
+                  </div>
                 </th>
 
                 <th
@@ -1404,31 +1262,74 @@ function FloorAreaTable({ floorDetails = [] }) {
                     width: USAGE_GROUP_WIDTH,
                     minWidth: 0,
                     maxWidth: USAGE_GROUP_WIDTH,
-                    fontSize: "4.6px",
+                    fontSize: "4.3px",
                     textTransform: "uppercase",
+                    textAlign: "center",
                   }}
                 >
-                  Commercial
+                  <div
+                    style={{
+                      ...cellContentStyle,
+                      minHeight: HEADER_ROW_HEIGHT,
+                    }}
+                  >
+                    Commercial
+                  </div>
                 </th>
               </React.Fragment>
             ))}
           </tr>
 
-          <tr>
+          <tr style={{ height: HEADER_ROW_HEIGHT }}>
             {CONSTRUCTION_COLUMNS.map((constructionType) => (
               <React.Fragment key={constructionType}>
-                <th style={detailHeaderStyle}>
-                  Self-
-                  <br />
-                  Used
+                <th style={{ ...detailHeaderStyle, textAlign: "center" }}>
+                  <div
+                    style={{
+                      ...cellContentStyle,
+                      minHeight: HEADER_ROW_HEIGHT,
+                      flexDirection: "column",
+                    }}
+                  >
+                    <span>Self-</span>
+                    <span>Used</span>
+                  </div>
                 </th>
-                <th style={detailHeaderStyle}>Rented</th>
-                <th style={detailHeaderStyle}>
-                  Self-
-                  <br />
-                  Used
+
+                <th style={{ ...detailHeaderStyle, textAlign: "center" }}>
+                  <div
+                    style={{
+                      ...cellContentStyle,
+                      minHeight: HEADER_ROW_HEIGHT,
+                    }}
+                  >
+                    Rented
+                  </div>
                 </th>
-                <th style={detailHeaderStyle}>Rented</th>
+
+                <th style={{ ...detailHeaderStyle, textAlign: "center" }}>
+                  <div
+                    style={{
+                      ...cellContentStyle,
+                      minHeight: HEADER_ROW_HEIGHT,
+                      flexDirection: "column",
+                    }}
+                  >
+                    <span>Self-</span>
+                    <span>Used</span>
+                  </div>
+                </th>
+
+                <th style={{ ...detailHeaderStyle, textAlign: "center" }}>
+                  <div
+                    style={{
+                      ...cellContentStyle,
+                      minHeight: HEADER_ROW_HEIGHT,
+                    }}
+                  >
+                    Rented
+                  </div>
+                </th>
               </React.Fragment>
             ))}
           </tr>
@@ -1436,7 +1337,7 @@ function FloorAreaTable({ floorDetails = [] }) {
 
         <tbody>
           {floorNames.map((floor) => (
-            <tr key={String(floor)}>
+            <tr key={String(floor)} style={{ height: ROW_HEIGHT }}>
               <td
                 style={{
                   ...tdStyle,
@@ -1447,46 +1348,79 @@ function FloorAreaTable({ floorDetails = [] }) {
                   whiteSpace: "normal",
                   wordBreak: "break-word",
                   overflowWrap: "anywhere",
-                  fontSize: "4.7px",
-                  lineHeight: "1.3",
+                  fontSize: "4.3px",
+                  lineHeight: "1",
+                  textAlign: "center",
                 }}
               >
-                {String(floor).toUpperCase()}
+                <div
+                  style={{
+                    ...cellContentStyle,
+                    minHeight: ROW_HEIGHT,
+                    fontWeight: 700,
+                  }}
+                >
+                  {String(floor).toUpperCase()}
+                </div>
               </td>
 
               {CONSTRUCTION_COLUMNS.map((constructionType) => (
                 <React.Fragment key={constructionType}>
-                  <td style={detailCellStyle}>
-                    {getCellValue(
-                      floor,
-                      constructionType,
-                      "Residential",
-                      "Self-Used",
-                    )}
+                  <td style={{ ...detailCellStyle, textAlign: "center" }}>
+                    <div
+                      style={{
+                        ...cellContentStyle /*minHeight: ROW_HEIGHT  */,
+                      }}
+                    >
+                      {getCellValue(
+                        floor,
+                        constructionType,
+                        "Residential",
+                        "Self-Used",
+                      )}
+                    </div>
                   </td>
-                  <td style={detailCellStyle}>
-                    {getCellValue(
-                      floor,
-                      constructionType,
-                      "Residential",
-                      "Rented",
-                    )}
+                  <td style={{ ...detailCellStyle, textAlign: "center" }}>
+                    <div
+                      style={{
+                        ...cellContentStyle /*minHeight: ROW_HEIGHT  */,
+                      }}
+                    >
+                      {getCellValue(
+                        floor,
+                        constructionType,
+                        "Residential",
+                        "Rented",
+                      )}
+                    </div>
                   </td>
-                  <td style={detailCellStyle}>
-                    {getCellValue(
-                      floor,
-                      constructionType,
-                      "Commercial",
-                      "Self-Used",
-                    )}
+                  <td style={{ ...detailCellStyle, textAlign: "center" }}>
+                    <div
+                      style={{
+                        ...cellContentStyle /*minHeight: ROW_HEIGHT  */,
+                      }}
+                    >
+                      {getCellValue(
+                        floor,
+                        constructionType,
+                        "Commercial",
+                        "Self-Used",
+                      )}
+                    </div>
                   </td>
-                  <td style={detailCellStyle}>
-                    {getCellValue(
-                      floor,
-                      constructionType,
-                      "Commercial",
-                      "Rented",
-                    )}
+                  <td style={{ ...detailCellStyle, textAlign: "center" }}>
+                    <div
+                      style={{
+                        ...cellContentStyle /*minHeight: ROW_HEIGHT  */,
+                      }}
+                    >
+                      {getCellValue(
+                        floor,
+                        constructionType,
+                        "Commercial",
+                        "Rented",
+                      )}
+                    </div>
                   </td>
                 </React.Fragment>
               ))}
@@ -1497,14 +1431,24 @@ function FloorAreaTable({ floorDetails = [] }) {
                   width: TOTAL_WIDTH,
                   minWidth: 0,
                   maxWidth: TOTAL_WIDTH,
+                  fontWeight: 700,
+                  textAlign: "center",
                 }}
               >
-                {getFloorTotal(floor)}
+                <div
+                  style={{
+                    ...cellContentStyle,
+                    // minHeight: ROW_HEIGHT  ,
+                    fontWeight: 700,
+                  }}
+                >
+                  {getFloorTotal(floor)}
+                </div>
               </td>
             </tr>
           ))}
 
-          <tr>
+          <tr style={{ height: ROW_HEIGHT }}>
             <td
               style={{
                 ...tdStyle,
@@ -1513,26 +1457,99 @@ function FloorAreaTable({ floorDetails = [] }) {
                 maxWidth: FLOOR_WIDTH,
                 fontWeight: 700,
                 whiteSpace: "nowrap",
-                fontSize: "4.7px",
-                lineHeight: "1.3",
+                fontSize: "4.3px",
+                lineHeight: "1",
+                textAlign: "center",
               }}
             >
-              Total:-
+              <div
+                style={{
+                  ...cellContentStyle,
+                  // minHeight: ROW_HEIGHT  ,
+                  fontWeight: 700,
+                }}
+              >
+                Total:-
+              </div>
             </td>
 
             {CONSTRUCTION_COLUMNS.map((constructionType) => (
               <React.Fragment key={constructionType}>
-                <td style={{ ...detailCellStyle, fontWeight: 700 }}>
-                  {getColumnTotal(constructionType, "Residential", "Self-Used")}
+                <td
+                  style={{
+                    ...detailCellStyle,
+                    fontWeight: 700,
+                    textAlign: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      ...cellContentStyle,
+                      // minHeight: ROW_HEIGHT,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {getColumnTotal(
+                      constructionType,
+                      "Residential",
+                      "Self-Used",
+                    )}
+                  </div>
                 </td>
-                <td style={{ ...detailCellStyle, fontWeight: 700 }}>
-                  {getColumnTotal(constructionType, "Residential", "Rented")}
+                <td
+                  style={{
+                    ...detailCellStyle,
+                    fontWeight: 700,
+                    textAlign: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      ...cellContentStyle,
+                      // minHeight: ROW_HEIGHT,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {getColumnTotal(constructionType, "Residential", "Rented")}
+                  </div>
                 </td>
-                <td style={{ ...detailCellStyle, fontWeight: 700 }}>
-                  {getColumnTotal(constructionType, "Commercial", "Self-Used")}
+                <td
+                  style={{
+                    ...detailCellStyle,
+                    fontWeight: 700,
+                    textAlign: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      ...cellContentStyle,
+                      // minHeight: ROW_HEIGHT,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {getColumnTotal(
+                      constructionType,
+                      "Commercial",
+                      "Self-Used",
+                    )}
+                  </div>
                 </td>
-                <td style={{ ...detailCellStyle, fontWeight: 700 }}>
-                  {getColumnTotal(constructionType, "Commercial", "Rented")}
+                <td
+                  style={{
+                    ...detailCellStyle,
+                    fontWeight: 700,
+                    textAlign: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      ...cellContentStyle,
+                      // minHeight: ROW_HEIGHT,
+                      fontWeight: 700,
+                    }}
+                  >
+                    {getColumnTotal(constructionType, "Commercial", "Rented")}
+                  </div>
                 </td>
               </React.Fragment>
             ))}
@@ -1544,9 +1561,18 @@ function FloorAreaTable({ floorDetails = [] }) {
                 minWidth: 0,
                 maxWidth: TOTAL_WIDTH,
                 fontWeight: 700,
+                textAlign: "center",
               }}
             >
-              {grandTotal}
+              <div
+                style={{
+                  ...cellContentStyle,
+                  // minHeight: ROW_HEIGHT,
+                  fontWeight: 700,
+                }}
+              >
+                {grandTotal}
+              </div>
             </td>
           </tr>
         </tbody>
@@ -1831,7 +1857,7 @@ export default function SurveyReportTemplate({ survey }) {
                 minHeight: "5.8mm",
                 paddingLeft: "1mm",
                 boxSizing: "border-box",
-                borderBottom: "1px solid #dedede",
+
                 whiteSpace: "nowrap",
               }}
             >
@@ -1848,29 +1874,22 @@ export default function SurveyReportTemplate({ survey }) {
                 Usage Type:
               </span>
 
-              <div
+              <span
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "3mm",
-                  height: "100%",
-                  minWidth: 0,
+                  fontSize: "7.1px",
+                  fontWeight: 400,
+                  lineHeight: "1",
+                  color: "#333",
                 }}
               >
-                <UsageTypeCheckbox
-                  label="Residential"
-                  checked={
-                    usage.primary_use === "Residential" && !usage.mixed_use
-                  }
-                />
-                <UsageTypeCheckbox
-                  label="Commercial"
-                  checked={
-                    usage.primary_use === "Commercial" && !usage.mixed_use
-                  }
-                />
-                <UsageTypeCheckbox label="Both" checked={!!usage.mixed_use} />
-              </div>
+                {usage.mixed_use
+                  ? "Both"
+                  : usage.primary_use === "Residential"
+                    ? "Residential"
+                    : usage.primary_use === "Commercial"
+                      ? "Commercial"
+                      : "—"}
+              </span>
             </div>
           </div>
 
@@ -1994,7 +2013,7 @@ export default function SurveyReportTemplate({ survey }) {
         </div>
 
         <FloorAreaTable floorDetails={floorDetails} />
-        <WaterSupplyConnectionSection survey={survey} />
+        <UtilityConnectionsSection survey={survey} />
         <div
           style={{
             display: "flex",
