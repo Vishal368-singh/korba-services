@@ -29,5 +29,5 @@ export const hasRole = (allowedRoles = []) => {
 };
 
 export const canManageSurveys = () => {
-  return hasRole(["supervisor", "officer"]);
+  return hasRole(["supervisor"]);
 };

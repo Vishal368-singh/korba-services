@@ -960,9 +960,7 @@ function FloorAreaTable({ floorDetails = [] }) {
         .map((item) => item.floor)
         .filter(
           (floor) =>
-            floor !== null &&
-            floor !== undefined &&
-            String(floor).trim() !== "",
+            floor !== null && floor !== undefined && String(floor).trim() !== "",
         ),
     ),
   ];
@@ -987,10 +985,7 @@ function FloorAreaTable({ floorDetails = [] }) {
     return total;
   };
 
-  const grandTotal = floorNames.reduce(
-    (sum, floor) => sum + getFloorTotal(floor),
-    0,
-  );
+  const grandTotal = floorNames.reduce((sum, floor) => sum + getFloorTotal(floor), 0);
 
   const FLOOR_WIDTH = "9%";
   const DETAIL_WIDTH = "6.75%";
@@ -999,67 +994,55 @@ function FloorAreaTable({ floorDetails = [] }) {
   const CONSTRUCTION_WIDTH = "27%";
   const USAGE_GROUP_WIDTH = "13.5%";
 
-  // ✅ Reduced row height — this is the main size reduction
   const ROW_HEIGHT = "4.5mm";
   const HEADER_ROW1_HEIGHT = "5mm";
   const HEADER_ROW_HEIGHT = "4mm";
 
-  const cellContentStyle = {
-    width: "100%",
-    height: "100%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    textAlign: "center",
-    boxSizing: "border-box",
-    lineHeight: "1",
-    margin: 0,
-    padding: 0,
-  };
+  
+  const VERTICAL_NUDGE = "0.6mm";
 
   const thStyle = {
     border: "1px solid #b7b7b7",
-    padding: 0,
+    padding: `0 0 ${VERTICAL_NUDGE} 0`,
     fontWeight: 700,
     fontSize: "4.6px",
-    lineHeight: "1",
+    lineHeight: "1.4",
     backgroundColor: "#f2f2f2",
     color: "#222",
     boxSizing: "border-box",
     textAlign: "center",
+    verticalAlign: "middle",
     overflow: "hidden",
     whiteSpace: "normal",
     wordBreak: "break-word",
     overflowWrap: "anywhere",
-    height: "100%",
   };
 
   const tdStyle = {
     border: "1px solid #b7b7b7",
-    padding: 0,
+    padding: `0 0 ${VERTICAL_NUDGE} 0`,
     fontSize: "4.6px",
-    lineHeight: "1",
+    lineHeight: "1.4",
     color: "#333",
     boxSizing: "border-box",
     textAlign: "center",
+    verticalAlign: "middle",
     overflow: "hidden",
     whiteSpace: "nowrap",
     textOverflow: "clip",
-    // height: ROW_HEIGHT, // ✅ reduced from 7mm
+    height: ROW_HEIGHT,
   };
 
   const totalThStyle = {
     ...thStyle,
     backgroundColor: "#f2f2f2",
     borderLeft: "1px solid #b7b7b7",
-    textAlign: "center",
   };
 
   const totalTdStyle = {
     ...tdStyle,
     borderLeft: "1px solid #b7b7b7",
     fontWeight: 700,
-    textAlign: "center",
   };
 
   const detailCellStyle = {
@@ -1067,7 +1050,6 @@ function FloorAreaTable({ floorDetails = [] }) {
     width: DETAIL_WIDTH,
     minWidth: 0,
     maxWidth: DETAIL_WIDTH,
-    textAlign: "center",
   };
 
   const detailHeaderStyle = {
@@ -1075,7 +1057,7 @@ function FloorAreaTable({ floorDetails = [] }) {
     width: DETAIL_WIDTH,
     minWidth: 0,
     maxWidth: DETAIL_WIDTH,
-    textAlign: "center",
+    height: HEADER_ROW_HEIGHT,
   };
 
   if (floorNames.length === 0) {
@@ -1144,18 +1126,9 @@ function FloorAreaTable({ floorDetails = [] }) {
                 maxWidth: FLOOR_WIDTH,
                 fontSize: "4.6px",
                 textTransform: "uppercase",
-                textAlign: "center",
               }}
             >
-              <div
-                style={{
-                  ...cellContentStyle,
-                  minHeight: "16mm",
-                  fontWeight: 700,
-                }}
-              >
-                Floor
-              </div>
+              Floor
             </th>
 
             <th
@@ -1168,18 +1141,9 @@ function FloorAreaTable({ floorDetails = [] }) {
                 fontSize: "4.6px",
                 letterSpacing: "0.05px",
                 textTransform: "uppercase",
-                textAlign: "center",
               }}
             >
-              <div
-                style={{
-                  ...cellContentStyle,
-                  minHeight: "5mm",
-                  fontWeight: 700,
-                }}
-              >
-                Details of Constructed Area of Property
-              </div>
+              Details of Constructed Area of Property
             </th>
 
             <th
@@ -1191,18 +1155,9 @@ function FloorAreaTable({ floorDetails = [] }) {
                 maxWidth: TOTAL_WIDTH,
                 fontSize: "4.6px",
                 textTransform: "uppercase",
-                textAlign: "center",
               }}
             >
-              <div
-                style={{
-                  ...cellContentStyle,
-                  minHeight: "16mm",
-                  fontWeight: 700,
-                }}
-              >
-                Total
-              </div>
+              Total
             </th>
           </tr>
 
@@ -1218,14 +1173,9 @@ function FloorAreaTable({ floorDetails = [] }) {
                   maxWidth: CONSTRUCTION_WIDTH,
                   fontSize: "4.4px",
                   textTransform: "uppercase",
-                  textAlign: "center",
                 }}
               >
-                <div
-                  style={{ ...cellContentStyle, minHeight: HEADER_ROW_HEIGHT }}
-                >
-                  {constructionType}
-                </div>
+                {constructionType}
               </th>
             ))}
           </tr>
@@ -1242,17 +1192,9 @@ function FloorAreaTable({ floorDetails = [] }) {
                     maxWidth: USAGE_GROUP_WIDTH,
                     fontSize: "4.3px",
                     textTransform: "uppercase",
-                    textAlign: "center",
                   }}
                 >
-                  <div
-                    style={{
-                      ...cellContentStyle,
-                      minHeight: HEADER_ROW_HEIGHT,
-                    }}
-                  >
-                    Residential
-                  </div>
+                  Residential
                 </th>
 
                 <th
@@ -1264,17 +1206,9 @@ function FloorAreaTable({ floorDetails = [] }) {
                     maxWidth: USAGE_GROUP_WIDTH,
                     fontSize: "4.3px",
                     textTransform: "uppercase",
-                    textAlign: "center",
                   }}
                 >
-                  <div
-                    style={{
-                      ...cellContentStyle,
-                      minHeight: HEADER_ROW_HEIGHT,
-                    }}
-                  >
-                    Commercial
-                  </div>
+                  Commercial
                 </th>
               </React.Fragment>
             ))}
@@ -1283,53 +1217,10 @@ function FloorAreaTable({ floorDetails = [] }) {
           <tr style={{ height: HEADER_ROW_HEIGHT }}>
             {CONSTRUCTION_COLUMNS.map((constructionType) => (
               <React.Fragment key={constructionType}>
-                <th style={{ ...detailHeaderStyle, textAlign: "center" }}>
-                  <div
-                    style={{
-                      ...cellContentStyle,
-                      minHeight: HEADER_ROW_HEIGHT,
-                      flexDirection: "column",
-                    }}
-                  >
-                    <span>Self-</span>
-                    <span>Used</span>
-                  </div>
-                </th>
-
-                <th style={{ ...detailHeaderStyle, textAlign: "center" }}>
-                  <div
-                    style={{
-                      ...cellContentStyle,
-                      minHeight: HEADER_ROW_HEIGHT,
-                    }}
-                  >
-                    Rented
-                  </div>
-                </th>
-
-                <th style={{ ...detailHeaderStyle, textAlign: "center" }}>
-                  <div
-                    style={{
-                      ...cellContentStyle,
-                      minHeight: HEADER_ROW_HEIGHT,
-                      flexDirection: "column",
-                    }}
-                  >
-                    <span>Self-</span>
-                    <span>Used</span>
-                  </div>
-                </th>
-
-                <th style={{ ...detailHeaderStyle, textAlign: "center" }}>
-                  <div
-                    style={{
-                      ...cellContentStyle,
-                      minHeight: HEADER_ROW_HEIGHT,
-                    }}
-                  >
-                    Rented
-                  </div>
-                </th>
+                <th style={detailHeaderStyle}>Self Used</th>
+                <th style={detailHeaderStyle}>Rented</th>
+                <th style={detailHeaderStyle}>Self Used</th>
+                <th style={detailHeaderStyle}>Rented</th>
               </React.Fragment>
             ))}
           </tr>
@@ -1349,78 +1240,24 @@ function FloorAreaTable({ floorDetails = [] }) {
                   wordBreak: "break-word",
                   overflowWrap: "anywhere",
                   fontSize: "4.3px",
-                  lineHeight: "1",
-                  textAlign: "center",
                 }}
               >
-                <div
-                  style={{
-                    ...cellContentStyle,
-                    minHeight: ROW_HEIGHT,
-                    fontWeight: 700,
-                  }}
-                >
-                  {String(floor).toUpperCase()}
-                </div>
+                {String(floor).toUpperCase()}
               </td>
 
               {CONSTRUCTION_COLUMNS.map((constructionType) => (
                 <React.Fragment key={constructionType}>
-                  <td style={{ ...detailCellStyle, textAlign: "center" }}>
-                    <div
-                      style={{
-                        ...cellContentStyle /*minHeight: ROW_HEIGHT  */,
-                      }}
-                    >
-                      {getCellValue(
-                        floor,
-                        constructionType,
-                        "Residential",
-                        "Self-Used",
-                      )}
-                    </div>
+                  <td style={detailCellStyle}>
+                    {getCellValue(floor, constructionType, "Residential", "Self-Used")}
                   </td>
-                  <td style={{ ...detailCellStyle, textAlign: "center" }}>
-                    <div
-                      style={{
-                        ...cellContentStyle /*minHeight: ROW_HEIGHT  */,
-                      }}
-                    >
-                      {getCellValue(
-                        floor,
-                        constructionType,
-                        "Residential",
-                        "Rented",
-                      )}
-                    </div>
+                  <td style={detailCellStyle}>
+                    {getCellValue(floor, constructionType, "Residential", "Rented")}
                   </td>
-                  <td style={{ ...detailCellStyle, textAlign: "center" }}>
-                    <div
-                      style={{
-                        ...cellContentStyle /*minHeight: ROW_HEIGHT  */,
-                      }}
-                    >
-                      {getCellValue(
-                        floor,
-                        constructionType,
-                        "Commercial",
-                        "Self-Used",
-                      )}
-                    </div>
+                  <td style={detailCellStyle}>
+                    {getCellValue(floor, constructionType, "Commercial", "Self-Used")}
                   </td>
-                  <td style={{ ...detailCellStyle, textAlign: "center" }}>
-                    <div
-                      style={{
-                        ...cellContentStyle /*minHeight: ROW_HEIGHT  */,
-                      }}
-                    >
-                      {getCellValue(
-                        floor,
-                        constructionType,
-                        "Commercial",
-                        "Rented",
-                      )}
-                    </div>
+                  <td style={detailCellStyle}>
+                    {getCellValue(floor, constructionType, "Commercial", "Rented")}
                   </td>
                 </React.Fragment>
               ))}
@@ -1432,18 +1269,9 @@ function FloorAreaTable({ floorDetails = [] }) {
                   minWidth: 0,
                   maxWidth: TOTAL_WIDTH,
                   fontWeight: 700,
-                  textAlign: "center",
                 }}
               >
-                <div
-                  style={{
-                    ...cellContentStyle,
-                    // minHeight: ROW_HEIGHT  ,
-                    fontWeight: 700,
-                  }}
-                >
-                  {getFloorTotal(floor)}
-                </div>
+                {getFloorTotal(floor)}
               </td>
             </tr>
           ))}
@@ -1458,98 +1286,24 @@ function FloorAreaTable({ floorDetails = [] }) {
                 fontWeight: 700,
                 whiteSpace: "nowrap",
                 fontSize: "4.3px",
-                lineHeight: "1",
-                textAlign: "center",
               }}
             >
-              <div
-                style={{
-                  ...cellContentStyle,
-                  // minHeight: ROW_HEIGHT  ,
-                  fontWeight: 700,
-                }}
-              >
-                Total:-
-              </div>
+              Total:-
             </td>
 
             {CONSTRUCTION_COLUMNS.map((constructionType) => (
               <React.Fragment key={constructionType}>
-                <td
-                  style={{
-                    ...detailCellStyle,
-                    fontWeight: 700,
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      ...cellContentStyle,
-                      // minHeight: ROW_HEIGHT,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {getColumnTotal(
-                      constructionType,
-                      "Residential",
-                      "Self-Used",
-                    )}
-                  </div>
+                <td style={{ ...detailCellStyle, fontWeight: 700 }}>
+                  {getColumnTotal(constructionType, "Residential", "Self-Used")}
                 </td>
-                <td
-                  style={{
-                    ...detailCellStyle,
-                    fontWeight: 700,
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      ...cellContentStyle,
-                      // minHeight: ROW_HEIGHT,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {getColumnTotal(constructionType, "Residential", "Rented")}
-                  </div>
+                <td style={{ ...detailCellStyle, fontWeight: 700 }}>
+                  {getColumnTotal(constructionType, "Residential", "Rented")}
                 </td>
-                <td
-                  style={{
-                    ...detailCellStyle,
-                    fontWeight: 700,
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      ...cellContentStyle,
-                      // minHeight: ROW_HEIGHT,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {getColumnTotal(
-                      constructionType,
-                      "Commercial",
-                      "Self-Used",
-                    )}
-                  </div>
+                <td style={{ ...detailCellStyle, fontWeight: 700 }}>
+                  {getColumnTotal(constructionType, "Commercial", "Self-Used")}
                 </td>
-                <td
-                  style={{
-                    ...detailCellStyle,
-                    fontWeight: 700,
-                    textAlign: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      ...cellContentStyle,
-                      // minHeight: ROW_HEIGHT,
-                      fontWeight: 700,
-                    }}
-                  >
-                    {getColumnTotal(constructionType, "Commercial", "Rented")}
-                  </div>
+                <td style={{ ...detailCellStyle, fontWeight: 700 }}>
+                  {getColumnTotal(constructionType, "Commercial", "Rented")}
                 </td>
               </React.Fragment>
             ))}
@@ -1561,18 +1315,9 @@ function FloorAreaTable({ floorDetails = [] }) {
                 minWidth: 0,
                 maxWidth: TOTAL_WIDTH,
                 fontWeight: 700,
-                textAlign: "center",
               }}
             >
-              <div
-                style={{
-                  ...cellContentStyle,
-                  // minHeight: ROW_HEIGHT,
-                  fontWeight: 700,
-                }}
-              >
-                {grandTotal}
-              </div>
+              {grandTotal}
             </td>
           </tr>
         </tbody>
