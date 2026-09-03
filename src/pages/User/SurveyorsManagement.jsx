@@ -5,7 +5,7 @@ import {
   addSurveyorAPI,
   updateSurveyorAPI, // <-- NEW: add this to services/api.js (see note below)
   fetchSurveyorsList,
-  getLocationOptions,
+  // getLocationOptions,
 } from "../../services/api";
 import OTPModal from "./OtpModal/OTPModal";
 
