@@ -10,8 +10,12 @@ export const CHART_THEMES = {
     shades: ["#2f5478", "#4f7cac", "#7ba1c9", "#a5c1dd", "#c9dcec"],
   },
   property_location: {
-    base: "#4c9a7a",
-    shades: ["#2f6b52", "#4c9a7a", "#78b89e", "#a3d0bd", "#c9e4da"],
+    base: "#5B7FA3",
+    shades: [
+      "#5B7FA3", // Main Road
+      "#6FA58A", // Market
+      "#B88A68", // Others
+    ],
   },
   property_age: {
     base: "#c17d4f",
@@ -42,9 +46,9 @@ export const CHART_THEMES = {
 export const TRACK_COLOR = "#E9E9EC";
 
 export const MAP_LOCATION_COLORS = {
-  "Main Road": "#4f7cac",
-  "Market": "#4c9a7a",
-  "Others": "#c17d4f",
+  "Main Road": "#5B7FA3",
+  Market: "#6FA58A",
+  Others: "#B88A68",
 };
 
 export const MAP_ZONE_COLORS = {
@@ -78,4 +82,24 @@ export const GAUGE_COLORS = {
 };
 
 // Cross-filter dim opacity — non-matching segments across ALL charts
-export const CROSS_FILTER_DIM_OPACITY = 0.25;   
+export const CROSS_FILTER_DIM_OPACITY = 0.25;
+
+export const UTILITY_COLORS = {
+  "Water Supply": "#4F86F7",
+  Electricity: "#F5A623",
+  Sewerage: "#2E9B63",
+  Drainage: "#269BB5",
+  "Solid Waste": "#9B6FD3",
+};
+
+export const AGE_COLORS = {
+  "0-5 Years": "#4CCB7A",
+  "6-10 Years": "#8BCB24",
+  "11-20 Years": "#F0B90B",
+  "21-30 Years": "#F47B20",
+  "31+ Years": "#D94A4A",
+};
+
+export const BAR_DEFAULT_COLOR = "#7076B0";
+
+export const CARD_BORDER_COLOR = "#e5e7eb";

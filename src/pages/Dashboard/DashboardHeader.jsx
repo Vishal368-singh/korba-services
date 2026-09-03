@@ -1,4 +1,4 @@
-import { FaDownload, FaChevronDown } from "react-icons/fa";
+import { FaDownload } from "react-icons/fa";
 import DateRangePicker from "./DateRangePicker";
 
 const PRIMARY = "#7a1453";

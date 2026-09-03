@@ -9,7 +9,7 @@ export default function DashboardCharts({
   onClearFilter,
 }) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:h-[508px]">
       <div>
         <GeographicOverview
           data={data?.survey_analysis}
@@ -22,7 +22,7 @@ export default function DashboardCharts({
           title="Tax Rate Zone"
           themeKey="tax_rate_zone"
           data={data?.survey_analysis?.tax_rate_zones}
-          selectedKey={selectedFilter?.label}
+          selectedFilter={selectedFilter}
           onSegmentClick={onSegmentClick}
         />
 
@@ -30,7 +30,7 @@ export default function DashboardCharts({
           title="Property Location"
           themeKey="property_location"
           data={data?.survey_analysis?.property_locations}
-          selectedKey={selectedFilter?.label}
+          selectedFilter={selectedFilter}
           onSegmentClick={onSegmentClick}
         />
 
@@ -38,7 +38,7 @@ export default function DashboardCharts({
           title="Property Age"
           themeKey="property_age"
           data={data?.land_building_analysis?.building_age}
-          selectedKey={selectedFilter?.label}
+          selectedFilter={selectedFilter}
           onBarClick={onSegmentClick}
         />
 
@@ -46,7 +46,7 @@ export default function DashboardCharts({
           title="Utilities"
           themeKey="utilities"
           data={data?.utility_analysis}
-          selectedKey={selectedFilter?.label}
+          selectedFilter={selectedFilter}
           onBarClick={onSegmentClick}
         />
       </div>
