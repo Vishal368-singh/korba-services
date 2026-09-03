@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import Sanscript from "@indic-transliteration/sanscript";
 import "./SurveyorsManagement.css";
 import notify from "../../utils/toast";
