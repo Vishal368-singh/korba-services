@@ -401,6 +401,58 @@ export const fetchSurveyStatusCounts = async () => {
 //     }, 300);
 //   });
 // };
+// export const fetchKeyIndicators = async () => {
+//   return new Promise((resolve) => {
+//     setTimeout(() => {
+//       resolve({
+//         indicators: [
+//           {
+//             key: "unique_parcels",
+//             label: "Land Parcels",
+//             value: 181,
+//             // subtext: "96.8% of Total Surveys",
+//           },
+//           {
+//             key: "unique_properties",
+//             label: "Unique Properties",
+//             value: 187,
+//             // subtext: "100% of Total Surveys",
+//           },
+//           {
+//             key: "total_plot_area",
+//             label: "Total Parcel Area (sq.ft.)",
+//             value: 301355,
+//             subtext: "100% of Total Parcels",
+//           },
+//           {
+//             key: "total_builtup_area",
+//             label: "Total Built-up Area (sq.ft.)",
+//             value: 248853,
+//             subtext: "82.6% of Plot Area",
+//           },
+//           {
+//             key: "vacant_properties",
+//             label: "Vacant Properties",
+//             value: 26,
+//             subtext: "13.9% of Total Properties",
+//           },
+//           {
+//             key: "new_construction",
+//             label: "New Construction",
+//             value: 12,
+//             subtext: "6.4% of Total Properties",
+//           },
+//           {
+//             key: "additional_floor_constructed",
+//             label: "Additional Floor Constructed",
+//             value: 15,
+//             subtext: "8.0% of Total Properties",
+//           },
+//         ],
+//       });
+//     }, 300);
+//   });
+// };
 
 export const fetchGeographicOverview = async () => {
   return new Promise((resolve) => {
@@ -625,6 +677,12 @@ export const fetchDashboardData = async (
   selectedUids = null,
 ) => {
  
+export const fetchDashboardData = async (
+  startDate,
+  endDate,
+  selectedUids = null,
+) => {
+ 
   const token = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user")).access_token
     : null;
@@ -641,6 +699,10 @@ export const fetchDashboardData = async (
   };
 
   const params = new URLSearchParams();
+  if (startDate) params.append("start_date", formatDate(startDate));
+  if (endDate) params.append("end_date", formatDate(endDate));
+  if (selectedUids && selectedUids.length > 0) {
+    params.append("property_uids", selectedUids.join(","));
   if (startDate) params.append("start_date", formatDate(startDate));
   if (endDate) params.append("end_date", formatDate(endDate));
   if (selectedUids && selectedUids.length > 0) {
@@ -702,3 +764,72 @@ export const fetchKeyIndicators = async (
   return response.data;
 };
 
+export const fetchKeyIndicators = async (
+  startDate,
+  endDate
+) => {
+ 
+  const token = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user")).access_token
+    : null;
+
+  if (!token) {
+    notify.error("No token found. Please log in first.");
+    throw new Error("No token found. Please log in first.");
+  }
+
+  const formatDate = (date) => {
+    if (!date) return "";
+    const d = new Date(date);
+    return d.toISOString().split("T")[0];
+  };
+
+  const params = new URLSearchParams();
+  if (startDate) params.append("start_date", formatDate(startDate));
+  if (endDate) params.append("end_date", formatDate(endDate));
+  // if (selectedUids && selectedUids.length > 0) {
+  //   params.append("property_uids", selectedUids.join(","));
+  // }
+
+  const url = `/api/dashboard/key-indicators${params.toString() ? `?${params.toString()}` : ""}`;
+
+  const response = await api.get(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+ console.log("fetchKeyIndicators response:", response);
+  if (response.status !== 200) {
+    notify.error("Failed to fetch dashboard data");
+    throw new Error("Failed to fetch dashboard data");
+  }
+
+  return response.data;
+};
+
+export const updateSurveyorAPI = async (surveyorId, payload) => {
+  const token = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user")).access_token
+    : null;
+
+  if (!token) {
+    notify.error("No token found. Please log in first.");
+    throw new Error("No token found. Please log in first.");
+  }
+
+  const response = await api.post(
+    `/auth/update-surveyor`, 
+    { surveyor_id: surveyorId, ...payload },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (response.status !== 200 && response.status !== 201) {
+    notify.error("Failed to update surveyor");
+    throw new Error("Failed to update surveyor");
+  }
+
+  return response;
+};

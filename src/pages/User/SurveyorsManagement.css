@@ -605,3 +605,15 @@ input:disabled:hover,
 select:disabled:hover {
   background-color: #cbd5e1 !important;
 }
+.edit-btn {
+  color: #7a1453;
+}
+
+.cancel-edit-btn {
+  margin-left: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #f5f5f5;
+  cursor: pointer;
+}

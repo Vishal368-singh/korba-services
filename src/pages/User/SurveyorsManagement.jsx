@@ -1,9 +1,9 @@
-import  { useState, useEffect } from "react";
-import Sanscript from "@indic-transliteration/sanscript";
+import React, { useState, useEffect, useRef } from "react";
 import "./SurveyorsManagement.css";
 import notify from "../../utils/toast";
 import {
   addSurveyorAPI,
+  updateSurveyorAPI, // <-- NEW: add this to services/api.js (see note below)
   fetchSurveyorsList,
   getLocationOptions,
 } from "../../services/api";
@@ -11,42 +11,32 @@ import OTPModal from "./OtpModal/OTPModal";
 
 import SearchableMultiSelect from "../../components/SearchableMultiSelect";
 
-const transliterateEnglishToHindi = (text) => {
+const transliterateText = async (text) => {
   if (!text || !text.trim()) return "";
 
   try {
-    return Sanscript.t(text.trim(), "itrans", "devanagari");
-  } catch (error) {
-    console.error("English to Hindi transliteration failed:", error);
+    const response = await fetch(
+      `https://inputtools.google.com/request?text=${encodeURIComponent(
+        text,
+      )}&itc=hi-t-i0-und&num=1&cp=0&cs=1&ie=utf-8&oe=utf-8`,
+    );
+
+    const data = await response.json();
+
+    if (
+      Array.isArray(data) &&
+      data[0] === "SUCCESS" &&
+      Array.isArray(data[1]) &&
+      data[1][0] &&
+      Array.isArray(data[1][0][1]) &&
+      data[1][0][1][0]
+    ) {
+      return data[1][0][1][0];
+    }
+
     return "";
-  }
-};
-
-const transliterateHindiToEnglish = (text) => {
-  if (!text || !text.trim()) return "";
-
-  try {
-    const result = Sanscript.t(text.trim(), "devanagari", "itrans");
-
-    // Convert technical ITRANS output into a cleaner English spelling.
-    return result
-      .replace(/A/g, "a")
-      .replace(/I/g, "i")
-      .replace(/U/g, "u")
-      .replace(/RR/g, "r")
-      .replace(/R/g, "r")
-      .replace(/L/g, "l")
-      .replace(/~N/g, "n")
-      .replace(/~n/g, "n")
-      .replace(/~m/g, "m")
-      .replace(/j~n/g, "jn")
-      .replace(/GY/g, "gy")
-      .replace(/sh/g, "sh")
-      .replace(/[^a-zA-Z0-9 .,'-]/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
   } catch (error) {
-    console.error("Hindi to English transliteration failed:", error);
+    console.error("Google transliteration failed:", error);
     return "";
   }
 };
@@ -76,6 +66,9 @@ function SurveyorsManagement() {
 
   const [errors, setErrors] = useState({});
 
+  // NEW: tracks which surveyor is currently being edited (surveyor_id), or null when adding
+  const [editingId, setEditingId] = useState(null);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [zoneFilter, setZoneFilter] = useState("");
@@ -97,6 +90,13 @@ function SurveyorsManagement() {
   const [otpValidationModal, setOtpValidationModal] = useState(false);
   const [emailForOTP, setEmailForOTP] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+
+  // =========================================================
+  // TRANSLITERATION DEBOUNCE
+  // =========================================================
+
+  const nameDebounceRef = useRef(null);
+  const latestNameRequestId = useRef(0);
 
   // =========================================================
   // LOAD LOCATION OPTIONS
@@ -154,6 +154,7 @@ function SurveyorsManagement() {
         zone_hindi: item.zone_hindi || "",
         ward: item.ward || "",
         ward_hindi: item.ward_hindi || "",
+        target: item.target || "",
         status:
           String(item.status || "").toLowerCase() === "active"
             ? "Validated"
@@ -343,39 +344,29 @@ function SurveyorsManagement() {
 
   // =========================================================
   // NAME AUTO-TRANSLITERATION
-  // English -> Hindi and Hindi -> English are both supported.
-  // The source field is updated by the user; the opposite field
-  // is filled automatically.
+  // English -> Hindi only using Google Input Tools.
   // =========================================================
 
-  const handleEnglishNameChange = (value) => {
-    setFormData((prev) => ({
-      ...prev,
-      surveyor_name: value,
-      surveyor_name_hindi: value.trim()
-        ? transliterateEnglishToHindi(value)
-        : "",
-    }));
+  const scheduleNameToHindi = (englishValue) => {
+    if (nameDebounceRef.current) {
+      clearTimeout(nameDebounceRef.current);
+    }
 
-    setErrors((prev) => ({
-      ...prev,
-      surveyor_name: "",
-      surveyor_name_hindi: "",
-    }));
-  };
+    nameDebounceRef.current = setTimeout(async () => {
+      const requestId = ++latestNameRequestId.current;
 
-  const handleHindiNameChange = (value) => {
-    setFormData((prev) => ({
-      ...prev,
-      surveyor_name_hindi: value,
-      surveyor_name: value.trim() ? transliterateHindiToEnglish(value) : "",
-    }));
+      const hindiResult = await transliterateText(englishValue);
 
-    setErrors((prev) => ({
-      ...prev,
-      surveyor_name_hindi: "",
-      surveyor_name: "",
-    }));
+      // Ignore stale responses if user has typed something newer.
+      if (requestId !== latestNameRequestId.current) {
+        return;
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        surveyor_name_hindi: hindiResult,
+      }));
+    }, 400);
   };
 
   // =========================================================
@@ -384,16 +375,6 @@ function SurveyorsManagement() {
 
   const handleChange = (e) => {
     const { id, value } = e.target;
-
-    if (id === "surveyor_name") {
-      handleEnglishNameChange(value);
-      return;
-    }
-
-    if (id === "surveyor_name_hindi") {
-      handleHindiNameChange(value);
-      return;
-    }
 
     let sanitizedValue = value;
 
@@ -412,7 +393,41 @@ function SurveyorsManagement() {
         [id]: "",
       }));
     }
+
+    // =======================================================
+    // GOOGLE ENGLISH -> HINDI ONLY
+    // =======================================================
+
+    if (id === "surveyor_name") {
+      if (sanitizedValue.trim()) {
+        scheduleNameToHindi(sanitizedValue);
+      } else {
+        if (nameDebounceRef.current) {
+          clearTimeout(nameDebounceRef.current);
+        }
+
+        // Invalidate any previous Google response.
+        ++latestNameRequestId.current;
+
+        setFormData((prev) => ({
+          ...prev,
+          surveyor_name_hindi: "",
+        }));
+      }
+    }
   };
+
+  // =========================================================
+  // CLEANUP DEBOUNCE TIMER ON UNMOUNT
+  // =========================================================
+
+  useEffect(() => {
+    return () => {
+      if (nameDebounceRef.current) {
+        clearTimeout(nameDebounceRef.current);
+      }
+    };
+  }, []);
 
   // =========================================================
   // VALIDATION
@@ -421,7 +436,8 @@ function SurveyorsManagement() {
   const validateForm = () => {
     const requiredFields = [
       { key: "username", label: "Username" },
-      { key: "password", label: "Password" },
+      // Password not required while editing an existing surveyor
+      ...(editingId ? [] : [{ key: "password", label: "Password" }]),
       { key: "surveyor_name", label: "Surveyor Name (EN)" },
       { key: "surveyor_name_hindi", label: "Surveyor Name (HI)" },
       { key: "role", label: "Role" },
@@ -472,7 +488,7 @@ function SurveyorsManagement() {
   };
 
   // =========================================================
-  // ADD SURVEYOR
+  // ADD / UPDATE SURVEYOR
   // =========================================================
 
   const addSurveyor = async (payload) => {
@@ -492,7 +508,14 @@ function SurveyorsManagement() {
         target: payload.target || "",
       };
 
-      const response = await addSurveyorAPI(apiPayload);
+      let response;
+
+      if (editingId) {
+        // NEW: update branch — calls updateSurveyorAPI instead of addSurveyorAPI
+        response = await updateSurveyorAPI(editingId, apiPayload);
+      } else {
+        response = await addSurveyorAPI(apiPayload);
+      }
 
       let data = {};
 
@@ -503,31 +526,70 @@ function SurveyorsManagement() {
       if (data.message) {
         notify.info(data.message);
         handleSetFormDataInitial();
+        setEditingId(null);
         return;
       }
 
-      const newSurveyor = {
-        id: data.id || Date.now(),
-        ...apiPayload,
-        status: data.status || "Pending",
-        createdAt: data.created_at || new Date().toISOString(),
-      };
-
       notify.success(
-        `Surveyor "${newSurveyor.surveyor_name}" added successfully!`,
+        editingId
+          ? `Surveyor "${apiPayload.surveyor_name}" updated successfully!`
+          : `Surveyor "${apiPayload.surveyor_name}" added successfully!`,
       );
 
       await loadSurveyors();
 
       setErrors({});
+      setEditingId(null);
       handleSetFormDataInitial();
     } catch (error) {
-      console.error("Error adding surveyor:", error);
+      console.error("Error saving surveyor:", error);
 
       notify.error(
-        error.message || "Failed to add surveyor. Please try again.",
+        error.message ||
+          (editingId
+            ? "Failed to update surveyor. Please try again."
+            : "Failed to add surveyor. Please try again."),
       );
     }
+  };
+
+  // =========================================================
+  // EDIT SURVEYOR (NEW)
+  // =========================================================
+
+  const handleEditClick = (surveyor) => {
+    if (nameDebounceRef.current) {
+      clearTimeout(nameDebounceRef.current);
+    }
+
+    // Invalidate any pending Google transliteration request so it
+    // doesn't overwrite the Hindi name we're about to set from data.
+    ++latestNameRequestId.current;
+
+    setFormData({
+      username: surveyor.username || "",
+      password: "", // don't prefill password
+      surveyor_name: surveyor.surveyor_name || "",
+      surveyor_name_hindi: surveyor.surveyor_name_hindi || "",
+      role: surveyor.role || "Surveyor",
+      email: surveyor.email || "",
+      mobile: surveyor.mobile || "",
+      zone: surveyor.zone || "",
+      zone_hindi: surveyor.zone_hindi || "",
+      ward: surveyor.ward || "",
+      ward_hindi: surveyor.ward_hindi || "",
+      target: surveyor.target || "",
+    });
+
+    setEditingId(surveyor.surveyor_id);
+    setErrors({});
+
+    document.querySelector(".card")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    handleSetFormDataInitial();
   };
 
   // =========================================================
@@ -535,6 +597,12 @@ function SurveyorsManagement() {
   // =========================================================
 
   const handleSetFormDataInitial = () => {
+    if (nameDebounceRef.current) {
+      clearTimeout(nameDebounceRef.current);
+    }
+
+    ++latestNameRequestId.current;
+
     setFormData({
       username: "",
       password: "",
@@ -786,6 +854,15 @@ function SurveyorsManagement() {
 
           <td>
             <div className="action-icons">
+              {/* NEW: Edit button */}
+              <button
+                className="edit-btn"
+                onClick={() => handleEditClick(s)}
+                title="Edit"
+              >
+                <i className="fas fa-pen"></i>
+              </button>
+
               {!isActive && (
                 <button
                   className="approve-btn"
@@ -889,9 +966,16 @@ function SurveyorsManagement() {
 
       <div className="card">
         <div className="card-title">
-          <i className="fas fa-user-plus" style={{ color: "#7A1453" }}></i>
-          Add New Surveyor
-          <span className="sub">— fill all fields to register</span>
+          <i
+            className={editingId ? "fas fa-user-edit" : "fas fa-user-plus"}
+            style={{ color: "#7A1453" }}
+          ></i>
+          {editingId ? "Edit Surveyor" : "Add New Surveyor"}
+          <span className="sub">
+            {editingId
+              ? `— editing ${editingId}`
+              : "— fill all fields to register"}
+          </span>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -922,6 +1006,7 @@ function SurveyorsManagement() {
 
             {/* =====================================================
                 SURVEYOR NAME HINDI
+                READ ONLY - POPULATED BY GOOGLE
             ====================================================== */}
 
             <div className="form-group">
@@ -934,8 +1019,8 @@ function SurveyorsManagement() {
                 type="text"
                 id="surveyor_name_hindi"
                 value={formData.surveyor_name_hindi}
-                onChange={handleChange}
                 placeholder="जॉन डो"
+                readOnly
                 className={errors.surveyor_name_hindi ? "error" : ""}
               />
 
@@ -978,7 +1063,14 @@ function SurveyorsManagement() {
             <div className="form-group">
               <label>
                 <i className="fas fa-lock" style={{ color: "#7A1453" }}></i>{" "}
-                Password <span className="required-fields">*</span>
+                Password{" "}
+                {editingId ? (
+                  <span className="hint-text">
+                    (leave blank to keep current)
+                  </span>
+                ) : (
+                  <span className="required-fields">*</span>
+                )}
               </label>
 
               <input
@@ -1195,11 +1287,28 @@ function SurveyorsManagement() {
             </div>
           </div>
 
+          {/* =====================================================
+              FORM ACTIONS
+          ====================================================== */}
+
           <div className="form-actions">
             <button type="submit" className="submit-surveyor-btn btn-success">
-              <i className="fas fa-save" style={{ color: "white" }}></i> Add
-              Surveyor
+              <i
+                className={editingId ? "fas fa-sync-alt" : "fas fa-save"}
+                style={{ color: "white" }}
+              ></i>{" "}
+              {editingId ? "Update Surveyor" : "Add Surveyor"}
             </button>
+
+            {editingId && (
+              <button
+                type="button"
+                className="cancel-edit-btn"
+                onClick={handleCancelEdit}
+              >
+                <i className="fas fa-times"></i> Cancel
+              </button>
+            )}
 
             <span className="hint-text">
               <i className="fas fa-info-circle"></i> All * fields are required
@@ -1208,9 +1317,9 @@ function SurveyorsManagement() {
         </form>
       </div>
 
-      {/* =========================================================
+      {/* =======================================================
           SURVEYOR LIST
-      ========================================================== */}
+      ======================================================== */}
 
       <div className="card">
         <div className="card-title">
@@ -1221,6 +1330,10 @@ function SurveyorsManagement() {
             {filtered.length !== 1 ? "s" : ""}
           </span>
         </div>
+
+        {/* =====================================================
+            TOOLBAR
+        ====================================================== */}
 
         <div className="toolbar">
           <div className="search-box">
@@ -1268,6 +1381,10 @@ function SurveyorsManagement() {
           </div>
         </div>
 
+        {/* =====================================================
+            TABLE
+        ====================================================== */}
+
         <div className="table-wrapper">
           <table>
             <thead>
@@ -1286,9 +1403,14 @@ function SurveyorsManagement() {
                 <th style={{ textAlign: "center" }}>Action</th>
               </tr>
             </thead>
+
             <tbody>{renderTableRows()}</tbody>
           </table>
         </div>
+
+        {/* =====================================================
+            PAGINATION
+        ====================================================== */}
 
         <div className="pagination-controls">
           <button
