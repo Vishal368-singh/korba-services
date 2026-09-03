@@ -1,65 +1,105 @@
-export const BRAND = "#7a1453"; // app shell / chrome only, not used in charts
+// src/theme/colors.js
+export const BRAND = "#7a1453"; // app shell only
 
-export const HIGHLIGHT_COLOR = "#facc15"; // selection ring, shared everywhere
+export const HIGHLIGHT_COLOR = "#f59e0b"; // muted amber ring, less neon than before
 
-// One base hue per chart — pick colors that are visually distinct from each other
+// Softer, desaturated hues — same "one color per chart" idea, lower intensity
 export const CHART_THEMES = {
   tax_rate_zone: {
-    base: "#3b82f6", // blue
-    shades: ["#1d4ed8", "#3b82f6", "#60a5fa", "#93c5fd", "#bfdbfe", "#dbeafe"],
+    base: "#4f7cac",
+    shades: ["#2f5478", "#4f7cac", "#7ba1c9", "#a5c1dd", "#c9dcec"],
   },
   property_location: {
-    base: "#22c55e", // green
-    shades: ["#15803d", "#22c55e", "#4ade80", "#86efac", "#bbf7d0", "#dcfce7"],
+    base: "#5B7FA3",
+    shades: [
+      "#5B7FA3", // Main Road
+      "#6FA58A", // Market
+      "#B88A68", // Others
+    ],
   },
   property_age: {
-    base: "#f97316", // orange
-    shades: ["#c2410c", "#f97316", "#fb923c", "#fdba74", "#fed7aa", "#ffedd5"],
+    base: "#c17d4f",
+    shades: ["#93582f", "#c17d4f", "#d3a077", "#e2bd9f", "#efd8c1"],
   },
   utilities: {
-    base: "#a855f7", // purple
-    shades: ["#7e22ce", "#a855f7", "#c084fc", "#d8b4fe", "#e9d5ff", "#f3e8ff"],
+    base: "#8368a8",
+    shades: ["#5c4779", "#8368a8", "#a68dc0", "#c3b2d6", "#ddd3e8"],
   },
   property_status: {
-    base: "#ec4899", // pink/rose
-    shades: ["#be185d", "#ec4899", "#f472b6", "#f9a8d4", "#fbcfe8", "#fce7f3"],
+    base: "#b8557a",
+    shades: ["#8a3457", "#b8557a", "#cd7f9c", "#dfa8bb", "#eecdd6"],
   },
   building_permissions: {
-    base: "#14b8a6", // teal
-    shades: ["#0f766e", "#14b8a6", "#2dd4bf", "#5eead4", "#99f6e4", "#ccfbf1"],
+    base: "#4a9296",
+    shades: ["#2d6a6d", "#4a9296", "#77b0b3", "#a4c8ca", "#c9dfe0"],
   },
   property_ownership: {
-    base: "#eab308", // yellow/gold
-    shades: ["#a16207", "#eab308", "#facc15", "#fde047", "#fef08a", "#fef9c3"],
+    base: "#c19a3f",
+    shades: ["#93701f", "#c19a3f", "#d3b46f", "#e2c99a", "#efdec0"],
   },
   construction_type: {
-    base: "#6366f1", // indigo
-    shades: ["#4338ca", "#6366f1", "#818cf8", "#a5b4fc", "#c7d2fe", "#e0e7ff"],
-  },
-  data_completeness: {
-    base: "#06b6d4", // cyan (used as single gauge fill, not a segment set)
+    base: "#7076b0",
+    shades: ["#484e82", "#7076b0", "#9498c5", "#b6b9d8", "#d5d7e9"],
   },
 };
 
-// Track color for gauges (unfilled portion) — shared neutral
-export const TRACK_COLOR = "#E5E7EB";
+export const TRACK_COLOR = "#E9E9EC";
 
-// Map marker colors — deliberately reuse the SAME hues as tax_rate_zone / property_location
-// themes so the map's coloring mode (whichever field is active) visually matches its chart
 export const MAP_LOCATION_COLORS = {
-  "Main Road": "#15803d",
-  "Market": "#4ade80",
-  "Others": "#86efac",
+  "Main Road": "#5B7FA3",
+  Market: "#6FA58A",
+  Others: "#B88A68",
 };
 
 export const MAP_ZONE_COLORS = {
-  "Zone 1": "#1d4ed8",
-  "Zone 2": "#3b82f6",
-  "Zone 3": "#60a5fa",
-  "Zone 4": "#93c5fd",
+  "Zone 1": "#4f7cac",
+  "Zone 2": "#4c9a7a",
+  "Zone 3": "#c17d4f",
+  "Zone 4": "#8368a8",
 };
 
 export const MAP_DEFAULT_MARKER_COLOR = "#6b7280";
 
 export const DIM_MARKER_OPACITY = 0.3;
 export const DIM_MARKER_FILL_OPACITY = 0.15;
+
+export const KPI_COLORS = {
+  unique_parcels: "#4f7cac",
+  unique_properties: "#4c9a7a",
+  total_plot_area: "#c17d4f",
+  total_builtup_area: "#8368a8",
+  vacant_properties: "#b8557a",
+  new_construction: "#4a9296",
+  additional_floor_constructed: "#c19a3f",
+};
+export const KPI_DEFAULT_COLOR = "#7076b0";
+
+export const GAUGE_COLORS = {
+  owner_mobile_no: "#4f7cac",
+  property_image: "#4c9a7a",
+  geo_tag_completion: "#c17d4f",
+  boundary_verification: "#8368a8",
+};
+
+// Cross-filter dim opacity — non-matching segments across ALL charts
+export const CROSS_FILTER_DIM_OPACITY = 0.25;
+
+export const UTILITY_COLORS = {
+  "Water Supply": "#4F86F7",
+  Electricity: "#F5A623",
+  Sewerage: "#2E9B63",
+  Drainage: "#269BB5",
+  "Solid Waste": "#9B6FD3",
+};
+
+export const AGE_COLORS = {
+  "0-5 Years": "#4CCB7A",
+  "6-10 Years": "#8BCB24",
+  "11-20 Years": "#F0B90B",
+  "21-30 Years": "#F47B20",
+  "31+ Years": "#D94A4A",
+};
+
+export const BAR_DEFAULT_COLOR = "#7076B0";
+
+export const CARD_BORDER_COLOR = "#e5e7eb";

@@ -11,9 +11,9 @@ export default function GaugeChart({ label, completed, total, fillColor = "#6366
   ];
 
   return (
-    <div className="flex flex-col items-center mx-auto w-full max-w-[160px] sm:max-w-[200px] lg:max-w-[240px]">
+    <div className="flex flex-col items-center mx-auto w-full max-w-40 sm:max-w-50 lg:max-w-60">
       <p className="text-sm font-semibold text-gray-800 mb-2 text-center">{label}</p>
-      <div className="relative w-full aspect-[2/1] max-w-[180px]">
+      <div className="relative w-full aspect-2/1 max-w-45">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -37,7 +37,7 @@ export default function GaugeChart({ label, completed, total, fillColor = "#6366
           <span className="text-xl font-bold text-gray-900">{displaypercent}%</span>
         </div>
       </div>
-      <div className="flex items-center justify-between w-full max-w-[180px] text-xs text-gray-400 mt-1">
+      <div className="flex items-center justify-between w-full max-w-45 text-xs text-gray-400 mt-1">
         <span>0%</span>
         <span className="font-medium text-gray-500">{completed} of {total}</span>
         <span>100%</span>
