@@ -40,10 +40,8 @@ const FOUR_COL = {
 
 export default function Dashboard() {
   const today = new Date();
-  const [startDate, setStartDate] = useState(
-    new Date(today.getFullYear(), today.getMonth(), today.getDate() - 9),
-  );
-  const [endDate, setEndDate] = useState(today);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [isDownloading, setIsDownLoading] = useState(false);
 
   // State for dashboard data
@@ -51,36 +49,52 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedFilter, setSelectedFilter] = useState(null);
+  const [keyIndicatorsData, setKeyIndicatorsData] = useState(null);
 
-  const handleSegmentClick = (label, uids) => {
-    setSelectedFilter((prev) =>
-      prev?.label === label ? null : { label, uids: uids || [] },
-    );
-  };
+const handleSegmentClick = (label, uids) => {
+  console.log("CLICKED:", label, "uids count:", uids?.length);
+  setSelectedFilter((prev) => {
+    const next = prev?.label === label ? null : { label, uids: uids || [] };
+    console.log("NEW selectedFilter:", next?.label, "uids:", next?.uids?.length);
+    return next;
+  });
+};
   // Fetch dashboard data when date range changes
-  useEffect(() => {
-    const loadDashboardData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const response = await fetchDashboardData(startDate, endDate);
-
-        if (response.success) {
-          setDashboardData(response.data);
-        } else {
-          setError("Failed to fetch dashboard data");
-        }
-      } catch (err) {
-        //  console.error("Error loading dashboard data:", err);
-        setError(err.message || "An error occurred while fetching data");
-      } finally {
-        setLoading(false);
+useEffect(() => {
+  console.log("FETCHING with selectedFilter:", selectedFilter?.label, selectedFilter?.uids?.length);
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetchDashboardData(startDate, endDate, selectedFilter?.uids);
+      if (response.success) {
+        setDashboardData(response.data);
+      } else {
+        setError("Failed to fetch dashboard data");
       }
-    };
+    } catch (err) {
+      setError(err.message || "An error occurred while fetching data");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    loadDashboardData();
-  }, [startDate, endDate]); // Re-fetch when date range changes
+  loadDashboardData();
+}, [startDate, endDate, selectedFilter]); // Re-fetch when date range changes
+
+useEffect(() => {
+  const loadKeyIndicators = async () => {
+    try {
+      const response = await fetchKeyIndicators(startDate, endDate);
+      if (response.success) {
+        setKeyIndicatorsData(response.data);
+      }
+    } catch (err) {
+      console.error("Error loading key indicators:", err);
+    }
+  };
+  loadKeyIndicators();
+}, [startDate, endDate]);
 
   const handleDateChange = (start, end) => {
     setStartDate(start);
@@ -126,7 +140,7 @@ export default function Dashboard() {
         isDownloading={isDownloading}
       />
       <div className="mt-6">
-        <KeyIndicators data={dashboardData?.key_indicators} />
+        <KeyIndicators data={keyIndicatorsData} />
       </div>
 
       <DashboardCharts
@@ -142,7 +156,7 @@ export default function Dashboard() {
       />
       <DataCompletenes
         data={dashboardData?.data_completeness}
-        selectedKey={selectedFilter?.label}
+        selectedFilter={selectedFilter}
         onSegmentClick={handleSegmentClick}
       />
     </div>

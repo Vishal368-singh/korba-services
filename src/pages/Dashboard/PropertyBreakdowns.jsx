@@ -49,7 +49,7 @@ export default function PropertyBreakdowns({ data, selectedFilter, onSegmentClic
           title={chart.title}
           segments={chart.segments}
           accentColor={chart.accentColor}
-          selectedKey={selectedFilter?.label}
+          selectedFilter={selectedFilter}
           onSegmentClick={onSegmentClick}
         />
       ))}
