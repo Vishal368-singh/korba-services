@@ -1,4 +1,4 @@
-import  { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import "./SurveyorsManagement.css";
 import notify from "../../utils/toast";
 import {
@@ -47,7 +47,6 @@ function SurveyorsManagement() {
   // =========================================================
 
   const [surveyors, setSurveyors] = useState([]);
-  const [filtered, setFiltered] = useState([]);
 
   const [formData, setFormData] = useState({
     username: "",
@@ -127,12 +126,9 @@ function SurveyorsManagement() {
   // LOAD SURVEYORS
   // =========================================================
 
-  useEffect(() => {
-    loadSurveyors();
-  }, []);
-
   const loadSurveyors = async () => {
     try {
+      otpValidationModal;
       const response = await fetchSurveyorsList();
 
       const data = Array.isArray(response)
@@ -163,11 +159,14 @@ function SurveyorsManagement() {
       }));
 
       setSurveyors(mappedData);
-      setFiltered(mappedData);
     } catch (error) {
       console.error("Failed to load surveyors:", error);
     }
   };
+
+  useEffect(() => {
+    loadSurveyors();
+  }, []);
 
   // =========================================================
   // LOCATION HELPERS
@@ -382,10 +381,24 @@ function SurveyorsManagement() {
       sanitizedValue = value.replace(/\D/g, "");
     }
 
-    setFormData((prev) => ({
-      ...prev,
-      [id]: sanitizedValue,
-    }));
+    setFormData((prev) => {
+      // NEW (from old code): auto-derive Username from the first word of
+      // Surveyor Name (EN), lowercased, whenever the name changes.
+      if (id === "surveyor_name") {
+        const firstName = sanitizedValue.trim().split(/\s+/)[0] || "";
+
+        return {
+          ...prev,
+          [id]: sanitizedValue,
+          username: firstName ? firstName.toLowerCase() : "",
+        };
+      }
+
+      return {
+        ...prev,
+        [id]: sanitizedValue,
+      };
+    });
 
     if (errors[id]) {
       setErrors((prev) => ({
@@ -674,25 +687,22 @@ function SurveyorsManagement() {
 
       if (otpValue !== "123456") {
         notify.dismiss(loadingId);
-
         notify.error("Invalid OTP, enter the correct OTP.");
-
-        return;
+        return false; // <-- ADD THIS so the modal can react
       }
 
       notify.dismiss(loadingId);
-
       setOtpValidationModal(false);
-
       notify.success("OTP verified successfully!");
 
       await loadSurveyors();
 
       setOtp(["", "", "", "", "", ""]);
+      return true; // <-- ADD THIS (optional, but explicit)
     } catch (error) {
       console.error("Error verifying OTP:", error);
-
       notify.error(error.message || "Invalid OTP. Please try again.");
+      return false; // <-- ADD THIS
     }
   };
 
@@ -700,7 +710,7 @@ function SurveyorsManagement() {
   // FILTERING
   // =========================================================
 
-  useEffect(() => {
+  const filtered = useMemo(() => {
     let result = [...surveyors];
 
     if (searchTerm.trim()) {
@@ -757,8 +767,7 @@ function SurveyorsManagement() {
       });
     }
 
-    setFiltered(result);
-    setCurrentPage(1);
+    return result;
   }, [surveyors, searchTerm, statusFilter, zoneFilter, dateFilter]);
 
   // =========================================================
@@ -1063,7 +1072,14 @@ function SurveyorsManagement() {
             <div className="form-group">
               <label>
                 <i className="fas fa-lock" style={{ color: "#7A1453" }}></i>{" "}
-                Password {<span className="required-fields">*</span>}
+                Password{" "}
+                {editingId ? (
+                  <span className="hint-text">
+                    (leave blank to keep current)
+                  </span>
+                ) : (
+                  <span className="required-fields">*</span>
+                )}
               </label>
 
               <input

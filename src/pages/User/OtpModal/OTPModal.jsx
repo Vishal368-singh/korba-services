@@ -18,8 +18,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 
-function OTPModal({ open, onClose, onVerify, email, otp, setOtp}) {
-  
+function OTPModal({ open, onClose, onVerify, email, otp, setOtp }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef([]);
@@ -43,6 +42,7 @@ function OTPModal({ open, onClose, onVerify, email, otp, setOtp}) {
       setResendEnabled(false);
       setOtp(["", "", "", "", "", ""]);
       setError("");
+      setLoading(false);
     }
   }, [open]);
 
@@ -103,32 +103,61 @@ function OTPModal({ open, onClose, onVerify, email, otp, setOtp}) {
     }
   };
 
+  // =========================================================
+  // FIXED: properly awaits onVerify and reacts to its result
+  // instead of relying on a try/catch that never actually fires.
+  //
+  // Parent's onVerify (handleVerify in SurveyorsManagement.jsx)
+  // should return true on success and false on failure so this
+  // modal can show inline feedback and clear the boxes on retry.
+  // =========================================================
+
   const handleVerify = async () => {
     const otpString = otp.join("");
+
     if (otpString.length !== 6) {
       setError("Please enter all 6 digits");
       return;
     }
 
+    setError("");
     setLoading(true);
+
     try {
-      // Call your verify API here
-      // await verifyOTP(otpString);
-      console.log("Verifying OTP:", otpString);
-      onVerify(otpString);
+      const result = await onVerify(otpString);
+
+      // If the parent explicitly signals failure, show inline error
+      // and clear the boxes so the user can retry immediately.
+      if (result === false) {
+        setError("Invalid OTP. Please try again.");
+        setOtp(["", "", "", "", "", ""]);
+
+        if (inputRefs.current[0]) {
+          inputRefs.current[0].focus();
+        }
+      }
+      // If result is true or undefined (parent doesn't return anything),
+      // assume success — the parent already handles closing the modal
+      // and showing its own success toast.
     } catch (err) {
-      setError("Invalid OTP. Please try again.");
+      setError("Something went wrong while verifying. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+
+  // =========================================================
+  // TODO: Resend is currently a stub. Wire this to your real
+  // resend-OTP API once available (similar pattern to
+  // handleValidationOTP in SurveyorsManagement.jsx).
+  // =========================================================
 
   const handleResend = () => {
     setTimer(60);
     setResendEnabled(false);
     setError("");
     // Call your resend API here
-    console.log("Resending OTP");
+    onResend?.();
   };
 
   // Calculate OTP input size based on screen
@@ -250,6 +279,7 @@ function OTPModal({ open, onClose, onVerify, email, otp, setOtp}) {
                 onPaste={index === 0 ? handlePaste : undefined}
                 inputRef={(el) => (inputRefs.current[index] = el)}
                 variant="outlined"
+                disabled={loading}
                 sx={{
                   width: getOtpSize(),
                   "& .MuiOutlinedInput-root": {
@@ -369,6 +399,7 @@ function OTPModal({ open, onClose, onVerify, email, otp, setOtp}) {
               fullWidth
               variant="outlined"
               onClick={onClose}
+              disabled={loading}
               sx={{
                 borderColor: "#e2e8f0",
                 color: "#475569",
