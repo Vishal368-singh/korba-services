@@ -1,6 +1,5 @@
 /* ---- reset & base ---- */
 * {
- 
   padding: 0;
   box-sizing: border-box;
 }
@@ -10,7 +9,6 @@ body {
   color: #1e293b;
 }
 .app-container {
-  max-width: 1440px;
   margin: 0 auto;
   margin-top: 70px;
 }
@@ -471,7 +469,6 @@ tbody td {
 }
 /* ---- responsive ---- */
 @media (max-width: 768px) {
-
   .card {
     padding: 18px 16px;
   }
