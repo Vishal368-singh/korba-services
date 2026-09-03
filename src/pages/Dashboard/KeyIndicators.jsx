@@ -36,7 +36,7 @@ function IndicatorCard({ item }) {
             <img
               src={vacantPropertyIcon}
               alt="Vacant properties"
-              className="w-8 h-8 object-contain"
+              className="w-11 h-11 object-contain"
             />
           ) : (
             <Icon />
