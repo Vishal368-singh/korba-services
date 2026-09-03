@@ -29,47 +29,51 @@ export default function Survey() {
     has_previous: false,
   });
 
-  const loadSurveyData = useCallback(async () => {
-    try {
-      setLoading(true);
+  const loadSurveyData = useCallback(
+    async (pageOverride) => {
+      const pageToUse = pageOverride ?? currentPage;
+      try {
+        setLoading(true);
 
-      let response;
+        let response;
 
-      switch (activeTab) {
-        case "Approved":
-          response = await fetchCompletedSurveys(currentPage);
-          break;
+        switch (activeTab) {
+          case "Approved":
+            response = await fetchCompletedSurveys(pageToUse);
+            break;
 
-        case "All":
-          response = await fetchAllSurveys(currentPage);
-          break;
+          case "All":
+            response = await fetchAllSurveys(pageToUse);
+            break;
 
-        case "Rejected":
-          response = await fetchRejectedPendingSurveys(currentPage);
-          response = response.rejected;
-          break;
+          case "Rejected":
+            response = await fetchRejectedPendingSurveys(pageToUse);
+            response = response.rejected;
+            break;
 
-        case "Pending":
-        default:
-          response = await fetchRejectedPendingSurveys(currentPage);
-          response = response.pending;
-          break;
+          case "Pending":
+          default:
+            response = await fetchRejectedPendingSurveys(pageToUse);
+            response = response.pending;
+            break;
+        }
+        const paginationSource = response.pagination || response;
+        setSurveyData(response.surveys || []);
+        setPagination({
+          total_surveys: paginationSource.total_surveys ?? 0,
+          total_pages: paginationSource.total_pages ?? 1,
+          has_next: paginationSource.has_next ?? false,
+          has_previous: paginationSource.has_previous ?? false,
+        });
+      } catch (error) {
+        console.error("Error fetching survey data:", error);
+        setSurveyData([]);
+      } finally {
+        setLoading(false);
       }
-      const paginationSource = response.pagination || response;
-      setSurveyData(response.surveys || []);
-      setPagination({
-        total_surveys: paginationSource.total_surveys ?? 0,
-        total_pages: paginationSource.total_pages ?? 1,
-        has_next: paginationSource.has_next ?? false,
-        has_previous: paginationSource.has_previous ?? false,
-      });
-    } catch (error) {
-      console.error("Error fetching survey data:", error);
-      setSurveyData([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [activeTab, currentPage]);
+    },
+    [activeTab, currentPage],
+  );
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       loadSurveyData();
@@ -79,8 +83,8 @@ export default function Survey() {
   }, [loadSurveyData]);
 
   const handleTabChange = (tab) => {
-    setCurrentPage(1);
     setActiveTab(tab);
+    setCurrentPage(1);
   };
 
   const handlePageChange = (newPage) => {
@@ -112,7 +116,7 @@ export default function Survey() {
     setOptimisticCounts((prev) => {
       if (!prev) return prev;
       const updated = { ...prev };
-      updated.Pending = Math.max(0, (updated.pending || 0) - 1);
+      updated.Pending = Math.max(0, (updated.Pending || 0) - 1);
       if (action === "approve") updated.Approved = (updated.Approved || 0) + 1;
       if (action === "reject") updated.Rejected = (updated.Rejected || 0) + 1;
       return updated;

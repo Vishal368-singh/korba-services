@@ -5,12 +5,16 @@ import "./Navbar.css";
 import logo from "../assets/KorbaLogo.png";
 import { logout } from "../services/api";
 
-export default function Navbar( { collapsed, setCollapsed } ) {
+export default function Navbar({ collapsed, setCollapsed }) {
   const [open, setOpen] = useState(false);
 
   const menuRef = useRef(null);
 
   const navigate = useNavigate();
+
+  const currentUser = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user"))
+    : null;
 
   const handlelogout = async () => {
     try {
@@ -25,10 +29,7 @@ export default function Navbar( { collapsed, setCollapsed } ) {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target)
-      ) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
         setOpen(false);
       }
     };
@@ -36,10 +37,7 @@ export default function Navbar( { collapsed, setCollapsed } ) {
     document.addEventListener("mousedown", handleClickOutside);
 
     return () =>
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
-      );
+      document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
@@ -65,20 +63,16 @@ export default function Navbar( { collapsed, setCollapsed } ) {
 
         {open && (
           <div className="profile-dropdown">
+            {currentUser?.role && (
+              <div className="profile-header">
+                <strong>{currentUser.role}</strong>
+              </div>
+            )}
 
-            {/* <div className="profile-header">
-              <strong>Vishal Singh</strong>
-              <small>Administrator</small>
-            </div> */}
-
-            <button
-              className="dropdown-item logout"
-              onClick={handlelogout}
-            >
+            <button className="dropdown-item logout" onClick={handlelogout}>
               <FaSignOutAlt />
               Log Out
             </button>
-
           </div>
         )}
       </div>

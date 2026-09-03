@@ -1,21 +1,70 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
+import Sanscript from "@indic-transliteration/sanscript";
 import "./SurveyorsManagement.css";
 import notify from "../../utils/toast";
-import { addSurveyorAPI, fetchSurveyorsList } from "../../services/api";
+import {
+  addSurveyorAPI,
+  fetchSurveyorsList,
+  getLocationOptions,
+} from "../../services/api";
 import OTPModal from "./OtpModal/OTPModal";
-// import { sendOTP, verifyOTP } from "../../services/api";
+
+import SearchableMultiSelect from "../../components/SearchableMultiSelect";
+
+const transliterateEnglishToHindi = (text) => {
+  if (!text || !text.trim()) return "";
+
+  try {
+    return Sanscript.t(text.trim(), "itrans", "devanagari");
+  } catch (error) {
+    console.error("English to Hindi transliteration failed:", error);
+    return "";
+  }
+};
+
+const transliterateHindiToEnglish = (text) => {
+  if (!text || !text.trim()) return "";
+
+  try {
+    const result = Sanscript.t(text.trim(), "devanagari", "itrans");
+
+    // Convert technical ITRANS output into a cleaner English spelling.
+    return result
+      .replace(/A/g, "a")
+      .replace(/I/g, "i")
+      .replace(/U/g, "u")
+      .replace(/RR/g, "r")
+      .replace(/R/g, "r")
+      .replace(/L/g, "l")
+      .replace(/~N/g, "n")
+      .replace(/~n/g, "n")
+      .replace(/~m/g, "m")
+      .replace(/j~n/g, "jn")
+      .replace(/GY/g, "gy")
+      .replace(/sh/g, "sh")
+      .replace(/[^a-zA-Z0-9 .,'-]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  } catch (error) {
+    console.error("Hindi to English transliteration failed:", error);
+    return "";
+  }
+};
 
 function SurveyorsManagement() {
-  // ---------- state ----------
+  // =========================================================
+  // STATE
+  // =========================================================
+
   const [surveyors, setSurveyors] = useState([]);
   const [filtered, setFiltered] = useState([]);
+
   const [formData, setFormData] = useState({
     username: "",
     password: "",
     surveyor_name: "",
     surveyor_name_hindi: "",
     role: "Surveyor",
-    // surveyor_id: "",
     email: "",
     mobile: "",
     zone: "",
@@ -25,58 +74,93 @@ function SurveyorsManagement() {
     target: "",
   });
 
-  // Error state: one key per field
   const [errors, setErrors] = useState({});
+
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [zoneFilter, setZoneFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
-  // const [toast, setToast] = useState({
-  //   visible: false,
-  //   message: "",
-  //   type: "success",
-  // });
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10); // you can make this a dropdown later
+  const [itemsPerPage] = useState(10);
 
-  // Pending validatin Modal State
+  // =========================================================
+  // LOCATION DATA
+  // =========================================================
+
+  const [locationOptions, setLocationOptions] = useState([]);
+
+  // =========================================================
+  // OTP MODAL
+  // =========================================================
+
   const [otpValidationModal, setOtpValidationModal] = useState(false);
   const [emailForOTP, setEmailForOTP] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
 
-  // ---------- ref for toast timeout ----------
-  const toastTimeout = useRef(null);
+  // =========================================================
+  // LOAD LOCATION OPTIONS
+  // =========================================================
 
-  // ---------- load initial mock data ----------
+  useEffect(() => {
+    const loadLocationOptions = async () => {
+      try {
+        const data = await getLocationOptions();
+
+        const locations = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.data)
+            ? data.data
+            : [];
+
+        setLocationOptions(locations);
+      } catch (error) {
+        console.error("Failed to load location options:", error);
+        setLocationOptions([]);
+      }
+    };
+
+    loadLocationOptions();
+  }, []);
+
+  // =========================================================
+  // LOAD SURVEYORS
+  // =========================================================
+
   useEffect(() => {
     loadSurveyors();
   }, []);
 
   const loadSurveyors = async () => {
     try {
-      otpValidationModal;
       const response = await fetchSurveyorsList();
-      // Assuming response is an array of objects like the sample
-      const data = response || []; // adjust if response has wrapper
-      // Map to our internal structure (add missing fields with defaults)
+
+      const data = Array.isArray(response)
+        ? response
+        : Array.isArray(response?.data)
+          ? response.data
+          : [];
+
       const mappedData = data.map((item) => ({
         id: item.surveyor_id,
-        username: item.username,
-        surveyor_name: item.surveyor_name,
+        username: item.username || "",
+        surveyor_name: item.surveyor_name || "",
         surveyor_name_hindi: item.surveyor_name_hindi || "",
         role: item.role || "Surveyor",
-        surveyor_id: item.surveyor_id,
+        surveyor_id: item.surveyor_id || "",
         email: item.email || "",
-        mobile: item.mobile,
-        zone: item.zone,
+        mobile: item.mobile || "",
+        zone: item.zone || "",
         zone_hindi: item.zone_hindi || "",
-        ward: item.ward,
+        ward: item.ward || "",
         ward_hindi: item.ward_hindi || "",
         status:
-          item.status.toLowerCase() === "active" ? "Validated" : "Pending", // map to Active/Pending
+          String(item.status || "").toLowerCase() === "active"
+            ? "Validated"
+            : "Pending",
         createdAt: item.created_at || new Date().toISOString(),
       }));
+
       setSurveyors(mappedData);
       setFiltered(mappedData);
     } catch (error) {
@@ -84,107 +168,256 @@ function SurveyorsManagement() {
     }
   };
 
-  // ---------- filtering logic ----------
-  useEffect(() => {
-    let result = surveyors;
-    otpValidationModal;
-    // search
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase().trim();
-      result = result.filter(
-        (s) =>
-          s.surveyor_name.toLowerCase().includes(term) ||
-          s.surveyor_id.toLowerCase().includes(term) ||
-          s.email.toLowerCase().includes(term) ||
-          s.mobile.includes(term) ||
-          s.username.toLowerCase().includes(term),
-      );
+  // =========================================================
+  // LOCATION HELPERS
+  // =========================================================
+
+  const parseSelectedValues = (value) => {
+    if (!value) return [];
+
+    if (Array.isArray(value)) {
+      return value;
     }
 
-    // status filter
-    if (statusFilter) {
-      result = result.filter((s) => s.status.toLowerCase() === statusFilter);
-    }
+    return String(value)
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  };
 
-    // zone filter
-    if (zoneFilter) {
-      result = result.filter((s) => s.zone === zoneFilter);
-    }
+  const stringifySelectedValues = (values) => {
+    if (!Array.isArray(values)) return "";
 
-    // date filter (simple partial match)
-    if (dateFilter.trim()) {
-      const filterDate = dateFilter.trim();
-      result = result.filter((s) => {
-        const d = new Date(s.createdAt);
-        const day = String(d.getDate()).padStart(2, "0");
-        const month = String(d.getMonth() + 1).padStart(2, "0");
-        const year = d.getFullYear();
-        const formatted = `${day}-${month}-${year}`;
-        return formatted.includes(filterDate);
+    return values
+      .map((item) => String(item).trim())
+      .filter(Boolean)
+      .join(",");
+  };
+
+  const getSelectedZones = () => {
+    const selectedZoneEnglish = parseSelectedValues(formData.zone);
+    const selectedZoneHindi = parseSelectedValues(formData.zone_hindi);
+
+    return locationOptions.filter(
+      (item) =>
+        selectedZoneEnglish.includes(item?.zone?.en) ||
+        selectedZoneHindi.includes(item?.zone?.hi),
+    );
+  };
+
+  const getAvailableWards = () => {
+    const selectedZones = getSelectedZones();
+
+    const wardMap = new Map();
+
+    selectedZones.forEach((zoneItem) => {
+      (zoneItem?.wards || []).forEach((ward) => {
+        if (ward?.en) {
+          wardMap.set(ward.en, ward);
+        }
       });
-    }
+    });
 
-    setFiltered(result);
-  }, [surveyors, searchTerm, statusFilter, zoneFilter, dateFilter]);
+    return Array.from(wardMap.values());
+  };
 
-  // ---------- stats ----------
-  const total = surveyors.length;
-  const pending = surveyors.filter(
-    (s) => s.status.toLowerCase() === "pending",
-  ).length;
-  const validated = surveyors.filter(
-    (s) => s.status.toLowerCase() === "validated",
-  ).length;
-  // const notValidated = surveyors.filter(
-  //   (s) => s.status === "not-validated",
-  // ).length;
+  // =========================================================
+  // ZONE ENGLISH CHANGE
+  // =========================================================
 
-  // ---------- toast ----------
-  // const showToast = (message, type = "success") => {
-  //   if (toastTimeout.current) clearTimeout(toastTimeout.current);
-  //   setToast({ visible: true, message, type });
-  //   toastTimeout.current = setTimeout(() => {
-  //     setToast({ visible: false, message: "", type: "success" });
-  //   }, 3000);
-  // };
+  const handleZoneEnglishChange = (selectedValues) => {
+    const values = Array.isArray(selectedValues) ? selectedValues : [];
 
-  // ---------- CRUD operations (mock API) ----------
-  // const apiCall = (method, endpoint, data = null) => {
-  //   return new Promise((resolve) => {
-  //     setTimeout(() => resolve({ success: true, data }), 300);
-  //   });
-  // };
+    const selectedZones = locationOptions.filter((item) =>
+      values.includes(item?.zone?.en),
+    );
 
-  // ---------- form handlers ----------
+    const hindiValues = selectedZones
+      .map((item) => item?.zone?.hi)
+      .filter(Boolean);
+
+    setFormData((prev) => ({
+      ...prev,
+      zone: stringifySelectedValues(values),
+      zone_hindi: stringifySelectedValues(hindiValues),
+      ward: "",
+      ward_hindi: "",
+    }));
+
+    setErrors((prev) => ({
+      ...prev,
+      zone: "",
+      zone_hindi: "",
+      ward: "",
+      ward_hindi: "",
+    }));
+  };
+
+  // =========================================================
+  // ZONE HINDI CHANGE
+  // =========================================================
+
+  const handleZoneHindiChange = (selectedValues) => {
+    const values = Array.isArray(selectedValues) ? selectedValues : [];
+
+    const selectedZones = locationOptions.filter((item) =>
+      values.includes(item?.zone?.hi),
+    );
+
+    const englishValues = selectedZones
+      .map((item) => item?.zone?.en)
+      .filter(Boolean);
+
+    setFormData((prev) => ({
+      ...prev,
+      zone: stringifySelectedValues(englishValues),
+      zone_hindi: stringifySelectedValues(values),
+      ward: "",
+      ward_hindi: "",
+    }));
+
+    setErrors((prev) => ({
+      ...prev,
+      zone: "",
+      zone_hindi: "",
+      ward: "",
+      ward_hindi: "",
+    }));
+  };
+
+  // =========================================================
+  // WARD ENGLISH CHANGE
+  // =========================================================
+
+  const handleWardEnglishChange = (selectedValues) => {
+    const values = Array.isArray(selectedValues) ? selectedValues : [];
+
+    const availableWards = getAvailableWards();
+
+    const selectedWards = availableWards.filter((ward) =>
+      values.includes(ward?.en),
+    );
+
+    const hindiValues = selectedWards.map((ward) => ward?.hi).filter(Boolean);
+
+    setFormData((prev) => ({
+      ...prev,
+      ward: stringifySelectedValues(values),
+      ward_hindi: stringifySelectedValues(hindiValues),
+    }));
+
+    setErrors((prev) => ({
+      ...prev,
+      ward: "",
+      ward_hindi: "",
+    }));
+  };
+
+  // =========================================================
+  // WARD HINDI CHANGE
+  // =========================================================
+
+  const handleWardHindiChange = (selectedValues) => {
+    const values = Array.isArray(selectedValues) ? selectedValues : [];
+
+    const availableWards = getAvailableWards();
+
+    const selectedWards = availableWards.filter((ward) =>
+      values.includes(ward?.hi),
+    );
+
+    const englishValues = selectedWards.map((ward) => ward?.en).filter(Boolean);
+
+    setFormData((prev) => ({
+      ...prev,
+      ward: stringifySelectedValues(englishValues),
+      ward_hindi: stringifySelectedValues(values),
+    }));
+
+    setErrors((prev) => ({
+      ...prev,
+      ward: "",
+      ward_hindi: "",
+    }));
+  };
+
+  // =========================================================
+  // NAME AUTO-TRANSLITERATION
+  // English -> Hindi and Hindi -> English are both supported.
+  // The source field is updated by the user; the opposite field
+  // is filled automatically.
+  // =========================================================
+
+  const handleEnglishNameChange = (value) => {
+    setFormData((prev) => ({
+      ...prev,
+      surveyor_name: value,
+      surveyor_name_hindi: value.trim()
+        ? transliterateEnglishToHindi(value)
+        : "",
+    }));
+
+    setErrors((prev) => ({
+      ...prev,
+      surveyor_name: "",
+      surveyor_name_hindi: "",
+    }));
+  };
+
+  const handleHindiNameChange = (value) => {
+    setFormData((prev) => ({
+      ...prev,
+      surveyor_name_hindi: value,
+      surveyor_name: value.trim() ? transliterateHindiToEnglish(value) : "",
+    }));
+
+    setErrors((prev) => ({
+      ...prev,
+      surveyor_name_hindi: "",
+      surveyor_name: "",
+    }));
+  };
+
+  // =========================================================
+  // FORM HANDLER
+  // =========================================================
+
   const handleChange = (e) => {
     const { id, value } = e.target;
 
-    // Special handling for mobile: only digits allowed
-    let sanitizedValue = value;
-    if (id === "mobile") {
-      sanitizedValue = value.replace(/\D/g, ""); // remove non-digits
+    if (id === "surveyor_name") {
+      handleEnglishNameChange(value);
+      return;
     }
 
-    setFormData((prev) => {
-      if (id === "surveyor_name") {
-        const firstName = sanitizedValue.trim().split(/\s+/)[0] || "";
-        return {
-          ...prev,
-          [id]: sanitizedValue,
-          username: firstName ? firstName.toLowerCase() : "",
-        };
-      }
+    if (id === "surveyor_name_hindi") {
+      handleHindiNameChange(value);
+      return;
+    }
 
-      return { ...prev, [id]: sanitizedValue };
-    });
+    let sanitizedValue = value;
 
-    // Clear error for this field if it exists
+    if (id === "mobile") {
+      sanitizedValue = value.replace(/\D/g, "");
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      [id]: sanitizedValue,
+    }));
+
     if (errors[id]) {
-      setErrors((prev) => ({ ...prev, [id]: "" }));
+      setErrors((prev) => ({
+        ...prev,
+        [id]: "",
+      }));
     }
   };
 
-  // Validation function – returns true if valid, else sets errors and returns false
+  // =========================================================
+  // VALIDATION
+  // =========================================================
+
   const validateForm = () => {
     const requiredFields = [
       { key: "username", label: "Username" },
@@ -204,17 +437,18 @@ function SurveyorsManagement() {
     const newErrors = {};
     let isValid = true;
 
-    // 1. Check empty fields
     for (const field of requiredFields) {
-      if (!formData[field.key] || formData[field.key].trim() === "") {
+      const value = formData[field.key];
+
+      if (!value || String(value).trim() === "") {
         newErrors[field.key] = `${field.label} is required`;
         isValid = false;
       }
     }
 
-    // 2. Email format (only if not empty)
     if (formData.email && formData.email.trim() !== "") {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
       if (!emailRegex.test(formData.email)) {
         newErrors.email =
           "Please enter a valid email address (e.g., name@domain.com)";
@@ -222,7 +456,6 @@ function SurveyorsManagement() {
       }
     }
 
-    // 3. Mobile number: exactly 10 digits (only if not empty)
     if (formData.mobile && formData.mobile.trim() !== "") {
       if (!/^\d{10}$/.test(formData.mobile)) {
         newErrors.mobile = "Mobile number must be exactly 10 digits";
@@ -231,46 +464,19 @@ function SurveyorsManagement() {
     }
 
     setErrors(newErrors);
-    return isValid;
+
+    return {
+      isValid,
+      errors: newErrors,
+    };
   };
 
-  // Update the field username with the help of the Surveyor Name
-  useEffect(() => {
-    if (formData.surveyor_name && formData.surveyor_name.trim().length > 0) {
-      const firstName = formData.surveyor_name.trim().split(" ")[0];
-      setFormData((prev) => ({
-        ...prev,
-        username: firstName.toLowerCase(),
-      }));
-    } else {
-      // Clear username when surveyor_name is empty
-      setFormData((prev) => ({
-        ...prev,
-        username: "",
-      }));
-    }
-  }, [formData.surveyor_name]);
-  useEffect(() => {
-    if (formData.surveyor_name && formData.surveyor_name.trim().length > 0) {
-      const firstName = formData.surveyor_name.trim().split(" ")[0];
-      setFormData((prev) => ({
-        ...prev,
-        username: firstName.toLowerCase(),
-      }));
-    } else {
-      // Clear username when surveyor_name is empty
-      setFormData((prev) => ({
-        ...prev,
-        username: "",
-      }));
-    }
-  }, [formData.surveyor_name]);
+  // =========================================================
+  // ADD SURVEYOR
+  // =========================================================
 
   const addSurveyor = async (payload) => {
     try {
-      otpValidationModal;
-
-      // Prepare payload for API (match the API expected fields)
       const apiPayload = {
         username: payload.username,
         password: payload.password,
@@ -286,8 +492,6 @@ function SurveyorsManagement() {
         target: payload.target || "",
       };
 
-      // Call the actual API function
-      otpValidationModal;
       const response = await addSurveyorAPI(apiPayload);
 
       let data = {};
@@ -301,6 +505,7 @@ function SurveyorsManagement() {
         handleSetFormDataInitial();
         return;
       }
+
       const newSurveyor = {
         id: data.id || Date.now(),
         ...apiPayload,
@@ -313,24 +518,29 @@ function SurveyorsManagement() {
       );
 
       await loadSurveyors();
+
       setErrors({});
       handleSetFormDataInitial();
     } catch (error) {
       console.error("Error adding surveyor:", error);
+
       notify.error(
         error.message || "Failed to add surveyor. Please try again.",
       );
     }
   };
 
+  // =========================================================
+  // RESET FORM
+  // =========================================================
+
   const handleSetFormDataInitial = () => {
-    // Reset form and clear errors
     setFormData({
       username: "",
       password: "",
       surveyor_name: "",
       surveyor_name_hindi: "",
-      role: "",
+      role: "Surveyor",
       email: "",
       mobile: "",
       zone: "",
@@ -339,87 +549,185 @@ function SurveyorsManagement() {
       ward_hindi: "",
       target: "",
     });
+
+    setErrors({});
   };
 
+  // =========================================================
+  // SUBMIT
+  // =========================================================
+
   const handleSubmit = async (e) => {
-    otpValidationModal;
     e.preventDefault();
-    if (!validateForm()) {
-      // Focus first error field
-      const firstErrorKey = Object.keys(errors)[0];
+
+    const validation = validateForm();
+
+    if (!validation.isValid) {
+      const firstErrorKey = Object.keys(validation.errors)[0];
+
       if (firstErrorKey) {
-        const el = document.getElementById(firstErrorKey);
-        if (el) el.focus();
+        const element = document.getElementById(firstErrorKey);
+
+        if (element) {
+          element.focus();
+        }
       }
+
       return;
     }
+
     await addSurveyor(formData);
   };
 
+  // =========================================================
+  // OTP VALIDATION
+  // =========================================================
+
   const handleValidationOTP = async (email) => {
     try {
-      // Show loading
       const loadingId = notify.loading("Sending OTP...");
 
-      // Call API to send OTP
-      // await sendOTP(email);
-
-      // Dismiss loading
       notify.dismiss(loadingId);
 
-      // Show success message
       notify.success(`OTP sent to ${email}`);
 
-      // Open the OTP validation modal
       setOtpValidationModal(true);
-      setEmailForOTP(email); // Store email for verification
+      setEmailForOTP(email);
     } catch (error) {
       console.error("Error sending OTP:", error);
+
       notify.error(error.message || "Failed to send OTP. Please try again.");
     }
   };
 
-  const handleVerify = async (otp) => {
+  const handleVerify = async (otpValue) => {
     try {
-      otpValidationModal;
-
       const loadingId = notify.loading("Verifying OTP...");
 
-      // Call API to verify OTP
-      // const response = await verifyOTP(emailForOTP, otp);
-
-      if (otp !== "123456") {
+      if (otpValue !== "123456") {
         notify.dismiss(loadingId);
-        notify.error("Invalid opt, Enter correct otp.");
+
+        notify.error("Invalid OTP, enter the correct OTP.");
+
         return;
       }
 
       notify.dismiss(loadingId);
+
       setOtpValidationModal(false);
+
       notify.success("OTP verified successfully!");
 
-      // Reload surveyors list
       await loadSurveyors();
 
-      // Optional: Reset OTP state
       setOtp(["", "", "", "", "", ""]);
     } catch (error) {
       console.error("Error verifying OTP:", error);
+
       notify.error(error.message || "Invalid OTP. Please try again.");
     }
   };
 
-  // ---------- render table rows ----------
+  // =========================================================
+  // FILTERING
+  // =========================================================
+
+  useEffect(() => {
+    let result = [...surveyors];
+
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase().trim();
+
+      result = result.filter((s) => {
+        const surveyorName = String(s.surveyor_name || "").toLowerCase();
+        const surveyorId = String(s.surveyor_id || "").toLowerCase();
+        const email = String(s.email || "").toLowerCase();
+        const mobile = String(s.mobile || "").toLowerCase();
+        const username = String(s.username || "").toLowerCase();
+
+        return (
+          surveyorName.includes(term) ||
+          surveyorId.includes(term) ||
+          email.includes(term) ||
+          mobile.includes(term) ||
+          username.includes(term)
+        );
+      });
+    }
+
+    if (statusFilter) {
+      result = result.filter(
+        (s) => String(s.status || "").toLowerCase() === statusFilter,
+      );
+    }
+
+    if (zoneFilter) {
+      result = result.filter((s) => {
+        const zones = parseSelectedValues(s.zone);
+
+        return zones.includes(zoneFilter);
+      });
+    }
+
+    if (dateFilter.trim()) {
+      const filterDate = dateFilter.trim();
+
+      result = result.filter((s) => {
+        const d = new Date(s.createdAt);
+
+        if (Number.isNaN(d.getTime())) {
+          return false;
+        }
+
+        const day = String(d.getDate()).padStart(2, "0");
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const year = d.getFullYear();
+
+        const formatted = `${day}-${month}-${year}`;
+
+        return formatted.includes(filterDate);
+      });
+    }
+
+    setFiltered(result);
+    setCurrentPage(1);
+  }, [surveyors, searchTerm, statusFilter, zoneFilter, dateFilter]);
+
+  // =========================================================
+  // STATS
+  // =========================================================
+
+  const total = surveyors.length;
+
+  const pending = surveyors.filter(
+    (s) => String(s.status || "").toLowerCase() === "pending",
+  ).length;
+
+  const validated = surveyors.filter(
+    (s) => String(s.status || "").toLowerCase() === "validated",
+  ).length;
+
+  // =========================================================
+  // PAGINATION
+  // =========================================================
+
   const totalPages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
+
   const safePage = Math.min(Math.max(currentPage, 1), totalPages);
+
   const startIndex = (safePage - 1) * itemsPerPage;
+
   const paginatedData = filtered.slice(startIndex, startIndex + itemsPerPage);
+
+  // =========================================================
+  // RENDER TABLE ROWS
+  // =========================================================
 
   const renderTableRows = () => {
     if (filtered.length === 0) {
       return (
         <tr>
-          <td colSpan="11">
+          <td colSpan="12">
             <div className="empty-state">
               <i className="fas fa-user-slash"></i>
               <p>No surveyors found. Add one using the form above!</p>
@@ -430,10 +738,10 @@ function SurveyorsManagement() {
     }
 
     return paginatedData.map((s, idx) => {
-      const isActive = s.status?.toLowerCase() === "validated";
-     // const displayStatus = isActive ? "validated" : "pending";
+      const isActive = String(s.status || "").toLowerCase() === "validated";
 
       let statusBadge;
+
       if (isActive) {
         statusBadge = (
           <span className="badge badge-validated">
@@ -451,25 +759,33 @@ function SurveyorsManagement() {
       return (
         <tr key={s.id || idx}>
           <td>{startIndex + idx + 1}</td>
+
           <td>
             <strong>{s.surveyor_id}</strong>
           </td>
+
           <td>{s.username}</td>
+
           <td>{s.surveyor_name}</td>
+
           <td>{s.surveyor_name_hindi || "—"}</td>
+
           <td>
             <span className="role-pill">{s.role || "Surveyor"}</span>
           </td>
+
           <td>{s.email || "—"}</td>
-          <td>{s.mobile}</td>
-          <td>{s.zone}</td>
-          {/* <td>{s.zone_hindi}</td> */}
-          <td>{s.ward}</td>
-          {/* <td>{s.ward_hindi}</td> */}
+
+          <td>{s.mobile || "—"}</td>
+
+          <td>{s.zone || "—"}</td>
+
+          <td>{s.ward || "—"}</td>
+
           <td>{statusBadge}</td>
+
           <td>
             <div className="action-icons">
-              {/* Show validate button only if NOT active */}
               {!isActive && (
                 <button
                   className="approve-btn"
@@ -479,9 +795,13 @@ function SurveyorsManagement() {
                   <i className="fas fa-check-circle"></i>
                 </button>
               )}
-              {/* Show reject button only if active */}
+
               {isActive && (
-                <button className="reject-btn" onClick={""} title="Invalidate">
+                <button
+                  className="reject-btn"
+                  onClick={() => {}}
+                  title="Invalidate"
+                >
                   <i className="fas fa-times-circle"></i>
                 </button>
               )}
@@ -492,37 +812,59 @@ function SurveyorsManagement() {
     });
   };
 
-  // ---------- JSX ----------
+  // =========================================================
+  // SELECT OPTIONS
+  // =========================================================
+
+  const zoneEnglishOptions = locationOptions
+    .map((item) => item?.zone?.en)
+    .filter(Boolean);
+
+  const zoneHindiOptions = locationOptions
+    .map((item) => item?.zone?.hi)
+    .filter(Boolean);
+
+  const availableWards = getAvailableWards();
+
+  const wardEnglishOptions = availableWards
+    .map((ward) => ward?.en)
+    .filter(Boolean);
+
+  const wardHindiOptions = availableWards
+    .map((ward) => ward?.hi)
+    .filter(Boolean);
+
+  // =========================================================
+  // JSX
+  // =========================================================
+
   return (
     <div className="app-container">
-      {
-        <OTPModal
-          open={otpValidationModal}
-          onClose={() => setOtpValidationModal(false)}
-          onVerify={handleVerify}
-          email={emailForOTP}
-          otp={otp}
-          setOtp={setOtp}
-        />
-      }
-      {/* header */}
+      <OTPModal
+        open={otpValidationModal}
+        onClose={() => setOtpValidationModal(false)}
+        onVerify={handleVerify}
+        email={emailForOTP}
+        otp={otp}
+        setOtp={setOtp}
+      />
+
       <header className="app-header">
-        <h1 className="text-2xl sm:text-3xl  text-[#7a1453]">
+        <h1 className="text-2xl sm:text-3xl text-[#7a1453]">
           Surveyors Management
         </h1>
-
-       
       </header>
 
-      {/* stats */}
       <div className="stats-row">
         <div className="stat-card">
           <div className="stat-label">
             <i className="fas fa-users" style={{ color: "#7A1453" }}></i> Total
             Surveyors
           </div>
+
           <div className="stat-number">{total}</div>
         </div>
+
         <div className="stat-card">
           <div className="stat-label">
             <i
@@ -531,18 +873,20 @@ function SurveyorsManagement() {
             ></i>{" "}
             Pending
           </div>
+
           <div className="stat-number">{pending}</div>
         </div>
+
         <div className="stat-card">
           <div className="stat-label">
             <i className="fas fa-check-circle" style={{ color: "#7A1453" }}></i>{" "}
             Validated
           </div>
+
           <div className="stat-number">{validated}</div>
         </div>
       </div>
 
-      {/* add form */}
       <div className="card">
         <div className="card-title">
           <i className="fas fa-user-plus" style={{ color: "#7A1453" }}></i>
@@ -552,11 +896,16 @@ function SurveyorsManagement() {
 
         <form onSubmit={handleSubmit}>
           <div className="form-grid">
+            {/* =====================================================
+                SURVEYOR NAME ENGLISH
+            ====================================================== */}
+
             <div className="form-group">
               <label>
                 <i className="fas fa-id-card" style={{ color: "#7A1453" }}></i>{" "}
                 Surveyor Name (EN) <span className="required-fields">*</span>
               </label>
+
               <input
                 type="text"
                 id="surveyor_name"
@@ -565,52 +914,22 @@ function SurveyorsManagement() {
                 placeholder="John Doe"
                 className={errors.surveyor_name ? "error" : ""}
               />
+
               {errors.surveyor_name && (
                 <span className="error-message">{errors.surveyor_name}</span>
               )}
             </div>
-            <div className="form-group">
-              <label>
-                <i className="fas fa-user" style={{ color: "#7A1453" }}></i>{" "}
-                Username <span className="required-fields">*</span>
-              </label>
-              <input
-                type="text"
-                id="username"
-                value={formData.username}
-                onChange={handleChange}
-                placeholder="e.g. john"
-                // required
-                disabled
-                className={errors.username ? "error" : ""}
-              />
-              {errors.username && (
-                <span className="error-message">{errors.username}</span>
-              )}
-            </div>
-            <div className="form-group">
-              <label>
-                <i className="fas fa-lock" style={{ color: "#7A1453" }}></i>{" "}
-                Password <span className="required-fields">*</span>
-              </label>
-              <input
-                type="password"
-                id="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                className={errors.password ? "error" : ""}
-              />
-              {errors.password && (
-                <span className="error-message">{errors.password}</span>
-              )}
-            </div>
+
+            {/* =====================================================
+                SURVEYOR NAME HINDI
+            ====================================================== */}
 
             <div className="form-group">
               <label>
                 <i className="fas fa-language" style={{ color: "#7A1453" }}></i>{" "}
                 Surveyor Name (HI) <span className="required-fields">*</span>
               </label>
+
               <input
                 type="text"
                 id="surveyor_name_hindi"
@@ -619,12 +938,67 @@ function SurveyorsManagement() {
                 placeholder="जॉन डो"
                 className={errors.surveyor_name_hindi ? "error" : ""}
               />
+
               {errors.surveyor_name_hindi && (
                 <span className="error-message">
                   {errors.surveyor_name_hindi}
                 </span>
               )}
             </div>
+
+            {/* =====================================================
+                USERNAME
+            ====================================================== */}
+
+            <div className="form-group">
+              <label>
+                <i className="fas fa-user" style={{ color: "#7A1453" }}></i>{" "}
+                Username <span className="required-fields">*</span>
+              </label>
+
+              <input
+                type="text"
+                id="username"
+                value={formData.username}
+                onChange={handleChange}
+                placeholder="e.g. john"
+                disabled
+                className={errors.username ? "error" : ""}
+              />
+
+              {errors.username && (
+                <span className="error-message">{errors.username}</span>
+              )}
+            </div>
+
+            {/* =====================================================
+                PASSWORD
+            ====================================================== */}
+
+            <div className="form-group">
+              <label>
+                <i className="fas fa-lock" style={{ color: "#7A1453" }}></i>{" "}
+                Password <span className="required-fields">*</span>
+              </label>
+
+              <input
+                type="password"
+                id="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                className={errors.password ? "error" : ""}
+              />
+
+              {errors.password && (
+                <span className="error-message">{errors.password}</span>
+              )}
+            </div>
+
+            {/* =====================================================
+                ROLE
+            ====================================================== */}
+
             <div className="form-group">
               <label>
                 <i
@@ -633,24 +1007,32 @@ function SurveyorsManagement() {
                 ></i>{" "}
                 Role <span className="required-fields">*</span>
               </label>
+
               <input
                 type="text"
                 id="role"
                 value={formData.role}
                 onChange={handleChange}
-                placeholder="e.g. SUR22336913"
+                placeholder="Surveyor"
                 disabled
                 className={errors.role ? "error" : ""}
               />
+
               {errors.role && (
                 <span className="error-message">{errors.role}</span>
               )}
             </div>
+
+            {/* =====================================================
+                EMAIL
+            ====================================================== */}
+
             <div className="form-group">
               <label>
                 <i className="fas fa-envelope" style={{ color: "#7A1453" }}></i>{" "}
                 Email <span className="required-fields">*</span>
               </label>
+
               <input
                 type="email"
                 id="email"
@@ -659,15 +1041,22 @@ function SurveyorsManagement() {
                 placeholder="john@example.com"
                 className={errors.email ? "error" : ""}
               />
+
               {errors.email && (
                 <span className="error-message">{errors.email}</span>
               )}
             </div>
+
+            {/* =====================================================
+                MOBILE
+            ====================================================== */}
+
             <div className="form-group">
               <label>
                 <i className="fas fa-phone" style={{ color: "#7A1453" }}></i>{" "}
                 Mobile <span className="required-fields">*</span>
               </label>
+
               <input
                 type="tel"
                 id="mobile"
@@ -677,89 +1066,22 @@ function SurveyorsManagement() {
                 className={errors.mobile ? "error" : ""}
                 maxLength={10}
               />
+
               {errors.mobile && (
                 <span className="error-message">{errors.mobile}</span>
               )}
             </div>
-            <div className="form-group">
-              <label>
-                <i className="fas fa-map-pin" style={{ color: "#7A1453" }}></i>{" "}
-                Zone (EN) <span className="required-fields">*</span>
-              </label>
-              <input
-                type="text"
-                id="zone"
-                value={formData.zone}
-                onChange={handleChange}
-                placeholder="Zone 1"
-                className={errors.zone ? "error" : ""}
-              />
-              {errors.zone && (
-                <span className="error-message">{errors.zone}</span>
-              )}
-            </div>
-            <div className="form-group">
-              <label>
-                <i className="fas fa-map-pin" style={{ color: "#7A1453" }}></i>{" "}
-                Zone (HI) <span className="required-fields">*</span>
-              </label>
-              <input
-                type="text"
-                id="zone_hindi"
-                value={formData.zone_hindi}
-                onChange={handleChange}
-                placeholder="ज़ोन १"
-                className={errors.zone_hindi ? "error" : ""}
-              />
-              {errors.zone_hindi && (
-                <span className="error-message">{errors.zone_hindi}</span>
-              )}
-            </div>
-            <div className="form-group">
-              <label>
-                <i
-                  className="fas fa-location-dot"
-                  style={{ color: "#7A1453" }}
-                ></i>{" "}
-                Ward (EN) <span className="required-fields">*</span>
-              </label>
-              <input
-                type="text"
-                id="ward"
-                value={formData.ward}
-                onChange={handleChange}
-                placeholder="Ward A"
-                className={errors.ward ? "error" : ""}
-              />
-              {errors.ward && (
-                <span className="error-message">{errors.ward}</span>
-              )}
-            </div>
-            <div className="form-group">
-              <label>
-                <i
-                  className="fas fa-location-dot"
-                  style={{ color: "#7A1453" }}
-                ></i>{" "}
-                Ward (HI) <span className="required-fields">*</span>
-              </label>
-              <input
-                type="text"
-                id="ward_hindi"
-                value={formData.ward_hindi}
-                onChange={handleChange}
-                placeholder="वार्ड ए"
-                className={errors.ward_hindi ? "error" : ""}
-              />
-              {errors.ward_hindi && (
-                <span className="error-message">{errors.ward_hindi}</span>
-              )}
-            </div>
+
+            {/* =====================================================
+                TARGET
+            ====================================================== */}
+
             <div className="form-group">
               <label>
                 <i className="fas fa-box" style={{ color: "#7A1453" }}></i> No.
                 of Parcels <span className="required-fields">*</span>
               </label>
+
               <input
                 type="text"
                 id="target"
@@ -768,8 +1090,107 @@ function SurveyorsManagement() {
                 placeholder="120"
                 className={errors.target ? "error" : ""}
               />
+
               {errors.target && (
                 <span className="error-message">{errors.target}</span>
+              )}
+            </div>
+
+            {/* =====================================================
+                ZONE ENGLISH
+            ====================================================== */}
+
+            <div className="form-group">
+              <label>
+                <i className="fas fa-map-pin" style={{ color: "#7A1453" }}></i>{" "}
+                Zone (EN) <span className="required-fields">*</span>
+              </label>
+
+              <SearchableMultiSelect
+                options={zoneEnglishOptions}
+                selected={parseSelectedValues(formData.zone)}
+                onChange={handleZoneEnglishChange}
+                placeholder="Select Zone (EN)"
+              />
+
+              {errors.zone && (
+                <span className="error-message">{errors.zone}</span>
+              )}
+            </div>
+
+            {/* =====================================================
+                ZONE HINDI
+            ====================================================== */}
+
+            <div className="form-group">
+              <label>
+                <i className="fas fa-map-pin" style={{ color: "#7A1453" }}></i>{" "}
+                Zone (HI) <span className="required-fields">*</span>
+              </label>
+
+              <SearchableMultiSelect
+                options={zoneHindiOptions}
+                selected={parseSelectedValues(formData.zone_hindi)}
+                onChange={handleZoneHindiChange}
+                placeholder="Select Zone (HI)"
+              />
+
+              {errors.zone_hindi && (
+                <span className="error-message">{errors.zone_hindi}</span>
+              )}
+            </div>
+
+            {/* =====================================================
+                WARD ENGLISH
+            ====================================================== */}
+
+            <div className="form-group">
+              <label>
+                <i
+                  className="fas fa-location-dot"
+                  style={{ color: "#7A1453" }}
+                ></i>{" "}
+                Ward (EN) <span className="required-fields">*</span>
+              </label>
+
+              <SearchableMultiSelect
+                options={wardEnglishOptions}
+                selected={parseSelectedValues(formData.ward)}
+                onChange={handleWardEnglishChange}
+                placeholder={
+                  formData.zone ? "Select Ward (EN)" : "Select Zone First"
+                }
+              />
+
+              {errors.ward && (
+                <span className="error-message">{errors.ward}</span>
+              )}
+            </div>
+
+            {/* =====================================================
+                WARD HINDI
+            ====================================================== */}
+
+            <div className="form-group">
+              <label>
+                <i
+                  className="fas fa-location-dot"
+                  style={{ color: "#7A1453" }}
+                ></i>{" "}
+                Ward (HI) <span className="required-fields">*</span>
+              </label>
+
+              <SearchableMultiSelect
+                options={wardHindiOptions}
+                selected={parseSelectedValues(formData.ward_hindi)}
+                onChange={handleWardHindiChange}
+                placeholder={
+                  formData.zone_hindi ? "Select Ward (HI)" : "Select Zone First"
+                }
+              />
+
+              {errors.ward_hindi && (
+                <span className="error-message">{errors.ward_hindi}</span>
               )}
             </div>
           </div>
@@ -779,6 +1200,7 @@ function SurveyorsManagement() {
               <i className="fas fa-save" style={{ color: "white" }}></i> Add
               Surveyor
             </button>
+
             <span className="hint-text">
               <i className="fas fa-info-circle"></i> All * fields are required
             </span>
@@ -786,20 +1208,24 @@ function SurveyorsManagement() {
         </form>
       </div>
 
-      {/* table */}
+      {/* =========================================================
+          SURVEYOR LIST
+      ========================================================== */}
+
       <div className="card">
         <div className="card-title">
           <i className="fas fa-table" style={{ color: "#7A1453" }}></i>
           Surveyor List
           <span className="sub">
-            — {filtered.length} record{filtered.length !== 1 ? "s" : ""}
+            — {filtered.length} record
+            {filtered.length !== 1 ? "s" : ""}
           </span>
         </div>
 
-        {/* toolbar */}
         <div className="toolbar">
           <div className="search-box">
             <i className="fas fa-search"></i>
+
             <input
               type="text"
               placeholder="Search by name, ID, email..."
@@ -810,6 +1236,7 @@ function SurveyorsManagement() {
               }}
             />
           </div>
+
           <div className="filter-group">
             <select
               value={statusFilter}
@@ -822,6 +1249,7 @@ function SurveyorsManagement() {
               <option value="validated">Validated</option>
               <option value="pending">Pending</option>
             </select>
+
             <select
               value={zoneFilter}
               onChange={(e) => {
@@ -830,19 +1258,14 @@ function SurveyorsManagement() {
               }}
             >
               <option value="">All Zones</option>
-              <option value="Zone 1">Zone 1</option>
-              <option value="Zone 2">Zone 2</option>
+
+              {zoneEnglishOptions.map((zone) => (
+                <option key={zone} value={zone}>
+                  {zone}
+                </option>
+              ))}
             </select>
           </div>
-          {/* <div className="date-picker">
-            <i className="fas fa-calendar-alt"></i>
-            <input
-              type="text"
-              placeholder="dd-mm-yyyy"
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-            />
-          </div> */}
         </div>
 
         <div className="table-wrapper">
@@ -858,9 +1281,7 @@ function SurveyorsManagement() {
                 <th>Email</th>
                 <th>Mobile</th>
                 <th>Zone(EN)</th>
-                {/* <th>Zone(HI)</th> */}
                 <th>Ward(EN)</th>
-                {/* <th>Ward(HI)</th> */}
                 <th>Status</th>
                 <th style={{ textAlign: "center" }}>Action</th>
               </tr>
@@ -868,7 +1289,7 @@ function SurveyorsManagement() {
             <tbody>{renderTableRows()}</tbody>
           </table>
         </div>
-        {/* Pagination */}
+
         <div className="pagination-controls">
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
@@ -876,9 +1297,11 @@ function SurveyorsManagement() {
           >
             &lt;
           </button>
+
           <span>
             Page {safePage} of {totalPages}
           </span>
+
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={safePage === totalPages}

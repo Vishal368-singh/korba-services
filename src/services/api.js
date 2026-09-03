@@ -620,7 +620,6 @@ export const fetchDataCompleteness = async () => {
 
 // Dashboard API calls
 export const fetchDashboardData = async (startDate, endDate) => {
-  
   const token = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user")).access_token
     : null;
@@ -652,11 +651,53 @@ export const fetchDashboardData = async (startDate, endDate) => {
       Authorization: `Bearer ${token}`,
     },
   });
-console.log("Dashboard API response:", response);
+  console.log("Dashboard API response:", response);
   if (response.status !== 200) {
     notify.error("Failed to fetch dashboard data");
     throw new Error("Failed to fetch dashboard data");
   }
 
   return response.data;
+};
+
+// =========================================================
+// ZONE & WARD DATA
+// =========================================================
+
+export const getLocationOptions = async () => {
+  return [
+    {
+      zone: {
+        en: "Zone 1",
+        hi: "ज़ोन 1",
+      },
+      wards: [
+        { en: "Ward A", hi: "वार्ड ए" },
+        { en: "Ward B", hi: "वार्ड बी" },
+        { en: "Ward C", hi: "वार्ड सी" },
+      ],
+    },
+    {
+      zone: {
+        en: "Zone 2",
+        hi: "ज़ोन 2",
+      },
+      wards: [
+        { en: "Ward D", hi: "वार्ड डी" },
+        { en: "Ward E", hi: "वार्ड ई" },
+        { en: "Ward F", hi: "वार्ड एफ" },
+      ],
+    },
+    {
+      zone: {
+        en: "Zone 3",
+        hi: "ज़ोन 3",
+      },
+      wards: [
+        { en: "Ward G", hi: "वार्ड जी" },
+        { en: "Ward H", hi: "वार्ड एच" },
+        { en: "Ward I", hi: "वार्ड आई" },
+      ],
+    },
+  ];
 };

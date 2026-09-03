@@ -91,15 +91,6 @@ const getImageSrc = (value) => {
 
   if (!url) return null;
 
-  /*
-    Convert remote GIS URL to Vite proxy URL.
-
-    Example:
-    https://weather.mlinfomap.com/dev-documents/gis/...
-    ->
-    /gis-images/dev-documents/gis/...
-  */
-
   if (url.startsWith("https://weather.mlinfomap.com/")) {
     return url.replace("https://weather.mlinfomap.com", "/gis-images");
   }
@@ -114,7 +105,181 @@ const getImageSrc = (value) => {
 
   return url;
 };
+/* =========================================================
+   WATER SUPPLY CONNECTION
+========================================================= */
 
+function UtilityConnectionsSection({ survey }) {
+  const utility = survey?.utility_connections || {};
+
+  const waterSupplyProvided = utility.water_connection_no ? "Yes" : "No";
+  const waterSupplyNumber = utility.water_connection_no ?? "";
+
+  const sewerageConnection = utility.sewer_connection;
+  const sewerageType = utility.sewerage_type ?? utility.sewer_type ?? "";
+
+  const doorToDoorCollection = utility.door_to_door_collection;
+  const doorToDoorCollectionType =
+    utility.door_to_door_collection_type ?? utility.waste_collection_type ?? "";
+
+  const blankIfMissing = (value) => {
+    if (value === null || value === undefined || value === "") {
+      return "—";
+    }
+    if (typeof value === "boolean") {
+      return value ? "Yes" : "No";
+    }
+    return String(value);
+  };
+
+  const rowStyle = {
+    display: "flex",
+    alignItems: "flex-start",
+    width: "100%",
+    minHeight: "3mm",
+    marginBottom: "2.5mm",
+    fontSize: "8px",
+    lineHeight: "1.4",
+    color: "#222",
+  };
+
+  const labelStyle = {
+    fontWeight: 700,
+  };
+
+  const valueStyle = {
+    marginLeft: "2mm",
+    fontWeight: 400,
+    whiteSpace: "nowrap",
+  };
+
+  return (
+    <section
+      style={{
+        width: "100%",
+        boxSizing: "border-box",
+        padding: "4mm 1mm",
+        marginTop: "0mm",
+        marginBottom: "2.5mm",
+        fontFamily: "Arial, Helvetica, sans-serif",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          gap: "18mm",
+          boxSizing: "border-box",
+        }}
+      >
+        {/* LEFT COLUMN */}
+        <div style={{ width: "50%", minWidth: 0, boxSizing: "border-box" }}>
+          <div style={rowStyle}>
+            <span style={labelStyle}>
+              1. Water Supply Connection provided by Municipal Council (Yes/No):
+            </span>
+            <span style={valueStyle}>{waterSupplyProvided}</span>
+          </div>
+
+          <div style={rowStyle}>
+            <span style={labelStyle}>2. Sewerage Connection (Yes/No):</span>
+            <span style={valueStyle}>{blankIfMissing(sewerageConnection)}</span>
+          </div>
+
+          <div style={{ ...rowStyle, marginBottom: 0 }}>
+            <span style={labelStyle}>3. Door to Door Collection (Yes/No):</span>
+            <span style={valueStyle}>
+              {blankIfMissing(doorToDoorCollection)}
+            </span>
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN */}
+        <div style={{ width: "50%", minWidth: 0, boxSizing: "border-box" }}>
+          <div style={rowStyle}>
+            <span style={labelStyle}>
+              If yes, water supply connection number :
+            </span>
+            <span style={valueStyle}>{blankIfMissing(waterSupplyNumber)}</span>
+          </div>
+
+          <div style={rowStyle}>
+            <span style={labelStyle}>If yes, Sewerage Type:</span>
+            <span style={valueStyle}>{blankIfMissing(sewerageType)}</span>
+          </div>
+
+          <div style={{ ...rowStyle, marginBottom: 0 }}>
+            <span style={labelStyle}>If yes, Collection Type:</span>
+            <span style={valueStyle}>
+              {blankIfMissing(doorToDoorCollectionType)}
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function DeclarationSection({ survey }) {
+  const owner = survey?.owner_details || {};
+  const ownerName = owner.owner_name || "—";
+  const fatherHusbandName = owner.father_husband_name || "—";
+
+  return (
+    <div
+      style={{
+        width: "100%",
+        boxSizing: "border-box",
+        marginTop: "3mm",
+        paddingTop: "2.5mm",
+        borderTop: "1px dashed #777",
+        fontFamily: "Arial, Helvetica, sans-serif",
+      }}
+    >
+      <p
+        style={{
+          margin: 0,
+          fontSize: "7px",
+          lineHeight: "1.5",
+          color: "#222",
+        }}
+      >
+        The property owner's name is{" "}
+        <strong style={{ textDecoration: "underline" }}>{ownerName}</strong>,
+        father's/husband's name is{" "}
+        <strong style={{ textDecoration: "underline" }}>
+          {fatherHusbandName}
+        </strong>
+        . Based on the GIS survey of your house/plot, the property tax survey
+        work has been completed through a single page. Through this, complete
+        information about your property has been provided to you. Therefore, for
+        any kind of correction, please contact the municipal office.
+      </p>
+
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginTop: "4mm",
+        }}
+      >
+        <span
+          style={{
+            fontSize: "7px",
+            fontWeight: 700,
+            color: "#222",
+            borderTop: "1px solid #333",
+            paddingTop: "1mm",
+            minWidth: "35mm",
+            textAlign: "center",
+          }}
+        >
+          Recipient's Signature
+        </span>
+      </div>
+    </div>
+  );
+}
 /* =========================================================
    SECTION
 ========================================================= */
@@ -138,7 +303,8 @@ function Section({ number, title, children, className = "" }) {
       >
         <h2
           style={{
-            margin: 0,
+            marginBottom: "2.5mm",
+            marginRight: "2.5mm",
             padding: 0,
             fontSize: "8px",
             fontWeight: 700,
@@ -169,7 +335,7 @@ function Section({ number, title, children, className = "" }) {
 function Field({ label, value, date = false }) {
   return (
     <div
-      className="flex w-full items-center border-b border-[#dedede]"
+      className="flex w-full items-center "
       style={{
         minHeight: "5.8mm",
         boxSizing: "border-box",
@@ -177,25 +343,28 @@ function Field({ label, value, date = false }) {
     >
       <div
         style={{
-          width: "48%",
+          flex: "0 0 auto",
+          maxWidth: "42%",
           minWidth: 0,
-          paddingRight: "2mm",
+          paddingRight: "1.5mm",
           paddingLeft: "1mm",
           fontSize: "7.1px",
           fontWeight: 700,
           lineHeight: "1.15",
           color: "#292929",
           boxSizing: "border-box",
+          overflowWrap: "break-word",
+          wordBreak: "break-word",
         }}
       >
-        {label}
+        {label} :
       </div>
 
       <div
         style={{
-          width: "52%",
+          flex: "1 1 auto",
           minWidth: 0,
-          paddingLeft: "1.5mm",
+          paddingLeft: "1mm",
           paddingRight: "1mm",
           fontSize: "7.1px",
           fontWeight: 400,
@@ -312,7 +481,6 @@ function PropertyPhotoBox({ src, title = "PROPERTY PHOTO" }) {
 
   const handleImageError = (event) => {
     console.error("[Survey Report] Property photo failed:", src);
-
     event.currentTarget.style.display = "none";
   };
 
@@ -441,9 +609,7 @@ function LocationBox({ latitude, longitude, locationName }) {
         }}
       >
         {hasLocation ? (
-          <>
-            {/* MAP BACKGROUND */}
-
+          <React.Fragment>
             <div
               style={{
                 position: "absolute",
@@ -454,8 +620,6 @@ function LocationBox({ latitude, longitude, locationName }) {
                 zIndex: 1,
               }}
             />
-
-            {/* ROAD 1 */}
 
             <div
               style={{
@@ -472,8 +636,6 @@ function LocationBox({ latitude, longitude, locationName }) {
               }}
             />
 
-            {/* ROAD 2 */}
-
             <div
               style={{
                 position: "absolute",
@@ -488,8 +650,6 @@ function LocationBox({ latitude, longitude, locationName }) {
                 zIndex: 3,
               }}
             />
-
-            {/* LOCATION PIN + NAME */}
 
             <div
               style={{
@@ -509,8 +669,6 @@ function LocationBox({ latitude, longitude, locationName }) {
                 overflow: "visible",
               }}
             >
-              {/* PIN */}
-
               <div
                 style={{
                   width: "22px",
@@ -537,9 +695,7 @@ function LocationBox({ latitude, longitude, locationName }) {
                 />
               </div>
 
-              {/* LOCATION NAME */}
-
-              {cleanLocationName && (
+              {cleanLocationName ? (
                 <div
                   style={{
                     position: "absolute",
@@ -563,10 +719,8 @@ function LocationBox({ latitude, longitude, locationName }) {
                 >
                   {cleanLocationName}
                 </div>
-              )}
+              ) : null}
             </div>
-
-            {/* GPS COORDINATES */}
 
             <div
               style={{
@@ -583,12 +737,10 @@ function LocationBox({ latitude, longitude, locationName }) {
                 fontWeight: 600,
               }}
             >
-              GPS: {lat.toFixed(6)}, {lng.toFixed(6)}
+              {"GPS: " + lat.toFixed(6) + ", " + lng.toFixed(6)}
             </div>
 
-            {/* GOOGLE MAPS LINK */}
-
-            {googleMapsUrl && (
+            {googleMapsUrl ? (
               <a
                 href={googleMapsUrl}
                 target="_blank"
@@ -609,8 +761,8 @@ function LocationBox({ latitude, longitude, locationName }) {
               >
                 VIEW MAP
               </a>
-            )}
-          </>
+            ) : null}
+          </React.Fragment>
         ) : (
           <div
             style={{
@@ -647,59 +799,6 @@ function LocationBox({ latitude, longitude, locationName }) {
         PROPERTY LOCATION
       </div>
     </div>
-  );
-}
-
-/* =========================================================
-   USAGE TYPE CHECKBOX
-========================================================= */
-
-function UsageTypeCheckbox({ label, checked }) {
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "1.2mm",
-        height: "100%",
-        whiteSpace: "nowrap",
-        fontSize: "6.5px",
-        lineHeight: "1",
-        color: "#333",
-        fontWeight: 400,
-      }}
-    >
-      <span
-        style={{
-          width: "2.8mm",
-          height: "2.8mm",
-          minWidth: "2.8mm",
-          minHeight: "2.8mm",
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          boxSizing: "border-box",
-          border: checked ? "1px solid #333" : "0.8px solid #777",
-          backgroundColor: checked ? "#333" : "#fff",
-          color: "#fff",
-          fontSize: "5px",
-          fontWeight: 700,
-          lineHeight: 1,
-        }}
-      >
-        {checked ? "✓" : ""}
-      </span>
-
-      <span
-        style={{
-          display: "inline-block",
-          lineHeight: "1",
-        }}
-      >
-        {label}
-      </span>
-    </span>
   );
 }
 
@@ -778,18 +877,12 @@ function QuickInfoStrip({ items }) {
 }
 
 /* =========================================================
-   FLOOR AREA TABLE
+   FLOOR AREA TABLE — CONFIG
 ========================================================= */
 
 const CONSTRUCTION_COLUMNS = ["Pucca / RCC", "Tin", "Kachha"];
-
 const USAGE_TYPES = ["Residential", "Commercial"];
-
 const OCCUPANCY_TYPES = ["Self-Used", "Rented"];
-
-/* =========================================================
-   NORMALIZERS
-========================================================= */
 
 const normalizeConstructionType = (type) => {
   const normalized = String(type || "")
@@ -845,8 +938,7 @@ const normalizeOccupancy = (factor) => {
 };
 
 /* =========================================================
-   FLOOR AREA TABLE
-   FIXED WIDTH VERSION
+   FLOOR AREA TABLE — COMPONENT
 ========================================================= */
 
 function FloorAreaTable({ floorDetails = [] }) {
@@ -859,7 +951,6 @@ function FloorAreaTable({ floorDetails = [] }) {
         normalizeUsageType(item.usage_type) === usageType &&
         normalizeOccupancy(item.usage_factor) === occupancy,
     );
-
     return match ? toNumber(match.area) : 0;
   };
 
@@ -869,16 +960,13 @@ function FloorAreaTable({ floorDetails = [] }) {
         .map((item) => item.floor)
         .filter(
           (floor) =>
-            floor !== null &&
-            floor !== undefined &&
-            String(floor).trim() !== "",
+            floor !== null && floor !== undefined && String(floor).trim() !== "",
         ),
     ),
   ];
 
   const getFloorTotal = (floor) => {
     let total = 0;
-
     CONSTRUCTION_COLUMNS.forEach((constructionType) => {
       USAGE_TYPES.forEach((usageType) => {
         OCCUPANCY_TYPES.forEach((occupancy) => {
@@ -886,68 +974,98 @@ function FloorAreaTable({ floorDetails = [] }) {
         });
       });
     });
-
     return total;
   };
 
   const getColumnTotal = (constructionType, usageType, occupancy) => {
     let total = 0;
-
     floorNames.forEach((floor) => {
       total += getCellValue(floor, constructionType, usageType, occupancy);
     });
-
     return total;
   };
 
-  const grandTotal = floorNames.reduce(
-    (sum, floor) => sum + getFloorTotal(floor),
-    0,
-  );
+  const grandTotal = floorNames.reduce((sum, floor) => sum + getFloorTotal(floor), 0);
 
-  /* =======================================================
-     IMPORTANT:
-     14 TOTAL COLUMNS
+  const FLOOR_WIDTH = "9%";
+  const DETAIL_WIDTH = "6.75%";
+  const DETAILS_GROUP_WIDTH = "81%";
+  const TOTAL_WIDTH = "10%";
+  const CONSTRUCTION_WIDTH = "27%";
+  const USAGE_GROUP_WIDTH = "13.5%";
 
-     Floor = 9%
-     12 data columns = 80%
-     Total = 11%
+  const ROW_HEIGHT = "4.5mm";
+  const HEADER_ROW1_HEIGHT = "5mm";
+  const HEADER_ROW_HEIGHT = "4mm";
 
-     Total = 100%
-  ======================================================= */
+  
+  const VERTICAL_NUDGE = "0.6mm";
 
   const thStyle = {
     border: "1px solid #b7b7b7",
-    padding: "0.65mm 0.3mm",
+    padding: `0 0 ${VERTICAL_NUDGE} 0`,
     fontWeight: 700,
-    fontSize: "5px",
-    lineHeight: "1.05",
+    fontSize: "4.6px",
+    lineHeight: "1.4",
     backgroundColor: "#f2f2f2",
     color: "#222",
     boxSizing: "border-box",
     textAlign: "center",
     verticalAlign: "middle",
     overflow: "hidden",
-    wordBreak: "normal",
+    whiteSpace: "normal",
+    wordBreak: "break-word",
+    overflowWrap: "anywhere",
   };
 
   const tdStyle = {
     border: "1px solid #b7b7b7",
-    padding: "0.65mm 0.25mm",
-    fontSize: "5px",
-    lineHeight: "1.05",
+    padding: `0 0 ${VERTICAL_NUDGE} 0`,
+    fontSize: "4.6px",
+    lineHeight: "1.4",
     color: "#333",
     boxSizing: "border-box",
     textAlign: "center",
     verticalAlign: "middle",
     overflow: "hidden",
     whiteSpace: "nowrap",
+    textOverflow: "clip",
+    height: ROW_HEIGHT,
+  };
+
+  const totalThStyle = {
+    ...thStyle,
+    backgroundColor: "#f2f2f2",
+    borderLeft: "1px solid #b7b7b7",
+  };
+
+  const totalTdStyle = {
+    ...tdStyle,
+    borderLeft: "1px solid #b7b7b7",
+    fontWeight: 700,
+  };
+
+  const detailCellStyle = {
+    ...tdStyle,
+    width: DETAIL_WIDTH,
+    minWidth: 0,
+    maxWidth: DETAIL_WIDTH,
+  };
+
+  const detailHeaderStyle = {
+    ...thStyle,
+    width: DETAIL_WIDTH,
+    minWidth: 0,
+    maxWidth: DETAIL_WIDTH,
+    height: HEADER_ROW_HEIGHT,
   };
 
   if (floorNames.length === 0) {
     return (
       <div
         style={{
+          width: "100%",
+          boxSizing: "border-box",
           marginTop: "1.5mm",
           border: "1px solid #b7b7b7",
           padding: "3mm",
@@ -966,63 +1084,48 @@ function FloorAreaTable({ floorDetails = [] }) {
       style={{
         width: "100%",
         maxWidth: "100%",
+        minWidth: 0,
         marginTop: "1.5mm",
-        overflow: "hidden",
-        border: "1px solid #b7b7b7",
         boxSizing: "border-box",
+        overflow: "hidden",
+        textAlign: "center",
       }}
     >
       <table
+        cellPadding={0}
+        cellSpacing={0}
         style={{
           width: "100%",
           maxWidth: "100%",
+          minWidth: 0,
           tableLayout: "fixed",
           borderCollapse: "collapse",
           borderSpacing: 0,
-          textAlign: "center",
-          boxSizing: "border-box",
           margin: 0,
           padding: 0,
+          boxSizing: "border-box",
+          textAlign: "center",
         }}
       >
-        {/* =================================================
-            FIXED COLUMN WIDTHS
-
-            1 Floor
-            12 Construction/Usage/Occupancy
-            1 Total
-        ================================================== */}
-
         <colgroup>
-          <col style={{ width: "9%" }} />
-
-          <col style={{ width: "6.67%" }} />
-          <col style={{ width: "6.67%" }} />
-          <col style={{ width: "6.67%" }} />
-          <col style={{ width: "6.67%" }} />
-
-          <col style={{ width: "6.67%" }} />
-          <col style={{ width: "6.67%" }} />
-          <col style={{ width: "6.67%" }} />
-          <col style={{ width: "6.67%" }} />
-
-          <col style={{ width: "6.67%" }} />
-          <col style={{ width: "6.67%" }} />
-          <col style={{ width: "6.67%" }} />
-          <col style={{ width: "6.67%" }} />
-
-          <col style={{ width: "11%" }} />
+          <col style={{ width: FLOOR_WIDTH }} />
+          {Array.from({ length: 12 }).map((_, index) => (
+            <col key={index} style={{ width: DETAIL_WIDTH }} />
+          ))}
+          <col style={{ width: TOTAL_WIDTH }} />
         </colgroup>
 
         <thead>
-          {/* ROW 1 */}
-
-          <tr>
+          <tr style={{ height: HEADER_ROW1_HEIGHT }}>
             <th
               rowSpan={4}
               style={{
                 ...thStyle,
-                fontSize: "5.2px",
+                width: FLOOR_WIDTH,
+                minWidth: 0,
+                maxWidth: FLOOR_WIDTH,
+                fontSize: "4.6px",
+                textTransform: "uppercase",
               }}
             >
               Floor
@@ -1032,86 +1135,111 @@ function FloorAreaTable({ floorDetails = [] }) {
               colSpan={12}
               style={{
                 ...thStyle,
-                fontSize: "5.2px",
+                width: DETAILS_GROUP_WIDTH,
+                minWidth: 0,
+                maxWidth: DETAILS_GROUP_WIDTH,
+                fontSize: "4.6px",
+                letterSpacing: "0.05px",
+                textTransform: "uppercase",
               }}
             >
-              DETAILS OF CONSTRUCTED AREA OF PROPERTY
+              Details of Constructed Area of Property
             </th>
 
             <th
               rowSpan={4}
               style={{
-                ...thStyle,
-                fontSize: "5.2px",
+                ...totalThStyle,
+                width: TOTAL_WIDTH,
+                minWidth: 0,
+                maxWidth: TOTAL_WIDTH,
+                fontSize: "4.6px",
+                textTransform: "uppercase",
               }}
             >
               Total
             </th>
           </tr>
 
-          {/* ROW 2 */}
-
-          <tr>
+          <tr style={{ height: HEADER_ROW_HEIGHT }}>
             {CONSTRUCTION_COLUMNS.map((constructionType) => (
-              <th key={constructionType} colSpan={4} style={thStyle}>
+              <th
+                key={constructionType}
+                colSpan={4}
+                style={{
+                  ...thStyle,
+                  width: CONSTRUCTION_WIDTH,
+                  minWidth: 0,
+                  maxWidth: CONSTRUCTION_WIDTH,
+                  fontSize: "4.4px",
+                  textTransform: "uppercase",
+                }}
+              >
                 {constructionType}
               </th>
             ))}
           </tr>
 
-          {/* ROW 3 */}
-
-          <tr>
+          <tr style={{ height: HEADER_ROW_HEIGHT }}>
             {CONSTRUCTION_COLUMNS.map((constructionType) => (
               <React.Fragment key={constructionType}>
-                <th colSpan={2} style={thStyle}>
+                <th
+                  colSpan={2}
+                  style={{
+                    ...thStyle,
+                    width: USAGE_GROUP_WIDTH,
+                    minWidth: 0,
+                    maxWidth: USAGE_GROUP_WIDTH,
+                    fontSize: "4.3px",
+                    textTransform: "uppercase",
+                  }}
+                >
                   Residential
                 </th>
 
-                <th colSpan={2} style={thStyle}>
+                <th
+                  colSpan={2}
+                  style={{
+                    ...thStyle,
+                    width: USAGE_GROUP_WIDTH,
+                    minWidth: 0,
+                    maxWidth: USAGE_GROUP_WIDTH,
+                    fontSize: "4.3px",
+                    textTransform: "uppercase",
+                  }}
+                >
                   Commercial
                 </th>
               </React.Fragment>
             ))}
           </tr>
 
-          {/* ROW 4 */}
-
-          <tr>
+          <tr style={{ height: HEADER_ROW_HEIGHT }}>
             {CONSTRUCTION_COLUMNS.map((constructionType) => (
               <React.Fragment key={constructionType}>
-                <th style={thStyle}>
-                  Self-
-                  <br />
-                  Used
-                </th>
-
-                <th style={thStyle}>Rented</th>
-
-                <th style={thStyle}>
-                  Self-
-                  <br />
-                  Used
-                </th>
-
-                <th style={thStyle}>Rented</th>
+                <th style={detailHeaderStyle}>Self Used</th>
+                <th style={detailHeaderStyle}>Rented</th>
+                <th style={detailHeaderStyle}>Self Used</th>
+                <th style={detailHeaderStyle}>Rented</th>
               </React.Fragment>
             ))}
           </tr>
         </thead>
 
         <tbody>
-          {/* FLOOR ROWS */}
-
           {floorNames.map((floor) => (
-            <tr key={String(floor)}>
+            <tr key={String(floor)} style={{ height: ROW_HEIGHT }}>
               <td
                 style={{
                   ...tdStyle,
+                  width: FLOOR_WIDTH,
+                  minWidth: 0,
+                  maxWidth: FLOOR_WIDTH,
                   fontWeight: 700,
                   whiteSpace: "normal",
                   wordBreak: "break-word",
-                  fontSize: "5px",
+                  overflowWrap: "anywhere",
+                  fontSize: "4.3px",
                 }}
               >
                 {String(floor).toUpperCase()}
@@ -1119,51 +1247,28 @@ function FloorAreaTable({ floorDetails = [] }) {
 
               {CONSTRUCTION_COLUMNS.map((constructionType) => (
                 <React.Fragment key={constructionType}>
-                  <td style={tdStyle}>
-                    {getCellValue(
-                      floor,
-                      constructionType,
-                      "Residential",
-                      "Self-Used",
-                    )}
+                  <td style={detailCellStyle}>
+                    {getCellValue(floor, constructionType, "Residential", "Self-Used")}
                   </td>
-
-                  <td style={tdStyle}>
-                    {getCellValue(
-                      floor,
-                      constructionType,
-                      "Residential",
-                      "Rented",
-                    )}
+                  <td style={detailCellStyle}>
+                    {getCellValue(floor, constructionType, "Residential", "Rented")}
                   </td>
-
-                  <td style={tdStyle}>
-                    {getCellValue(
-                      floor,
-                      constructionType,
-                      "Commercial",
-                      "Self-Used",
-                    )}
+                  <td style={detailCellStyle}>
+                    {getCellValue(floor, constructionType, "Commercial", "Self-Used")}
                   </td>
-
-                  <td style={tdStyle}>
-                    {getCellValue(
-                      floor,
-                      constructionType,
-                      "Commercial",
-                      "Rented",
-                    )}
+                  <td style={detailCellStyle}>
+                    {getCellValue(floor, constructionType, "Commercial", "Rented")}
                   </td>
                 </React.Fragment>
               ))}
 
-              {/* TOTAL COLUMN */}
-
               <td
                 style={{
-                  ...tdStyle,
+                  ...totalTdStyle,
+                  width: TOTAL_WIDTH,
+                  minWidth: 0,
+                  maxWidth: TOTAL_WIDTH,
                   fontWeight: 700,
-                  fontSize: "5px",
                 }}
               >
                 {getFloorTotal(floor)}
@@ -1171,13 +1276,16 @@ function FloorAreaTable({ floorDetails = [] }) {
             </tr>
           ))}
 
-          {/* GRAND TOTAL ROW */}
-
-          <tr>
+          <tr style={{ height: ROW_HEIGHT }}>
             <td
               style={{
                 ...tdStyle,
+                width: FLOOR_WIDTH,
+                minWidth: 0,
+                maxWidth: FLOOR_WIDTH,
                 fontWeight: 700,
+                whiteSpace: "nowrap",
+                fontSize: "4.3px",
               }}
             >
               Total:-
@@ -1185,51 +1293,28 @@ function FloorAreaTable({ floorDetails = [] }) {
 
             {CONSTRUCTION_COLUMNS.map((constructionType) => (
               <React.Fragment key={constructionType}>
-                <td
-                  style={{
-                    ...tdStyle,
-                    fontWeight: 700,
-                  }}
-                >
+                <td style={{ ...detailCellStyle, fontWeight: 700 }}>
                   {getColumnTotal(constructionType, "Residential", "Self-Used")}
                 </td>
-
-                <td
-                  style={{
-                    ...tdStyle,
-                    fontWeight: 700,
-                  }}
-                >
+                <td style={{ ...detailCellStyle, fontWeight: 700 }}>
                   {getColumnTotal(constructionType, "Residential", "Rented")}
                 </td>
-
-                <td
-                  style={{
-                    ...tdStyle,
-                    fontWeight: 700,
-                  }}
-                >
+                <td style={{ ...detailCellStyle, fontWeight: 700 }}>
                   {getColumnTotal(constructionType, "Commercial", "Self-Used")}
                 </td>
-
-                <td
-                  style={{
-                    ...tdStyle,
-                    fontWeight: 700,
-                  }}
-                >
+                <td style={{ ...detailCellStyle, fontWeight: 700 }}>
                   {getColumnTotal(constructionType, "Commercial", "Rented")}
                 </td>
               </React.Fragment>
             ))}
 
-            {/* FINAL TOTAL COLUMN */}
-
             <td
               style={{
-                ...tdStyle,
+                ...totalTdStyle,
+                width: TOTAL_WIDTH,
+                minWidth: 0,
+                maxWidth: TOTAL_WIDTH,
                 fontWeight: 700,
-                fontSize: "5.2px",
               }}
             >
               {grandTotal}
@@ -1250,68 +1335,59 @@ export default function SurveyReportTemplate({ survey }) {
     return null;
   }
 
-  /* =======================================================
-     API DATA
-  ======================================================= */
-
   const info = survey.survey_information || {};
-
   const owner = survey.owner_details || {};
-
   const property = survey.property_details || {};
-
   const land = survey.land_building_information || {};
-
   const usage = survey.usage_details || {};
-
   const utility = survey.utility_connections || {};
-
   const gis = survey.gis_information || {};
-
   const verification = survey.verification || {};
-
   const documents = survey.documents_collected || {};
 
-  const remarks =
-    survey.surveyor_remarks?.surveyor_remarks ?? survey.surveyor_remarks;
+  const remarks = survey.surveyor_remarks
+    ? survey.surveyor_remarks.surveyor_remarks !== undefined
+      ? survey.surveyor_remarks.surveyor_remarks
+      : survey.surveyor_remarks
+    : null;
 
   const taxInformation = survey.tax_related_information || {};
-
-  /* =======================================================
-     LAND & BUILDING DATA
-  ======================================================= */
 
   const floorDetails = Array.isArray(land.floor_detail)
     ? land.floor_detail
     : [];
 
-  const hasSelfOccupiedFloor = floorDetails.some(
-    (floor) =>
-      String(floor?.usage_factor || "")
+  const hasSelfOccupiedFloor = floorDetails.some(function (floor) {
+    return (
+      String((floor && floor.usage_factor) || "")
         .toLowerCase()
-        .trim() === "self occupied",
-  );
+        .trim() === "self occupied"
+    );
+  });
 
-  const hasRentedFloor = floorDetails.some(
-    (floor) =>
-      String(floor?.usage_factor || "")
+  const hasRentedFloor = floorDetails.some(function (floor) {
+    return (
+      String((floor && floor.usage_factor) || "")
         .toLowerCase()
-        .trim() === "rented",
-  );
+        .trim() === "rented"
+    );
+  });
 
-  const hasResidentialFloor = floorDetails.some(
-    (floor) =>
-      String(floor?.usage_type || "")
+  const hasResidentialFloor = floorDetails.some(function (floor) {
+    return (
+      String((floor && floor.usage_type) || "")
         .toLowerCase()
-        .trim() === "residential",
-  );
+        .trim() === "residential"
+    );
+  });
 
-  const hasCommercialFloor = floorDetails.some(
-    (floor) =>
-      String(floor?.usage_type || "")
+  const hasCommercialFloor = floorDetails.some(function (floor) {
+    return (
+      String((floor && floor.usage_type) || "")
         .toLowerCase()
-        .trim() === "commercial",
-  );
+        .trim() === "commercial"
+    );
+  });
 
   const isSelf =
     hasSelfOccupiedFloor ||
@@ -1340,14 +1416,8 @@ export default function SurveyReportTemplate({ survey }) {
       .trim() === "commercial" ||
     usage.mixed_use === true;
 
-  /* =======================================================
-     PROPERTY LOCATION
-  ======================================================= */
-
   const streetRoadName = String(info.street_road_name || "").trim();
-
   const propertyLocation = String(info.property_location || "").trim();
-
   const isRoadOrMarket = /road|market/i.test(streetRoadName);
 
   const propertyLocationFieldValue = isRoadOrMarket ? streetRoadName : "—";
@@ -1368,25 +1438,23 @@ export default function SurveyReportTemplate({ survey }) {
     ? otherPropertyLocation
     : propertyLocation;
 
-  /* =======================================================
-     GPS DATA
-  ======================================================= */
-
   const latitude =
-    info.gps_latitude ??
-    info.latitude ??
-    gis.gps_latitude ??
-    survey.gps_latitude;
+    info.gps_latitude !== undefined && info.gps_latitude !== null
+      ? info.gps_latitude
+      : info.latitude !== undefined && info.latitude !== null
+        ? info.latitude
+        : gis.gps_latitude !== undefined && gis.gps_latitude !== null
+          ? gis.gps_latitude
+          : survey.gps_latitude;
 
   const longitude =
-    info.gps_longitude ??
-    info.longitude ??
-    gis.gps_longitude ??
-    survey.gps_longitude;
-
-  /* =======================================================
-     GIS FIELDS
-  ======================================================= */
+    info.gps_longitude !== undefined && info.gps_longitude !== null
+      ? info.gps_longitude
+      : info.longitude !== undefined && info.longitude !== null
+        ? info.longitude
+        : gis.gps_longitude !== undefined && gis.gps_longitude !== null
+          ? gis.gps_longitude
+          : survey.gps_longitude;
 
   const gisFields = [
     ["GIS Property Polygon", "gis_property_polygon_available"],
@@ -1394,10 +1462,6 @@ export default function SurveyReportTemplate({ survey }) {
     ["Geo Tag Completed", "geo_tag_completed"],
     ["Property Photo Captured", "property_photo_captured"],
   ];
-
-  /* =======================================================
-     VERIFICATION FIELDS
-  ======================================================= */
 
   const verificationFields = [
     ["Unassessed Property", "unassessed_property"],
@@ -1409,10 +1473,6 @@ export default function SurveyReportTemplate({ survey }) {
     ["Demolished Property", "demolished_property"],
     ["New Property", "new_property"],
   ];
-
-  /* =======================================================
-     DOCUMENT FIELDS
-  ======================================================= */
 
   const documentFields = [
     ["Aadhaar Copy", "aadhaar_copy", "aadhaar_copy_files"],
@@ -1428,25 +1488,17 @@ export default function SurveyReportTemplate({ survey }) {
     ["Other Documents", "other_documents", "other_documents_files"],
   ];
 
-  /* =======================================================
-     PROPERTY PHOTO
-  ======================================================= */
-
   const propertyPhoto =
     gis.property_photo_path || survey.property_photo_path || null;
-
-  /* =======================================================
-     REPORT
-  ======================================================= */
 
   return (
     <div
       id="survey-report"
       style={{
-        width: "204mm",
-        maxWidth: "204mm",
+        width: "208mm",
+        maxWidth: "208mm",
         margin: "0 auto",
-        padding: "4mm",
+        padding: "2mm",
         boxSizing: "border-box",
         backgroundColor: "#fff",
         fontFamily: "Arial, Helvetica, sans-serif",
@@ -1454,10 +1506,6 @@ export default function SurveyReportTemplate({ survey }) {
         overflow: "hidden",
       }}
     >
-      {/* =================================================
-          HEADER
-      ================================================= */}
-
       <header
         style={{
           textAlign: "center",
@@ -1497,72 +1545,29 @@ export default function SurveyReportTemplate({ survey }) {
         </h1>
       </header>
 
-      {/* =================================================
-          QUICK INFO
-      ================================================= */}
-
-      <QuickInfoStrip
-        items={[
-          ["Survey ID", info.survey_id],
-          ["Property ID", info.property_id],
-          ["Parcel No.", info.parcel_no],
-          ["Surveyor", info.surveyor_name],
-        ]}
-      />
-
-      {/* =================================================
-          1. PROPERTY INFORMATION
-      ================================================= */}
-
       <Section number="1" title="PROPERTY INFORMATION">
-        <div
-          className="flex w-full"
-          style={{
-            gap: "5px",
-          }}
-        >
-          <div
-            className="min-w-0 flex-1"
-            style={{
-              width: "33.33%",
-            }}
-          >
+        <div className="flex w-full" style={{ gap: "5px" }}>
+          <div className="min-w-0 flex-1" style={{ width: "33.33%" }}>
             <Field label="Tax Rate Zone" value={info.tax_rate_zone} />
-
             <Field label="Parcel Number" value={info.parcel_no} />
-
             <Field
               label="Electricity Bill CA NO."
               value={utility.electricity_consumer_no || "NA"}
             />
           </div>
 
-          <div
-            className="min-w-0 flex-1"
-            style={{
-              width: "33.33%",
-            }}
-          >
+          <div className="min-w-0 flex-1" style={{ width: "33.33%" }}>
             <Field label="Zone" value={info.zone} />
-
             <Field label="Property ID" value={info.property_id} />
-
             <Field label="Gas Connection" value={utility.gas_connection} />
           </div>
 
-          <div
-            className="min-w-0 flex-1"
-            style={{
-              width: "33.33%",
-            }}
-          >
+          <div className="min-w-0 flex-1" style={{ width: "33.33%" }}>
             <Field label="Ward No." value={info.ward_no} />
-
             <Field
               label="Existing Property ID"
               value={info.existing_property_id}
             />
-
             <Field
               label="Property Ownership"
               value={property.property_ownership}
@@ -1571,47 +1576,23 @@ export default function SurveyReportTemplate({ survey }) {
         </div>
       </Section>
 
-      {/* =================================================
-          2. PROPERTY OWNER DETAILS
-      ================================================= */}
-
       <Section number="2" title="PROPERTY OWNER DETAILS">
-        <div
-          className="flex w-full"
-          style={{
-            gap: "5px",
-          }}
-        >
-          <div
-            className="min-w-0 flex-1"
-            style={{
-              width: "33.33%",
-            }}
-          >
+        <div className="flex w-full" style={{ gap: "5px" }}>
+          <div className="min-w-0 flex-1" style={{ width: "33.33%" }}>
             <Field label="Owner Name" value={owner.owner_name} />
-
             <Field label="Mobile Number" value={owner.mobile_number} />
-
             <Field
               label="Property Tax NO."
               value={taxInformation.existing_property_tax_no}
             />
           </div>
 
-          <div
-            className="min-w-0 flex-1"
-            style={{
-              width: "33.33%",
-            }}
-          >
+          <div className="min-w-0 flex-1" style={{ width: "33.33%" }}>
             <Field
               label="Father / Husband Name"
               value={owner.father_husband_name}
             />
-
             <Field label="AADHAR NO." value={documents.aadhaar_number} />
-
-            {/* USAGE TYPE */}
 
             <div
               style={{
@@ -1621,7 +1602,7 @@ export default function SurveyReportTemplate({ survey }) {
                 minHeight: "5.8mm",
                 paddingLeft: "1mm",
                 boxSizing: "border-box",
-                borderBottom: "1px solid #dedede",
+
                 whiteSpace: "nowrap",
               }}
             >
@@ -1638,47 +1619,31 @@ export default function SurveyReportTemplate({ survey }) {
                 Usage Type:
               </span>
 
-              <div
+              <span
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "3mm",
-                  height: "100%",
-                  minWidth: 0,
+                  fontSize: "7.1px",
+                  fontWeight: 400,
+                  lineHeight: "1",
+                  color: "#333",
                 }}
               >
-                <UsageTypeCheckbox
-                  label="Residential"
-                  checked={
-                    usage.primary_use === "Residential" && !usage.mixed_use
-                  }
-                />
-
-                <UsageTypeCheckbox
-                  label="Commercial"
-                  checked={
-                    usage.primary_use === "Commercial" && !usage.mixed_use
-                  }
-                />
-
-                <UsageTypeCheckbox label="Both" checked={!!usage.mixed_use} />
-              </div>
+                {usage.mixed_use
+                  ? "Both"
+                  : usage.primary_use === "Residential"
+                    ? "Residential"
+                    : usage.primary_use === "Commercial"
+                      ? "Commercial"
+                      : "—"}
+              </span>
             </div>
           </div>
 
-          <div
-            className="min-w-0 flex-1"
-            style={{
-              width: "33.33%",
-            }}
-          >
+          <div className="min-w-0 flex-1" style={{ width: "33.33%" }}>
             <Field
               label="Correspondence Address"
               value={owner.correspondence_address}
             />
-
             <Field label="Email" value={owner.email || survey.email || "—"} />
-
             <Field
               label="Total Built-up Area"
               value={land.total_builtup_area}
@@ -1687,28 +1652,13 @@ export default function SurveyReportTemplate({ survey }) {
         </div>
       </Section>
 
-      {/* =================================================
-          3. LAND & BUILDING
-      ================================================= */}
-
       <Section number="3" title="LAND & BUILDING">
-        <div
-          className="flex w-full"
-          style={{
-            gap: "5px",
-          }}
-        >
-          <div
-            className="min-w-0 flex-1"
-            style={{
-              width: "33.33%",
-            }}
-          >
+        <div className="flex w-full" style={{ gap: "5px" }}>
+          <div className="min-w-0 flex-1" style={{ width: "33.33%" }}>
             <Field
               label="Property Ownership"
               value={property.property_ownership}
             />
-
             <Field
               label="Property Use (Rented / Self / Both)"
               value={
@@ -1721,7 +1671,6 @@ export default function SurveyReportTemplate({ survey }) {
                       : "—"
               }
             />
-
             <Field
               label="Property Use (Residential / Commercial / Both)"
               value={
@@ -1734,98 +1683,54 @@ export default function SurveyReportTemplate({ survey }) {
                       : "—"
               }
             />
-
             <Field label="Building Year" value={land.year_of_construction} />
           </div>
 
-          <div
-            className="min-w-0 flex-1"
-            style={{
-              width: "33.33%",
-            }}
-          >
+          <div className="min-w-0 flex-1" style={{ width: "33.33%" }}>
             <Field
               label="Property Location (Main Road / Main Market / Other)"
               value={propertyLocationFieldValue}
             />
-
             <Field label="Self" value={isSelf ? "Yes" : "No"} />
-
             <Field label="Residential" value={isResidential ? "Yes" : "No"} />
-
             <Field label="Building Age" value={land.building_age} />
           </div>
 
-          <div
-            className="min-w-0 flex-1"
-            style={{
-              width: "33.33%",
-            }}
-          >
+          <div className="min-w-0 flex-1" style={{ width: "33.33%" }}>
             <Field label="Other" value={otherLocationFieldValue} />
-
             <Field label="Rented" value={isRented ? "Yes" : "No"} />
-
             <Field label="Commercial" value={isCommercial ? "Yes" : "No"} />
-
             <Field label="" value="" />
           </div>
         </div>
       </Section>
 
-      {/* =================================================
-          4. PROPERTY AREA DETAILS
-      ================================================= */}
-
       <Section number="4" title="PROPERTY AREA DETAILS">
-        <div
-          className="flex w-full"
-          style={{
-            gap: "5px",
-          }}
-        >
-          <div
-            className="min-w-0 flex-1"
-            style={{
-              width: "33.33%",
-            }}
-          >
+        <div className="flex w-full" style={{ gap: "5px" }}>
+          <div className="min-w-0 flex-1" style={{ width: "33.33%" }}>
             <Field label="Land / Plot Area (in sq ft)" value={land.plot_area} />
-
             <Field
               label="Property's Plinth Area - Commercial / Industrial Use (in sq ft)"
               value="—"
             />
           </div>
 
-          <div
-            className="min-w-0 flex-1"
-            style={{
-              width: "33.33%",
-            }}
-          >
+          <div className="min-w-0 flex-1" style={{ width: "33.33%" }}>
             <Field
               label="Property Plinth Area (in sq ft)"
               value={land.plinth_area}
             />
-
             <Field
               label="Total Built-up Area of Property (in sq ft)"
               value={land.total_builtup_area}
             />
           </div>
 
-          <div
-            className="min-w-0 flex-1"
-            style={{
-              width: "33.33%",
-            }}
-          >
+          <div className="min-w-0 flex-1" style={{ width: "33.33%" }}>
             <Field
               label="Vacant Land / Plot Area (in sq ft)"
               value={toNumber(land.plot_area) - toNumber(land.plinth_area)}
             />
-
             <Field
               label="Lat/Long"
               value={
@@ -1833,17 +1738,12 @@ export default function SurveyReportTemplate({ survey }) {
                 latitude !== null &&
                 longitude !== undefined &&
                 longitude !== null
-                  ? `${latitude},${longitude}`
+                  ? latitude + "," + longitude
                   : "—"
               }
             />
           </div>
         </div>
-
-        <Field
-          label="Open Land Area for Commercial / Industrial Use (in sq ft)"
-          value="—"
-        />
 
         <div
           style={{
@@ -1857,149 +1757,110 @@ export default function SurveyReportTemplate({ survey }) {
           Details of Constructed Area of Property
         </div>
 
-        {/* FIXED TABLE */}
-
         <FloorAreaTable floorDetails={floorDetails} />
-      </Section>
-
-      {/* =================================================
-          8. PROPERTY PHOTO + LOCATION
-      ================================================= */}
-
-      <Section number="8" title="PROPERTY PHOTO & LOCATION">
+        <UtilityConnectionsSection survey={survey} />
         <div
           style={{
             display: "flex",
             width: "100%",
             gap: "7px",
+            marginTop: "5px",
           }}
         >
           <PropertyPhotoBox
             src={getImageSrc(propertyPhoto)}
             title="PROPERTY PHOTO"
           />
-
           <LocationBox
             latitude={latitude}
             longitude={longitude}
             locationName={locationName}
           />
         </div>
-      </Section>
-
-      {/* =================================================
-          11. SURVEYOR REMARKS
-      ================================================= */}
-
-      <Section number="11" title="SURVEYOR REMARKS" className="mb-0">
         <div
           style={{
-            minHeight: "8mm",
-            fontSize: "7px",
+            marginTop: "2.5mm",
+            paddingTop: "1.5mm",
+
+            fontSize: "5.8px",
             lineHeight: 1.35,
-            color: "#444",
-            overflowWrap: "break-word",
+            color: "#555",
           }}
         >
-          {displayValue(remarks)}
+          <strong>Note:</strong> This report has been prepared based on the
+          information recorded in the property survey system. This document is
+          not a final proof of property ownership.
         </div>
-      </Section>
-
-      {/* =================================================
-          SIGNATURES
-      ================================================= */}
-
-      <div
-        style={{
-          display: "flex",
-          width: "100%",
-          gap: "8px",
-          marginTop: "3mm",
-          boxSizing: "border-box",
-        }}
-      >
-        {[
-          "Chief Municipal Officer",
-          "Revenue Officer Signature",
-          "Property Owner Signature",
-        ].map((label) => (
-          <div
-            key={label}
-            style={{
-              position: "relative",
-              width: "calc((100% - 16px) / 3)",
-              height: "18mm",
-              minWidth: 0,
-              flexShrink: 0,
-              boxSizing: "border-box",
-              border: "1px solid #b7b7b7",
-              backgroundColor: "#fff",
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                left: 0,
-                right: 0,
-                bottom: "2.5mm",
-                height: "4mm",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: "#fff",
-                padding: "0 2mm",
-                boxSizing: "border-box",
-              }}
-            >
-              <span
+        <div
+          style={{
+            display: "flex",
+            width: "100%",
+            gap: "8px",
+            marginTop: "3mm",
+            boxSizing: "border-box",
+          }}
+        >
+          {[
+            "Chief Municipal Officer",
+            "Revenue Officer Signature",
+            "Property Owner Signature",
+          ].map(function (label) {
+            return (
+              <div
+                key={label}
                 style={{
-                  display: "block",
-                  width: "100%",
-                  fontSize: "6.2px",
-                  fontWeight: 700,
-                  lineHeight: "4mm",
-                  color: "#222",
-                  textAlign: "center",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
+                  position: "relative",
+                  width: "calc((100% - 16px) / 3)",
+                  height: "18mm",
+                  minWidth: 0,
+                  flexShrink: 0,
+                  boxSizing: "border-box",
+                  border: "1px solid #b7b7b7",
                   backgroundColor: "#fff",
+                  overflow: "hidden",
                 }}
               >
-                {label}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* =================================================
-          NOTE
-      ================================================= */}
-
-      <div
-        style={{
-          marginTop: "2.5mm",
-          paddingTop: "1.5mm",
-          borderTop: "1px dashed #777",
-          fontSize: "5.8px",
-          lineHeight: 1.35,
-          color: "#555",
-        }}
-      >
-        <strong>Note:</strong> This report has been prepared based on the
-        information recorded in the property survey system. This document is not
-        a final proof of property ownership.
-      </div>
-
-      {/* =================================================
-          FOOTER
-      ================================================= */}
+                <div
+                  style={{
+                    position: "absolute",
+                    left: 0,
+                    right: 0,
+                    bottom: "2.5mm",
+                    height: "4mm",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: "#fff",
+                    padding: "0 2mm",
+                    boxSizing: "border-box",
+                  }}
+                >
+                  <span
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      fontSize: "6.2px",
+                      fontWeight: 700,
+                      lineHeight: "4mm",
+                      color: "#222",
+                      textAlign: "center",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      backgroundColor: "#fff",
+                    }}
+                  >
+                    {label}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <DeclarationSection survey={survey} />
+      </Section>
 
       <footer className="mt-[1.5mm] flex items-center justify-between gap-4 text-[5.5px] text-[#666]">
-        <span>System Generated Property Survey Report</span>
-
         <span>Generated on: {formatDate(new Date().toISOString())}</span>
       </footer>
     </div>
