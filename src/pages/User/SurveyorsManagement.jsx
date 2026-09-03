@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./SurveyorsManagement.css";
 import notify from "../../utils/toast";
 import {
@@ -97,8 +97,6 @@ function SurveyorsManagement() {
 
   const nameDebounceRef = useRef(null);
   const latestNameRequestId = useRef(0);
-  // ---------- ref for toast timeout ----------
-  //const toastTimeout = useRef(null);
 
   // =========================================================
   // LOAD LOCATION OPTIONS
@@ -134,8 +132,6 @@ function SurveyorsManagement() {
   }, []);
 
   const loadSurveyors = async () => {
-  // ---------- load initial mock data ----------
-  const loadSurveyors = useCallback(async () => {
     try {
       const response = await fetchSurveyorsList();
 
@@ -167,72 +163,12 @@ function SurveyorsManagement() {
       }));
 
       setSurveyors(mappedData);
+      setFiltered(mappedData);
     } catch (error) {
       console.error("Failed to load surveyors:", error);
     }
-  }, []);
+  };
 
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      loadSurveyors();
-    }, 0);
-
-    return () => clearTimeout(timeoutId);
-  }, [loadSurveyors]);
-
-  // ---------- filtering logic ----------
-  const filtered = useMemo(() => {
-    let result = surveyors;
-    // search
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase().trim();
-      result = result.filter(
-        (s) =>
-          s.surveyor_name.toLowerCase().includes(term) ||
-          s.surveyor_id.toLowerCase().includes(term) ||
-          s.email.toLowerCase().includes(term) ||
-          s.mobile.includes(term) ||
-          s.username.toLowerCase().includes(term),
-      );
-    }
-
-    // status filter
-    if (statusFilter) {
-      result = result.filter((s) => s.status.toLowerCase() === statusFilter);
-    }
-
-    // zone filter
-    if (zoneFilter) {
-      result = result.filter((s) => s.zone === zoneFilter);
-    }
-
-    // date filter (simple partial match)
-    if (dateFilter.trim()) {
-      const filterDate = dateFilter.trim();
-      result = result.filter((s) => {
-        const d = new Date(s.createdAt);
-        const day = String(d.getDate()).padStart(2, "0");
-        const month = String(d.getMonth() + 1).padStart(2, "0");
-        const year = d.getFullYear();
-        const formatted = `${day}-${month}-${year}`;
-        return formatted.includes(filterDate);
-      });
-    }
-
-    return result;
-  }, [surveyors, searchTerm, statusFilter, zoneFilter, dateFilter]);
-
-  // ---------- stats ----------
-  const total = surveyors.length;
-  const pending = surveyors.filter(
-    (s) => s.status.toLowerCase() === "pending",
-  ).length;
-  const validated = surveyors.filter(
-    (s) => s.status.toLowerCase() === "validated",
-  ).length;
-  // const notValidated = surveyors.filter(
-  //   (s) => s.status === "not-validated",
-  // ).length;
   // =========================================================
   // LOCATION HELPERS
   // =========================================================
@@ -544,8 +480,16 @@ function SurveyorsManagement() {
     }
 
     setErrors(newErrors);
-    return isValid;
+
+    return {
+      isValid,
+      errors: newErrors,
+    };
   };
+
+  // =========================================================
+  // ADD / UPDATE SURVEYOR
+  // =========================================================
 
   const addSurveyor = async (payload) => {
     try {
@@ -585,12 +529,6 @@ function SurveyorsManagement() {
         setEditingId(null);
         return;
       }
-      const newSurveyor = {
-        id: data.id || apiPayload.username,
-        ...apiPayload,
-        status: data.status || "Pending",
-        createdAt: data.created_at || "",
-      };
 
       notify.success(
         editingId
