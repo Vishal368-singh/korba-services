@@ -8,13 +8,13 @@ import {
 } from "react-icons/fa";
 import { LandPlot } from "lucide-react";
 import { KPI_COLORS, KPI_DEFAULT_COLOR } from "../../theme/colors";
-
+import vacantPropertyIcon from "../../assets/vacant-property-icon.png";
+const PRIMARY = "#7a1453";
 const ICON_MAP = {
   unique_parcels: FaMapMarkedAlt,
   unique_properties: FaCity,
   total_plot_area: FaThLarge,
   total_builtup_area: FaBuilding,
-  vacant_properties: LandPlot,
   new_construction: FaPlusSquare,
   additional_floor_constructed: FaLayerGroup,
 };
@@ -24,38 +24,38 @@ const formatValue = (value) =>
 
 function IndicatorCard({ item }) {
   const Icon = ICON_MAP[item.key] || FaThLarge;
-  const color = KPI_COLORS[item.key] || KPI_DEFAULT_COLOR;
 
   return (
-    <div
-      className="relative rounded-xl h-[100%] border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-200 p-5 flex flex-col gap-3 cursor-pointer overflow-hidden"
-      style={{
-        backgroundColor: `${color}0D`,
-        borderColor: `${color}33`,
-      }}
-    >
-      <div className="absolute top-0 left-0 right-0 h-1" style={{ backgroundColor: color }} />
-
+    <div className="bg-white rounded-xl h-[100%] border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-200 p-5 flex flex-col gap-3 cursor-pointer">
       <div className="flex flex-row items-center gap-3">
         <div
-          style={{ backgroundColor: color }}
-          className="flex items-center mt-2 ml-2 justify-center w-11 h-11 rounded-lg text-white text-lg shrink-0 shadow-md"
+          style={{ backgroundColor: PRIMARY }}
+          className="flex items-center mt-2 ml-2 justify-center w-11 h-11 rounded-lg text-white text-lg shrink-0"
         >
-          <Icon />
+          {item.key === "vacant_properties" ? (
+            <img
+              src={vacantPropertyIcon}
+              alt="Vacant properties"
+              className="w-8 h-8 object-contain"
+            />
+          ) : (
+            <Icon />
+          )}
         </div>
-        <p className="text-xs text-gray-600 leading-snug font-medium">{item.label}</p>
+
+        <p className="text-xs text-gray-500 leading-snug">{item.label}</p>
       </div>
 
       <div className="flex flex-col items-center gap-1">
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
           {formatValue(item.value)}
         </h2>
+
         <p className="text-xs text-gray-500 leading-snug">{item.subtext}</p>
       </div>
     </div>
   );
 }
-
 // data: dashboardData?.key_indicators from Dashboard.jsx
 // shape per your backend: { unique_parcels: {value, percentage, property_uids}, unique_properties: {...}, ... }
 export default function KeyIndicators({ data }) {

@@ -153,16 +153,12 @@ export const fetchSurveyBySurveyID = async (surveyId) => {
     survey_id: surveyId,
   };
 
-  const response = await api.post(
-    "/web/survey-data-by-survey-id",
-    payload,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+  const response = await api.post("/web/survey-data-by-survey-id", payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
     },
-  );
+  });
 
   if (response.status !== 200) {
     notify.error("Failed to fetch survey data");
@@ -186,16 +182,12 @@ export const approveSurveyAPI = async (surveyId) => {
     survey_id: surveyId,
   };
 
-  const response = await api.post(
-    "/web/approve-survey",
-    payload,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+  const response = await api.post("/web/approve-survey", payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
     },
-  );
+  });
 
   if (response.status !== 200) {
     notify.error("Failed to approve survey");
@@ -250,16 +242,12 @@ export const addSurveyorAPI = async (payload) => {
     throw new Error("No token found. Please log in first.");
   }
 
-  const response = await api.post(
-    "/auth/register",
-    payload,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+  const response = await api.post("/auth/register", payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
     },
-  );
+  });
 
   if (response.status !== 200 && response.status !== 201) {
     notify.error("Failed to add surveyor");
@@ -311,6 +299,34 @@ export const updateSurveyorAPI = async (surveyorId, payload) => {
   endpoint if your backend uses a different route.
 */
 
+// TEMPORARY: hardcoded fallback while /auth/location-options is broken (404)
+// TODO: REMOVE THIS FALLBACK ONCE BACKEND ROUTE IS FIXED
+const HARDCODED_LOCATION_OPTIONS = [
+  {
+    zone: { en: "Zone 1", hi: "ज़ोन 1" },
+    wards: [
+      { en: "Ward 1", hi: "वार्ड 1" },
+      { en: "Ward 2", hi: "वार्ड 2" },
+      { en: "Ward 3", hi: "वार्ड 3" },
+    ],
+  },
+  {
+    zone: { en: "Zone 2", hi: "ज़ोन 2" },
+    wards: [
+      { en: "Ward 4", hi: "वार्ड 4" },
+      { en: "Ward 5", hi: "वार्ड 5" },
+    ],
+  },
+  {
+    zone: { en: "Zone 3", hi: "ज़ोन 3" },
+    wards: [
+      { en: "Ward 6", hi: "वार्ड 6" },
+      { en: "Ward 7", hi: "वार्ड 7" },
+      { en: "Ward 8", hi: "वार्ड 8" },
+    ],
+  },
+];
+
 export const getLocationOptions = async () => {
   const token = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user")).access_token
@@ -321,22 +337,41 @@ export const getLocationOptions = async () => {
     throw new Error("No token found. Please log in first.");
   }
 
-  const response = await api.get(
-    "/auth/location-options",
-    {
+  try {
+    const response = await api.get("/auth/location-options", {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-    },
-  );
+    });
 
-  if (response.status !== 200) {
-    notify.error("Failed to fetch location options");
-    throw new Error("Failed to fetch location options");
+    if (response.status !== 200) {
+      throw new Error("Failed to fetch location options");
+    }
+
+    // If the API responds but with empty data, still fall back
+    const data = response.data;
+    const hasData = Array.isArray(data)
+      ? data.length > 0
+      : Array.isArray(data?.data) && data.data.length > 0;
+
+    if (!hasData) {
+      console.warn(
+        "location-options returned empty data, using hardcoded fallback",
+      );
+      return HARDCODED_LOCATION_OPTIONS;
+    }
+
+    return data;
+  } catch (error) {
+    // TEMPORARY: fall back to hardcoded data on any failure (e.g. 404)
+    // TODO: REMOVE THIS FALLBACK ONCE BACKEND ROUTE IS FIXED
+    console.warn(
+      "getLocationOptions failed, using hardcoded fallback:",
+      error?.message || error,
+    );
+    return HARDCODED_LOCATION_OPTIONS;
   }
-
-  return response.data;
 };
 
 /* =========================================================
@@ -357,16 +392,12 @@ export const sendOTP = async (email) => {
     email,
   };
 
-  const response = await api.post(
-    "/auth/send-otp",
-    payload,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+  const response = await api.post("/auth/send-otp", payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
     },
-  );
+  });
 
   if (response.status !== 200 && response.status !== 201) {
     notify.error("Failed to send OTP");
@@ -391,16 +422,12 @@ export const verifyOTP = async (email, otp) => {
     otp,
   };
 
-  const response = await api.post(
-    "/auth/verify-otp",
-    payload,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+  const response = await api.post("/auth/verify-otp", payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
     },
-  );
+  });
 
   if (response.status !== 200) {
     notify.error("Invalid OTP. Please try again.");
@@ -424,16 +451,12 @@ export const updateSurvey = async (surveyId, surveyData) => {
     throw new Error("No token found. Please log in first.");
   }
 
-  const response = await api.put(
-    `/web/update/${surveyId}`,
-    surveyData,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+  const response = await api.put(`/web/update/${surveyId}`, surveyData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
     },
-  );
+  });
 
   if (response.status !== 200) {
     notify.error("Failed to update survey");
@@ -479,9 +502,7 @@ export const updateSurveyStatus = async (payload) => {
   }
 
   notify.success(
-    payload.action === "approve"
-      ? "Survey approved"
-      : "Survey rejected",
+    payload.action === "approve" ? "Survey approved" : "Survey rejected",
   );
 
   return response.data;
@@ -581,10 +602,7 @@ export const fetchDashboardData = async (
   return response.data;
 };
 
-export const fetchKeyIndicators = async (
-  startDate,
-  endDate,
-) => {
+export const fetchKeyIndicators = async (startDate, endDate) => {
   const token = getToken();
 
   if (!token) {
