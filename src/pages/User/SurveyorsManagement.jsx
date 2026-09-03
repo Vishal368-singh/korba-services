@@ -1063,10 +1063,7 @@ function SurveyorsManagement() {
             <div className="form-group">
               <label>
                 <i className="fas fa-lock" style={{ color: "#7A1453" }}></i>{" "}
-                Password{" "}
-                {
-                  <span className="required-fields">*</span>
-                }
+                Password {<span className="required-fields">*</span>}
               </label>
 
               <input
