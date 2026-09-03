@@ -701,3 +701,32 @@ export const getLocationOptions = async () => {
     },
   ];
 };
+
+export const updateSurveyorAPI = async (surveyorId, payload) => {
+  const token = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user")).access_token
+    : null;
+
+  if (!token) {
+    notify.error("No token found. Please log in first.");
+    throw new Error("No token found. Please log in first.");
+  }
+
+  const response = await api.post(
+    `/auth/update-surveyor`, 
+    { surveyor_id: surveyorId, ...payload },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (response.status !== 200 && response.status !== 201) {
+    notify.error("Failed to update surveyor");
+    throw new Error("Failed to update surveyor");
+  }
+
+  return response;
+};
