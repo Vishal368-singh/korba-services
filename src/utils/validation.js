@@ -54,7 +54,28 @@ export const validateSectionA = (data) => {
   } else if (!/^\d{3}$/.test(data.property_id)) {
     errors.property_id = "Property ID must be 3 digits";
   }
+  // Surveyor Name
+  if (isEmpty(data.surveyor_name)) {
+    errors.surveyor_name = "Surveyor Name is required";
+  } else if (data.surveyor_name.length > 100) {
+    errors.surveyor_name = "Surveyor Name must be at most 100 characters";
+  }
+if (isEmpty(data.survey_id)) {
+  errors.survey_id = "Survey ID is required";
+}
 
+  // Existing Property ID
+  if (isEmpty(data.existing_property_id)) {
+    errors.existing_property_id = "Existing Property ID is required";
+  } else if (!/^\d{6}$/.test(data.existing_property_id)) {
+    errors.existing_property_id = "Existing Property ID must be 6 digits";
+  }
+
+  // Surveyor ID
+  // Surveyor ID
+  if (isEmpty(data.surveyor_id)) {
+    errors.surveyor_id = "Surveyor ID is required";
+  }
   // Existing Property ID - optional
   if (data.existing_property_id && !/^\d{6}$/.test(data.existing_property_id)) {
     errors.existing_property_id = "Existing Property ID must be 6 digits";
