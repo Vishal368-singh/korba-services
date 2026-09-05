@@ -18,8 +18,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 
-function OTPModal({ open, onClose, onVerify, email, otp, setOtp}) {
-  
+function OTPModal({ open, onClose, onVerify, email, otp, setOtp }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef([]);
@@ -250,6 +249,13 @@ function OTPModal({ open, onClose, onVerify, email, otp, setOtp}) {
                 onPaste={index === 0 ? handlePaste : undefined}
                 inputRef={(el) => (inputRefs.current[index] = el)}
                 variant="outlined"
+                slotProps={{
+                  htmlInput: {
+                    maxLength: 1,
+                    type: "text",
+                    pattern: "[0-9]*",
+                  },
+                }}
                 sx={{
                   width: getOtpSize(),
                   "& .MuiOutlinedInput-root": {
@@ -275,11 +281,6 @@ function OTPModal({ open, onClose, onVerify, email, otp, setOtp}) {
                       boxShadow: "0 0 0 4px rgba(26, 115, 232, 0.12)",
                     },
                   },
-                }}
-                inputProps={{
-                  maxLength: 1,
-                  type: "text",
-                  pattern: "[0-9]*",
                 }}
               />
             ))}

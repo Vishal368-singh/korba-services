@@ -4,16 +4,17 @@ import {
   Button,
   Typography,
   Paper,
+  TextField,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
 import { Edit, Save, Cancel } from "@mui/icons-material";
-import PreviewField from "./PreviewField";
-import FloorDetailsTable from "./FloorDetailsTable";
 import "../SectionCard.css";
-import { validateLandBuilding } from "../../../utils/validation";
-
-export default function LandBuildingCard({ data, onUpdate }) {
+import DropdownField from "../../../common/DropdownField";
+import { EXEMPTION_CATEGORIES, YES_NO_OPTIONS } from "../../../utils/constants";
+import { validateTaxRelatedInformation } from "../../../utils/validation";
+import PreviewField from "./PreviewField";
+export default function TaxRelatedInformation({ data, onUpdate }) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(data || {});
   const [validationErrors, setValidationErrors] = useState({});
@@ -32,79 +33,27 @@ export default function LandBuildingCard({ data, onUpdate }) {
 
   if (!data) return null;
 
- const handleFieldChange = (fieldKey, value) => {
-   if (fieldKey === "plinth_area") {
-     const plotArea = Number(formData.plot_area) || 0;
-
-     if (Number(value) > plotArea) {
-       return false;
-     }
-   }
-
-   setFormData((prev) => {
-     const updatedData = {
-       ...prev,
-       [fieldKey]: value,
-     };
-
-     if (fieldKey === "year_of_construction") {
-       if (/^\d{4}$/.test(value)) {
-         const year = Number(value);
-         const currentYear = new Date().getFullYear();
-
-         if (year <= currentYear) {
-           updatedData.building_age = String(currentYear - year);
-         } else {
-           updatedData.building_age = "";
-         }
-       } else {
-         updatedData.building_age = "";
-       }
-     }
-
-     return updatedData;
-   });
-
-   return true;
- };
- const handleFloorUpdate = (updatedFloors) => {
-   const plotArea = Number(formData.plot_area) || 0;
-
-   const previousFloors = formData.floor_detail || [];
-
-   const validFloors = updatedFloors.map((floor, index) => {
-     const area = Number(floor.area);
-
-     if (area > plotArea) {
-       // Keep previous value
-       return previousFloors[index] || floor;
-     }
-
-     return floor;
-   });
-
-   const total = validFloors.reduce(
-     (sum, item) => sum + (Number(item.area) || 0),
-     0,
-   );
-
-   setFormData((prev) => ({
-     ...prev,
-     floor_detail: validFloors,
-     total_builtup_area: total.toFixed(2),
-   }));
- };
+  const handleFieldChange = (fieldKey, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [fieldKey]: value,
+    }));
+  };
 
   const handleEdit = () => {
-    setValidationErrors({});
     setIsEditing(true);
   };
 
-  const handleSave = () => {
-    const errors = validateLandBuilding(formData);
+  // const handleSave = () => {
+  //   if (onUpdate) {
+  //     onUpdate("tax_related_information", formData);
+  //   }
 
-    console.log("FORM DATA:", formData);
-    console.log("VALIDATION ERRORS:", errors);
+  //   setIsEditing(false);
+  // };
+  const handleSave = () => {
+    console.log("Form Data on Save:", formData); // Debugging line
+    const errors = validateTaxRelatedInformation(formData);
 
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
@@ -114,7 +63,7 @@ export default function LandBuildingCard({ data, onUpdate }) {
     setValidationErrors({});
 
     if (onUpdate) {
-      onUpdate("land_building_information", formData);
+      onUpdate("tax_related_information", formData);
     }
 
     setIsEditing(false);
@@ -122,44 +71,43 @@ export default function LandBuildingCard({ data, onUpdate }) {
 
   const handleCancel = () => {
     setFormData(data);
-    setValidationErrors({});
     setIsEditing(false);
   };
 
+  // Define fields for the card
   const fields = [
     {
-      key: "plot_area",
-      label: "Plot Area (Sq. Ft.)",
-      type: "number",
-      required: true,
+      key: "existing_property_tax_no",
+      label: "Existing Property Tax No.",
+      type: "text",
+      placeholder: "KNN/PT/2026/001245",
     },
     {
-      key: "plinth_area",
-      label: "Plinth Area",
-      type: "number",
-      required: true,
+      key: "tax_paid_till",
+      label: "Tax Paid Till",
+      type: "date",
     },
     {
-      key: "year_of_construction",
-      label: "Year of Construction",
+      key: "outstanding_tax",
+      label: "Outstanding Tax",
       type: "number",
-      required: true,
+      placeholder: "1540.50",
     },
     {
-      key: "building_age",
-      label: "Building Age",
-      type: "number",
-      suffix: " Year(s)",
+      key: "exempted_property",
+      label: "Exempted Property",
+      type: "select",
+      options: YES_NO_OPTIONS,
     },
     {
-      key: "total_builtup_area",
-      label: "Total Built-up Area",
-      type: "number",
-      required: true,
+      key: "exemption_category",
+      label: "Exemption Category",
+      type: "select",
+      options: EXEMPTION_CATEGORIES,
     },
   ];
 
-  // Button styles with color scheme
+  // Button styles
   const buttonStyles = {
     backgroundColor: "#ffffff",
     color: "#7A1453",
@@ -170,6 +118,7 @@ export default function LandBuildingCard({ data, onUpdate }) {
     fontWeight: 500,
     padding: isMobile ? "6px 12px" : "8px 16px",
     minWidth: isMobile ? "auto" : "64px",
+
     "&:hover": {
       backgroundColor: "#7A1453",
       color: "#ffffff",
@@ -217,7 +166,7 @@ export default function LandBuildingCard({ data, onUpdate }) {
             textAlign: isMobile ? "center" : "left",
           }}
         >
-          Land & Building Information
+          Tax Related Information
         </Typography>
 
         <Box
@@ -253,6 +202,7 @@ export default function LandBuildingCard({ data, onUpdate }) {
               >
                 Cancel
               </Button>
+
               <Button
                 variant="contained"
                 startIcon={<Save />}
@@ -285,44 +235,82 @@ export default function LandBuildingCard({ data, onUpdate }) {
             display: "grid",
             gridTemplateColumns: getGridColumns(),
             gap: isMobile ? "8px 12px" : isTablet ? "12px 20px" : "16px 32px",
-            mb: 3,
           }}
         >
-          {fields.map((field) => (
-            <PreviewField
-              key={field.key}
-              label={field.label}
-              value={formData[field.key] || ""}
-              onChange={handleFieldChange}
-              fieldKey={field.key}
-              type={field.type}
-              disabled={!isEditing}
-              isMobile={isMobile}
-              suffix={field.suffix || ""}
-              error={validationErrors[field.key] || ""}
-              required={field.required}
-            />
-          ))}
-        </Box>
+          {fields.map((field) => {
+            // Show exemption category only when Exempted Property is Yes
+            if (
+              field.key === "exemption_category" &&
+              formData.exempted_property !== true
+            ) {
+              return null;
+            }
+            const isRequired =
+              field.key === "exemption_category" &&
+              (formData.exempted_property === true ||
+                String(formData.exempted_property).toLowerCase() === "true");
+            // Select fields
+            if (field.type === "select") {
+              if (isEditing) {
+                return (
+                  <DropdownField
+                    key={field.key}
+                    label={field.label}
+                    options={field.options}
+                    required={isRequired}
+                    selected={
+                      formData[field.key] === true
+                        ? "Yes"
+                        : formData[field.key] === false
+                          ? "No"
+                          : (formData[field.key] ?? "")
+                    }
+                    onSelect={(value) =>
+                      handleFieldChange(
+                        field.key,
+                        value === "Yes" ? true : value === "No" ? false : value,
+                      )
+                    }
+                    error={validationErrors[field.key] || ""}
+                  />
+                );
+              }
 
-        {/* Floor Details Table */}
-        <Box sx={{ mt: 2 }}>
-          <Typography
-            variant="subtitle2"
-            sx={{
-              fontWeight: 600,
-              color: "#0b2b4a",
-              fontSize: "14px",
-              mb: 2,
-            }}
-          >
-            Floor Details
-          </Typography>
-          <FloorDetailsTable
-            floors={formData.floor_detail || []}
-            isEditing={isEditing}
-            onFloorUpdate={handleFloorUpdate}
-          />
+              // View mode
+              return (
+                <PreviewField
+                  key={field.key}
+                  label={field.label}
+                  value={
+                    formData[field.key] === true
+                      ? "Yes"
+                      : formData[field.key] === false
+                        ? "No"
+                        : (formData[field.key] ?? "")
+                  }
+                  onChange={handleFieldChange}
+                  fieldKey={field.key}
+                  type="text"
+                  disabled
+                  isMobile={isMobile}
+                />
+              );
+            }
+
+            // Text / Number / Date
+            return (
+              <PreviewField
+                key={field.key}
+                label={field.label}
+                value={formData[field.key] ?? ""}
+                onChange={handleFieldChange}
+                fieldKey={field.key}
+                type={field.type}
+                disabled={!isEditing}
+                isMobile={isMobile}
+              />
+            );
+          })}
         </Box>
       </Box>
     </Paper>
