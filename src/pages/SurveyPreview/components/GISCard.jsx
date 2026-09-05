@@ -39,10 +39,7 @@ export default function GISCard({ data, surveyInfo, onUpdate }) {
     const lng = surveyInfo?.gps_longitude;
 
     if (lat !== undefined && lng !== undefined) {
-      window.open(
-        `https://www.google.com/maps?q=${lat},${lng}`,
-        "_blank"
-      );
+      window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
     }
   };
 
@@ -240,9 +237,7 @@ export default function GISCard({ data, surveyInfo, onUpdate }) {
             >
               {data.front_elevation_photo_path && (
                 <Paper sx={{ p: 2, textAlign: "center" }}>
-                  <Typography variant="caption">
-                    Front Elevation
-                  </Typography>
+                  <Typography variant="caption">Front Elevation</Typography>
 
                   <img
                     src={data.front_elevation_photo_path}
@@ -259,9 +254,7 @@ export default function GISCard({ data, surveyInfo, onUpdate }) {
 
               {data.name_plate_photo_path && (
                 <Paper sx={{ p: 2, textAlign: "center" }}>
-                  <Typography variant="caption">
-                    Name Plate
-                  </Typography>
+                  <Typography variant="caption">Name Plate</Typography>
 
                   <img
                     src={data.name_plate_photo_path}
@@ -278,9 +271,7 @@ export default function GISCard({ data, surveyInfo, onUpdate }) {
 
               {data.property_photo_path && (
                 <Paper sx={{ p: 2, textAlign: "center" }}>
-                  <Typography variant="caption">
-                    Property Photo
-                  </Typography>
+                  <Typography variant="caption">Property Photo</Typography>
 
                   <img
                     src={data.property_photo_path}
