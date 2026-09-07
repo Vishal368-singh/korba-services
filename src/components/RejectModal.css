@@ -107,10 +107,10 @@
   background:white;
   border-radius: 6px;
   cursor: pointer;
-  
+
 }
 .close-btn:hover{
- background-color: ;
+ background-color: rgba(233, 225, 225, 0.925);
 }
 
 .reject-confirm-btn {
@@ -120,4 +120,8 @@
   color: #fff;
   border-radius: 6px;
   cursor: pointer;
+}
+
+.reject-confirm-btn:hover {
+  background: #5c0f3e;
 }

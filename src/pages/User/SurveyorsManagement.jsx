@@ -1073,13 +1073,9 @@ function SurveyorsManagement() {
               <label>
                 <i className="fas fa-lock" style={{ color: "#7A1453" }}></i>{" "}
                 Password{" "}
-                {editingId ? (
-                  <span className="hint-text">
-                    (leave blank to keep current)
-                  </span>
-                ) : (
+                {
                   <span className="required-fields">*</span>
-                )}
+                }
               </label>
 
               <input
