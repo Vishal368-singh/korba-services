@@ -16,10 +16,12 @@ import {
   PROPERTY_LOCATIONS,
 } from "../../../utils/constants";
 import DropdownField from "../../../common/DropdownField";
+import { validateSectionA } from "../../../utils/validation";
 
 export default function SurveyInformationCard({ data, onUpdate }) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(data || {});
+  const [validationErrors, setValidationErrors] = useState({});
 
   // Responsive hooks
   const theme = useTheme();
@@ -43,57 +45,125 @@ export default function SurveyInformationCard({ data, onUpdate }) {
   };
 
   const handleEdit = () => {
+    setValidationErrors({});
     setIsEditing(true);
   };
 
   const handleSave = () => {
+    const errors = validateSectionA(formData);
+
+    console.log("FORM DATA:", formData);
+    console.log("VALIDATION ERRORS:", errors);
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
+    setValidationErrors({});
+
     if (onUpdate) {
       onUpdate("survey_information", formData);
-      console.log("***", formData);
     }
+
     setIsEditing(false);
   };
 
   const handleCancel = () => {
     setFormData(data);
+    setValidationErrors({});
     setIsEditing(false);
   };
 
   // Define fields for the card
   const fields = [
-    { key: "parcel_no", label: "Parcel Number", type: "text" },
-    { key: "property_id", label: "Property ID", type: "text" },
+    {
+      key: "parcel_no",
+      label: "Parcel Number",
+      type: "text",
+      required: true,
+    },
+    {
+      key: "property_id",
+      label: "Property ID",
+      type: "text",
+      required: true,
+    },
     {
       key: "existing_property_id",
       label: "Existing Property ID",
       type: "text",
+      required: true,
     },
     {
       key: "property_location",
       label: "Property Location",
       type: "select",
       options: PROPERTY_LOCATIONS,
+      required: true,
     },
     {
       key: "tax_rate_zone",
       label: "Tax Rate Zone",
       type: "select",
       options: TAX_RATE_ZONES,
+      required: true,
     },
-    { key: "survey_id", label: "Survey ID", type: "text" },
-    { key: "survey_date", label: "Survey Date", type: "text" },
-    { key: "surveyor_name", label: "Surveyor Name", type: "text" },
-    { key: "surveyor_id", label: "Surveyor ID", type: "text" },
-    { key: "ward_no", label: "Ward No", type: "text" },
+    {
+      key: "survey_id",
+      label: "Survey ID",
+      type: "text",
+      required: true,
+    },
+    {
+      key: "survey_date",
+      label: "Survey Date",
+      type: "text",
+      required: true,
+    },
+    {
+      key: "surveyor_name",
+      label: "Surveyor Name",
+      type: "text",
+      required: true,
+    },
+    {
+      key: "surveyor_id",
+      label: "Surveyor ID",
+      type: "text",
+      required: true,
+    },
+    {
+      key: "ward_no",
+      label: "Ward No",
+      type: "text",
+      required: true,
+    },
     {
       key: "zone",
       label: "Zone",
       type: "select",
       options: ZONES,
+      required: true,
     },
-    { key: "colony_locality", label: "Colony / Locality", type: "text" },
-    { key: "gps_latitude", label: "GPS Latitude", type: "text" },
-    { key: "gps_longitude", label: "GPS Longitude", type: "text" },
+    {
+      key: "colony_locality",
+      label: "Colony / Locality",
+      type: "text",
+      required: true,
+    },
+    {
+      key: "gps_latitude",
+      label: "GPS Latitude",
+      type: "text",
+      required: true,
+    },
+    {
+      key: "gps_longitude",
+      label: "GPS Longitude",
+      type: "text",
+      required: true,
+    },
   ];
 
   // Button styles with new color scheme
@@ -234,6 +304,8 @@ export default function SurveyInformationCard({ data, onUpdate }) {
                     options={field.options}
                     selected={formData[field.key] || ""}
                     onSelect={(value) => handleFieldChange(field.key, value)}
+                    error={validationErrors[field.key] || ""}
+                    required={field.required}
                   />
                 );
               }
@@ -248,6 +320,8 @@ export default function SurveyInformationCard({ data, onUpdate }) {
                   type="text"
                   disabled
                   isMobile={isMobile}
+                  error={validationErrors[field.key] || ""}
+                  required={field.required}
                 />
               );
             }
@@ -262,6 +336,8 @@ export default function SurveyInformationCard({ data, onUpdate }) {
                 type={field.type}
                 disabled={!isEditing}
                 isMobile={isMobile}
+                error={validationErrors[field.key] || ""}
+                required={field.required}
               />
             );
           })}

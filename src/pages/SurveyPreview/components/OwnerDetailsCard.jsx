@@ -8,6 +8,7 @@ import {
   useTheme,
 } from "@mui/material";
 import RoleBased from "../../../components/RoleBased";
+import { validateOwnerDetails } from "../../../utils/validation";
 
 import { Edit, Save, Cancel } from "@mui/icons-material";
 
@@ -48,34 +49,56 @@ export default function OwnerDetailsCard({ data, onUpdate }) {
   // ----------------------------------
   // SAVE SECTION
   // ----------------------------------
+  // const handleSave = () => {
+  //   const errors = {};
+
+  //   const mobileNumber = formData.mobile_number || "";
+
+  //   if (!mobileNumber) {
+  //     errors.mobile_number = "Mobile number is required";
+  //   } else if (!/^[6-9]\d{9}$/.test(mobileNumber)) {
+  //     errors.mobile_number = "Please enter a valid 10-digit mobile number";
+  //   }
+
+  //   // If validation fails
+  //   if (Object.keys(errors).length > 0) {
+  //     setValidationErrors(errors);
+  //     return;
+  //   }
+
+  //   // Clear previous errors
+  //   setValidationErrors({});
+
+  //   // Save data
+  //   if (onUpdate) {
+  //     onUpdate("owner_details", formData);
+  //   }
+
+  //   setIsEditing(false);
+  // };
   const handleSave = () => {
-    const errors = {};
+    console.log("SAVE CLICKED");
+    console.log("FORM DATA:", formData);
 
-    const mobileNumber = formData.mobile_number || "";
+    const errors = validateOwnerDetails(formData);
 
-    if (!mobileNumber) {
-      errors.mobile_number = "Mobile number is required";
-    } else if (!/^[6-9]\d{9}$/.test(mobileNumber)) {
-      errors.mobile_number = "Please enter a valid 10-digit mobile number";
-    }
+    console.log("VALIDATION ERRORS:", errors);
 
-    // If validation fails
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
 
-    // Clear previous errors
     setValidationErrors({});
 
-    // Save data
+    console.log("VALIDATION PASSED");
+
     if (onUpdate) {
       onUpdate("owner_details", formData);
     }
 
     setIsEditing(false);
   };
-
   // ----------------------------------
   // CANCEL SECTION
   // ----------------------------------
@@ -89,41 +112,47 @@ export default function OwnerDetailsCard({ data, onUpdate }) {
   // ----------------------------------
   // FIELDS
   // ----------------------------------
+
   const fields = [
     {
       key: "Name of Respondent",
-      label: "Enter Name of Respondent",
+      label: "Name of Respondent",
       type: "text",
+      required: true,
     },
     {
       key: "Relationship of Respondent with Property Owner",
-      label: "Relationship of Respondent with Property Owner Selected",
+      label: "Relationship of Respondent with Property Owner",
       type: "DROPDOWN",
+      required: true,
     },
     {
       key: "owner_name",
       label: "Owner Name",
       type: "text",
+      required: true,
     },
     {
       key: "father_husband_name",
-      label: "Father / Husband Name",
+      label: "Father's / Husband Name",
       type: "text",
+      required: true,
     },
     {
       key: "mobile_number",
       label: "Mobile Number",
-      type: "tel",
+      type: "number",
+      required: true,
     },
     {
       key: "Alternate Mobile Number",
-      label: "Alternate Mobile Number",
-      type: "tel",
+      label: "Alternate Mobile",
+      type: "number",
     },
     {
-      key: "Adhar Number",
-      label: "Adhar Number",
-      type: "tel",
+      key: "AADHAAR Number",
+      label: "AADHAAR Number",
+      type: "number",
     },
     {
       key: "Email ID",
@@ -134,48 +163,13 @@ export default function OwnerDetailsCard({ data, onUpdate }) {
       key: "correspondence_address",
       label: "Correspondence Address",
       type: "text",
+      required: true,
     },
     {
       key: "Pincode",
       label: "Pincode",
-      type: "text",
-    },
-
-    // New fields
-    {
-      key: "owner_type",
-      label: "Owner Type",
-      type: "DROPDOWN",
-    },
-    {
-      key: "gender",
-      label: "Gender",
-      type: "DROPDOWN",
-    },
-    {
-      key: "occupation",
-      label: "Occupation",
-      type: "text",
-    },
-    {
-      key: "pan_number",
-      label: "PAN Number",
-      type: "text",
-    },
-    {
-      key: "village",
-      label: "Village",
-      type: "text",
-    },
-    {
-      key: "district",
-      label: "District",
-      type: "text",
-    },
-    {
-      key: "state",
-      label: "State",
-      type: "text",
+      type: "number",
+      required: true,
     },
   ];
 
@@ -348,6 +342,7 @@ export default function OwnerDetailsCard({ data, onUpdate }) {
               disabled={!isEditing}
               isMobile={isMobile}
               error={validationErrors[field.key] || ""}
+              required={field.required}
             />
           ))}
         </Box>

@@ -306,11 +306,6 @@ function OTPModal({ open, onClose, onVerify, email, otp, setOtp }) {
                     },
                   },
                 }}
-                inputProps={{
-                  maxLength: 1,
-                  type: "text",
-                  pattern: "[0-9]*",
-                }}
               />
             ))}
           </Box>
