@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { FaSyncAlt, FaFileExport } from "react-icons/fa";
 
 import "./Survey.css";
@@ -29,9 +29,18 @@ export default function Survey() {
     has_previous: false,
   });
 
+  // NEW: tracks the most recent survey-data request so stale
+  // responses (from a previous tab/page, or duplicate effect
+  // firing) can be safely ignored instead of overwriting fresh data.
+  const latestRequestId = useRef(0);
+
   const loadSurveyData = useCallback(
     async (pageOverride) => {
       const pageToUse = pageOverride ?? currentPage;
+
+      // NEW: stamp this call with a unique id
+      const requestId = ++latestRequestId.current;
+
       try {
         setLoading(true);
 
@@ -57,23 +66,55 @@ export default function Survey() {
             response = response.pending;
             break;
         }
+
+        // NEW: if a newer request has started since this one began,
+        // drop this (now-stale) response entirely — don't touch state.
+        if (requestId !== latestRequestId.current) {
+          return;
+        }
+
         const paginationSource = response.pagination || response;
-        setSurveyData(response.surveys || []);
+        const totalPages = paginationSource.total_pages ?? 1;
+        const surveysObj = response.surveys || {};
+        const hasSurveys = Object.keys(surveysObj).length > 0;
+
+        // Defensive retry: if backend says records exist but this
+        // page came back empty, and we're not already on page 1,
+        // retry once at page 1. The backend's own page/total_pages
+        // fields for "rejected" can't be fully trusted (see bug).
+        if (
+          !hasSurveys &&
+          (paginationSource.total_surveys ?? 0) > 0 &&
+          pageToUse !== 1
+        ) {
+          setCurrentPage(1);
+          await loadSurveyData(1);
+          return;
+        }
+
+        setSurveyData(surveysObj);
         setPagination({
           total_surveys: paginationSource.total_surveys ?? 0,
-          total_pages: paginationSource.total_pages ?? 1,
+          total_pages: totalPages,
           has_next: paginationSource.has_next ?? false,
           has_previous: paginationSource.has_previous ?? false,
         });
       } catch (error) {
-        console.error("Error fetching survey data:", error);
-        setSurveyData([]);
+        // NEW: only report/clear state if this is still the latest request
+        if (requestId === latestRequestId.current) {
+          console.error("Error fetching survey data:", error);
+          setSurveyData([]);
+        }
       } finally {
-        setLoading(false);
+        // NEW: only clear loading if this is still the latest request
+        if (requestId === latestRequestId.current) {
+          setLoading(false);
+        }
       }
     },
     [activeTab, currentPage],
   );
+
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       loadSurveyData();
@@ -123,10 +164,12 @@ export default function Survey() {
     });
     loadStatistics();
   };
+
   const handleRefreshClick = async () => {
     await loadSurveyData();
     notify.success("Data Refresh");
   };
+
   return (
     <div className="survey-page">
       {/* Header */}

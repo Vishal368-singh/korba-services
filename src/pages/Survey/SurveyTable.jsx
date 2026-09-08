@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FaEye, FaCheck, FaTimes, FaDownload } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import RejectModal from "../../components/Rejectmodal";
+import RejectModal from "../../components/RejectModal";
 import { approveSurveyAPI } from "../../services/api";
 import { updateSurveyStatus } from "../../services/api";
 import { fetchSurveyBySurveyID } from "../../services/api";
@@ -18,6 +18,38 @@ export default function SurveyTable({
   const [selectedSurveyId, setSelectedSurveyId] = useState(null);
   const [downloadingId, setDownloadingId] = useState(null);
   const canManage = canManageSurveys();
+
+  // =========================================================
+  // NEW: Calculate number of days a survey has been pending,
+  // based on survey_date vs. today. Used only in the Pending tab.
+  // =========================================================
+  const getDaysPending = (surveyDate) => {
+    if (!surveyDate) return "—";
+
+    const surveyDateObj = new Date(surveyDate);
+
+    if (Number.isNaN(surveyDateObj.getTime())) return "—";
+
+    // Zero out time portions so we get whole-day differences,
+    // regardless of what time survey_date carries.
+    const startOfSurveyDay = new Date(
+      surveyDateObj.getFullYear(),
+      surveyDateObj.getMonth(),
+      surveyDateObj.getDate(),
+    );
+
+    const today = new Date();
+    const startOfToday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    );
+
+    const diffMs = startOfToday - startOfSurveyDay;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    return diffDays < 0 ? 0 : diffDays;
+  };
 
   const handleDownloadReport = async (surveyId) => {
     try {
@@ -110,6 +142,8 @@ export default function SurveyTable({
             <th>Zone</th>
             {/* <th>Surveyor ID</th> */}
             <th>Survey Date</th>
+            {/* NEW: only shown on the Pending tab */}
+            {activeTab === "Pending" && <th>Days Pending</th>}
             <th>Status</th>
             <th width="250">Action</th>
           </tr>
@@ -124,6 +158,11 @@ export default function SurveyTable({
               <td>{survey.surveyor_name}</td>
               <td>{survey.zone}</td>
               <td>{survey.survey_date}</td>
+
+              {/* NEW: only shown on the Pending tab */}
+              {activeTab === "Pending" && (
+                <td>{getDaysPending(survey.survey_date)}</td>
+              )}
 
               <td>{survey.status}</td>
 

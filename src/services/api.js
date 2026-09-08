@@ -737,6 +737,47 @@ export const fetchDashboardData = async (
   return response.data;
 };
 
+// export const fetchKeyIndicators = async (
+//   startDate,
+//   endDate
+// ) => {
+ 
+//   const token = localStorage.getItem("user")
+//     ? JSON.parse(localStorage.getItem("user")).access_token
+//     : null;
+
+//   if (!token) {
+//     notify.error("No token found. Please log in first.");
+//     throw new Error("No token found. Please log in first.");
+//   }
+
+//   const formatDate = (date) => {
+//     if (!date) return "";
+//     const d = new Date(date);
+//     return d.toISOString().split("T")[0];
+//   };
+
+//   const params = new URLSearchParams();
+//   if (startDate) params.append("start_date", formatDate(startDate));
+//   if (endDate) params.append("end_date", formatDate(endDate));
+//   // if (selectedUids && selectedUids.length > 0) {
+//   //   params.append("property_uids", selectedUids.join(","));
+//   // }
+
+//   const url = `/api/dashboard/key-indicators${params.toString() ? `?${params.toString()}` : ""}`;
+
+//   const response = await api.get(url, {
+//     headers: { Authorization: `Bearer ${token}` },
+//   });
+//  console.log("fetchKeyIndicators response:", response);
+//   if (response.status !== 200) {
+//     notify.error("Failed to fetch dashboard data");
+//     throw new Error("Failed to fetch dashboard data");
+//   }
+
+//   return response.data;
+// };
+
 export const fetchKeyIndicators = async (
   startDate,
   endDate

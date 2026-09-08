@@ -1,4 +1,4 @@
-import  { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import "./SurveyorsManagement.css";
 import notify from "../../utils/toast";
 import {
@@ -687,25 +687,22 @@ function SurveyorsManagement() {
 
       if (otpValue !== "123456") {
         notify.dismiss(loadingId);
-
         notify.error("Invalid OTP, enter the correct OTP.");
-
-        return;
+        return false; // <-- ADD THIS so the modal can react
       }
 
       notify.dismiss(loadingId);
-
       setOtpValidationModal(false);
-
       notify.success("OTP verified successfully!");
 
       await loadSurveyors();
 
       setOtp(["", "", "", "", "", ""]);
+      return true; // <-- ADD THIS (optional, but explicit)
     } catch (error) {
       console.error("Error verifying OTP:", error);
-
       notify.error(error.message || "Invalid OTP. Please try again.");
+      return false; // <-- ADD THIS
     }
   };
 
@@ -1076,13 +1073,9 @@ function SurveyorsManagement() {
               <label>
                 <i className="fas fa-lock" style={{ color: "#7A1453" }}></i>{" "}
                 Password{" "}
-                {editingId ? (
-                  <span className="hint-text">
-                    (leave blank to keep current)
-                  </span>
-                ) : (
+                {
                   <span className="required-fields">*</span>
-                )}
+                }
               </label>
 
               <input
