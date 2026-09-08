@@ -87,21 +87,27 @@ function deconflictOverlaps(rawLocations) {
 
   return result;
 }
-
+function classifyLocation(propertyLocation) {
+  if (!propertyLocation) return "Others";
+  const lower = propertyLocation.toLowerCase();
+  if (lower.includes("main") || lower.includes("road")) return "Main Road";
+  if (lower.includes("market")) return "Market";
+  return "Others";
+}
 function mapApiDataToLocations(mapData, statusLookup) {
   if (!mapData || !Array.isArray(mapData)) return [];
   return mapData
     .filter((loc) => loc.latitude && loc.longitude)
     .map((loc) => {
       let color = MAP_DEFAULT_MARKER_COLOR;
+
       if (loc.property_location) {
-        const locationKey = Object.keys(LOCATION_COLORS).find((key) =>
-          loc.property_location.toLowerCase().includes(key.toLowerCase()),
-        );
-        if (locationKey) color = LOCATION_COLORS[locationKey];
+        const bucket = classifyLocation(loc.property_location);
+        color = LOCATION_COLORS[bucket] || MAP_DEFAULT_MARKER_COLOR;
       } else if (loc.tax_rate_zone) {
         color = ZONE_COLORS[loc.tax_rate_zone] || MAP_DEFAULT_MARKER_COLOR;
       }
+
       return {
         name: loc.parcel_no || loc.property_id || loc.property_uid,
         lat: parseFloat(loc.latitude),

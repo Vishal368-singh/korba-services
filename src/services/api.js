@@ -87,7 +87,33 @@ export const fetchAllSurveys = async (page = 1) => {
   return response.data;
 };
 
-export const fetchRejectedPendingSurveys = async (page = 1) => {
+// export const fetchRejectedPendingSurveys = async (page = 1) => {
+//   const token = localStorage.getItem("user")
+//     ? JSON.parse(localStorage.getItem("user")).access_token
+//     : null;
+//   if (!token) {
+//     notify.error("No token found. Please log in first.");
+//     throw new Error("No token found. Please log in first.");
+//   }
+//   const response = await api.post(
+//     "/web/pending-rejected-survey-data-summary",
+//     { page },
+//     {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//       },
+//     },
+//   );
+//   console.log("Rejected/Pending Surveys Response:", response); // Debugging line
+//   if (response.status !== 200) {
+//     notify.error("Failed to fetch rejected surveys");
+//     throw new Error("Failed to fetch rejected surveys");
+//   }
+//   return response.data;
+// };
+
+
+export const fetchRejectedPendingSurveys = async (pendingPage = 1, rejectedPage = 1) => {
   const token = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user")).access_token
     : null;
@@ -97,7 +123,7 @@ export const fetchRejectedPendingSurveys = async (page = 1) => {
   }
   const response = await api.post(
     "/web/pending-rejected-survey-data-summary",
-    { page },
+    { pending_page: pendingPage, rejected_page: rejectedPage },
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -110,7 +136,6 @@ export const fetchRejectedPendingSurveys = async (page = 1) => {
   }
   return response.data;
 };
-
 export const fetchSurveyBySurveyID = async (surveyId) => {
   const token = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user")).access_token
@@ -339,7 +364,7 @@ export const fetchSurveyStatusCounts = async () => {
       },
     },
   );
-
+console.log("Survey Status Counts Response:", response); // Debugging line
   if (response.status !== 200) {
     notify.error("Failed to fetch survey statistics");
     throw new Error("Failed to fetch survey statistics");
@@ -744,7 +769,7 @@ export const fetchKeyIndicators = async (
   const response = await api.get(url, {
     headers: { Authorization: `Bearer ${token}` },
   });
- console.log("fetchKeyIndicators response:", response);
+
   if (response.status !== 200) {
     notify.error("Failed to fetch dashboard data");
     throw new Error("Failed to fetch dashboard data");
