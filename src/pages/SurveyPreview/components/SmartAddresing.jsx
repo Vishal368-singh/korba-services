@@ -8,27 +8,19 @@ import {
   useTheme,
 } from "@mui/material";
 import { Edit, Save, Cancel } from "@mui/icons-material";
-import PreviewField from "./PreviewField";
 import "../SectionCard.css";
 import DropdownField from "../../../common/DropdownField";
-import {
-  OWNERSHIP_TYPES,
-  PROPERTY_STATUS,
-  YES_NO_OPTIONS,
-} from "../../../utils/constants";
-import { validatePropertyDetails } from "../../../utils/validation";
+import PreviewField from "./PreviewField";
+import { YES_NO_OPTIONS } from "../../../utils/constants";
 
-export default function PropertyDetailsCard({ data, onUpdate }) {
+export default function SmartAddresing({ data, onUpdate }) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(data || {});
-  const [validationErrors, setValidationErrors] = useState({});
 
-  // Responsive hooks
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
 
-  // Update local state when data prop changes
   useEffect(() => {
     if (data) {
       setFormData(data);
@@ -49,17 +41,8 @@ export default function PropertyDetailsCard({ data, onUpdate }) {
   };
 
   const handleSave = () => {
-    const errors = validatePropertyDetails(formData);
-
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(errors);
-      return;
-    }
-
-    setValidationErrors({});
-
     if (onUpdate) {
-      onUpdate("property_details", formData);
+      onUpdate("smart_addressing", formData);
     }
 
     setIsEditing(false);
@@ -72,26 +55,35 @@ export default function PropertyDetailsCard({ data, onUpdate }) {
 
   const fields = [
     {
-      key: "property_status",
-      label: "Property Status",
-      type: "select",
-      options: PROPERTY_STATUS,
-    },
-    {
-      key: "building_permission_available",
-      label: "Building Permission Available",
+      key: "ddn_generated",
+      label: "DDN Generated",
       type: "select",
       options: YES_NO_OPTIONS,
     },
     {
-      key: "property_ownership",
-      label: "Property Ownership",
+      key: "ddn_sticker_affixed",
+      label: "DDN Sticker Affixed",
       type: "select",
-      options: OWNERSHIP_TYPES,
+      options: YES_NO_OPTIONS,
+    },
+    {
+      key: "qr_code_affixed",
+      label: "QR Code Affixed",
+      type: "select",
+      options: YES_NO_OPTIONS,
+    },
+    {
+      key: "street_code",
+      label: "Street Code",
+      type: "text",
+    },
+    {
+      key: "building_sequence_no",
+      label: "Building Sequence No.",
+      type: "text",
     },
   ];
 
-  // Button styles with color scheme
   const buttonStyles = {
     backgroundColor: "#ffffff",
     color: "#7A1453",
@@ -102,6 +94,7 @@ export default function PropertyDetailsCard({ data, onUpdate }) {
     fontWeight: 500,
     padding: isMobile ? "6px 12px" : "8px 16px",
     minWidth: isMobile ? "auto" : "64px",
+
     "&:hover": {
       backgroundColor: "#7A1453",
       color: "#ffffff",
@@ -149,7 +142,7 @@ export default function PropertyDetailsCard({ data, onUpdate }) {
             textAlign: isMobile ? "center" : "left",
           }}
         >
-          Property Details
+          Smart Addressing
         </Typography>
 
         <Box
@@ -185,6 +178,7 @@ export default function PropertyDetailsCard({ data, onUpdate }) {
               >
                 Cancel
               </Button>
+
               <Button
                 variant="contained"
                 startIcon={<Save />}
@@ -219,7 +213,8 @@ export default function PropertyDetailsCard({ data, onUpdate }) {
             gap: isMobile ? "8px 12px" : isTablet ? "12px 20px" : "16px 32px",
           }}
         >
-          {fields.map((field) => {
+          {/* {fields.map((field) => {
+            // Select fields
             if (field.type === "select") {
               if (isEditing) {
                 return (
@@ -228,11 +223,11 @@ export default function PropertyDetailsCard({ data, onUpdate }) {
                     label={field.label}
                     options={field.options}
                     selected={
-                      typeof formData[field.key] === "boolean"
-                        ? formData[field.key]
-                          ? "Yes"
-                          : "No"
-                        : formData[field.key] || ""
+                      formData[field.key] === true
+                        ? "Yes"
+                        : formData[field.key] === false
+                          ? "No"
+                          : ""
                     }
                     onSelect={(value) =>
                       handleFieldChange(
@@ -240,33 +235,105 @@ export default function PropertyDetailsCard({ data, onUpdate }) {
                         value === "Yes" ? true : value === "No" ? false : value,
                       )
                     }
-                    error={validationErrors[field.key] || ""}
                   />
                 );
               }
 
+              // View mode: directly show Yes / No
               return (
                 <PreviewField
                   key={field.key}
                   label={field.label}
                   value={
-                    typeof formData[field.key] === "boolean"
-                      ? formData[field.key]
-                        ? "Yes"
-                        : "No"
-                      : formData[field.key] || ""
+                    formData[field.key] === true
+                      ? "Yes"
+                      : formData[field.key] === false
+                        ? "No"
+                        : ""
                   }
                   onChange={handleFieldChange}
                   fieldKey={field.key}
                   type="text"
                   disabled
                   isMobile={isMobile}
-                  error={validationErrors[field.key] || ""}
                 />
               );
             }
 
-            return null;
+            // Text / Number fields
+            return (
+              <PreviewField
+                key={field.key}
+                label={field.label}
+                value={formData[field.key] ?? ""}
+                onChange={handleFieldChange}
+                fieldKey={field.key}
+                type={field.type}
+                disabled={!isEditing}
+                isMobile={isMobile}
+              />
+            );
+          })} */}
+          {fields.map((field) => {
+            // Select fields
+            if (field.type === "select") {
+              if (isEditing) {
+                return (
+                  <DropdownField
+                    key={field.key}
+                    label={field.label}
+                    options={field.options}
+                    selected={
+                      formData[field.key] === true
+                        ? "Yes"
+                        : formData[field.key] === false
+                          ? "No"
+                          : (formData[field.key] ?? "")
+                    }
+                    onSelect={(value) =>
+                      handleFieldChange(
+                        field.key,
+                        value === "Yes" ? true : value === "No" ? false : value,
+                      )
+                    }
+                  />
+                );
+              }
+
+              // View mode
+              return (
+                <PreviewField
+                  key={field.key}
+                  label={field.label}
+                  value={
+                    formData[field.key] === true
+                      ? "Yes"
+                      : formData[field.key] === false
+                        ? "No"
+                        : (formData[field.key] ?? "")
+                  }
+                  onChange={handleFieldChange}
+                  fieldKey={field.key}
+                  type="text"
+                  disabled
+                  isMobile={isMobile}
+                />
+              );
+            }
+
+            // Text / Number fields
+            return (
+              <PreviewField
+                key={field.key}
+                label={field.label}
+                value={formData[field.key] ?? ""}
+                onChange={handleFieldChange}
+                fieldKey={field.key}
+                type={field.type}
+                disabled={!isEditing}
+                isMobile={isMobile}
+              />
+            );
           })}
         </Box>
       </Box>

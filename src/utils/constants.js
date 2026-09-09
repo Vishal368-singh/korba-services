@@ -108,7 +108,7 @@ export const USAGE_TYPES = [
   "Clinic/Nursing Home/Health Centre",
   "Diagnostic Centre/Care Institution",
   "Educational Institution",
-  "Industrial Unit/Factory",
+  "Industrial",
   "Religious Place",
   "Government Office",
   "Others (Specify)",

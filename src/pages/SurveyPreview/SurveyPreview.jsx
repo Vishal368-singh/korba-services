@@ -7,6 +7,8 @@ import OwnerDetailsCard from "./components/OwnerDetailsCard";
 import PropertyDetailsCard from "./components/PropertyDetailsCard";
 import LandBuildingCard from "./components/LandBuildingCard";
 import UsageDetailsCard from "./components/UsageDetailsCard";
+import TaxRelatedInformation from "./components/TaxRelatedInformation.jsx";
+import SmartAddresing from "./components/SmartAddresing.jsx";
 import UtilityCard from "./components/UtilityCard";
 import GISCard from "./components/GISCard";
 import VerificationCard from "./components/VerificationCard";
@@ -75,8 +77,10 @@ export default function SurveyPreview() {
         owner_details: survey.owner_details,
         property_details: survey.property_details,
         land_building_information: survey.land_building_information,
+        tax_related_information: survey.tax_related_information,
         usage_details: survey.usage_details,
         utility_connections: survey.utility_connections,
+        smart_addressing: survey.smart_addressing,
         gis_information: survey.gis_information,
         verification: survey.verification,
         documents_collected: survey.documents_collected,
@@ -211,7 +215,10 @@ export default function SurveyPreview() {
         data={survey.land_building_information}
         onUpdate={handleSectionUpdate}
       />
-
+      <TaxRelatedInformation
+        data={survey.tax_related_information}
+        onUpdate={handleSectionUpdate}
+      />
       <UsageDetailsCard
         data={survey.usage_details}
         onUpdate={handleSectionUpdate}
@@ -219,6 +226,10 @@ export default function SurveyPreview() {
 
       <UtilityCard
         data={survey.utility_connections}
+        onUpdate={handleSectionUpdate}
+      />
+      <SmartAddresing
+        data={survey.smart_addressing}
         onUpdate={handleSectionUpdate}
       />
 

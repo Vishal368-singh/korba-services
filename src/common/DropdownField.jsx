@@ -17,14 +17,21 @@ const DropdownField = ({
   required = false,
 }) => {
   return (
-    <FormControl
-      fullWidth
-      size="small"
-      error={!!error}
-      disabled={disabled}
-      required={required}
-    >
-      <InputLabel>{label}</InputLabel>
+    <FormControl fullWidth size="small" error={!!error} disabled={disabled}>
+      <InputLabel>
+        {label}
+
+        {required && (
+          <span
+            style={{
+              color: "#ef4444",
+              marginLeft: "4px",
+            }}
+          >
+            *
+          </span>
+        )}
+      </InputLabel>
 
       <Select
         value={selected || ""}
@@ -32,7 +39,7 @@ const DropdownField = ({
         onChange={(e) => onSelect(e.target.value)}
         MenuProps={{
           disableScrollLock: true,
-          PaperProps: {
+          slotProps: {
             sx: {
               maxHeight: 300,
               borderRadius: "8px",
