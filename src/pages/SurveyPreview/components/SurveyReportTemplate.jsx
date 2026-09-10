@@ -735,6 +735,7 @@ function LocationBox({ latitude, longitude, locationName }) {
                 lineHeight: 1.25,
                 color: "#333",
                 fontWeight: 600,
+                marginBottom: "2px",
               }}
             >
               {"GPS: " + lat.toFixed(6) + ", " + lng.toFixed(6)}

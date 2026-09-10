@@ -90,7 +90,10 @@ export default function KeyIndicators({ data }) {
     <div>
       <h3 className="text-2xl font-bold text-gray-800 mb-2">Key Indicators</h3>
 
-      <div className="grid grid-cols-2 mb-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+      <div
+        id="kpi-grid"
+        className="grid grid-cols-2 mb-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3"
+      >
         {indicators.map((item) => (
           <IndicatorCard key={item.key} item={item} />
         ))}

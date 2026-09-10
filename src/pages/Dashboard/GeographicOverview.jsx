@@ -1,10 +1,11 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MapContainer,
   TileLayer,
   CircleMarker,
   Popup,
   useMap,
+  useMapEvents,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import {
@@ -17,7 +18,6 @@ import {
 } from "../../theme/colors";
 
 const KORBA_CENTER = [22.351866935224848, 82.69620636172175];
-//22.356614966594247, 82.7061557631624
 const DEFAULT_ZOOM = 14;
 
 function FitBounds({ points }) {
@@ -36,7 +36,6 @@ function FitBounds({ points }) {
   return null;
 }
 
-// Resets the map back to Korba whenever the filter is cleared
 function ResetOnClear({ active }) {
   const map = useMap();
   useEffect(() => {
@@ -45,6 +44,79 @@ function ResetOnClear({ active }) {
     }
   }, [active, map]);
   return null;
+}
+
+// Draws every marker onto a plain <canvas> instead of Leaflet's SVG pane.
+// This is what makes markers survive html2canvas export — a flat canvas
+// bitmap copies reliably, whereas Leaflet's transformed SVG pane doesn't.
+function CanvasMarkerLayer({ dimmed, highlighted, selectedFilter }) {
+  const map = useMap();
+  const canvasRef = useRef(null);
+
+  const draw = () => {
+    const canvas = canvasRef.current;
+    if (!canvas || !map) return;
+
+    const size = map.getSize();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = size.x * dpr;
+    canvas.height = size.y * dpr;
+    canvas.style.width = `${size.x}px`;
+    canvas.style.height = `${size.y}px`;
+
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, size.x, size.y);
+
+    const drawPoint = (loc, radius, strokeColor, strokeWidth, fillOpacity) => {
+      const pt = map.latLngToContainerPoint([loc.lat, loc.lng]);
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, radius, 0, Math.PI * 2);
+      ctx.globalAlpha = fillOpacity;
+      ctx.fillStyle = loc.color;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = strokeWidth;
+      ctx.strokeStyle = strokeColor;
+      ctx.stroke();
+    };
+
+    dimmed.forEach((loc) =>
+      drawPoint(loc, 6, "#fff", 1, DIM_MARKER_FILL_OPACITY)
+    );
+    highlighted.forEach((loc) =>
+      drawPoint(
+        loc,
+        selectedFilter ? 11 : 9,
+        selectedFilter ? HIGHLIGHT_COLOR : "#fff",
+        selectedFilter ? 3 : 2,
+        1
+      )
+    );
+  };
+
+  useEffect(() => {
+    draw();
+  }, [dimmed, highlighted, selectedFilter, map]);
+
+  useMapEvents({
+    move: draw,
+    zoom: draw,
+    resize: draw,
+  });
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        pointerEvents: "none", // clicks pass through to the map/tiles beneath
+        zIndex: 400, // above tiles, below Leaflet controls (z-index 1000)
+      }}
+    />
+  );
 }
 
 function buildStatusLookup(propertyStatus) {
@@ -87,6 +159,7 @@ function deconflictOverlaps(rawLocations) {
 
   return result;
 }
+
 function classifyLocation(propertyLocation) {
   if (!propertyLocation) return "Others";
   const lower = propertyLocation.toLowerCase();
@@ -94,6 +167,7 @@ function classifyLocation(propertyLocation) {
   if (lower.includes("market")) return "Market";
   return "Others";
 }
+
 function mapApiDataToLocations(mapData, statusLookup) {
   if (!mapData || !Array.isArray(mapData)) return [];
   return mapData
@@ -209,54 +283,12 @@ export default function GeographicOverview({
 
           <ResetOnClear active={!!selectedFilter} />
 
-          {dimmed.map((loc, index) => (
-            <CircleMarker
-              key={`dim-${loc.property_uid || index}`}
-              center={[loc.lat, loc.lng]}
-              radius={6}
-              pathOptions={{
-                color: "#fff",
-                weight: 1,
-                fillColor: loc.color,
-                fillOpacity: DIM_MARKER_FILL_OPACITY,
-                opacity: DIM_MARKER_OPACITY,
-              }}
-            />
-          ))}
-
-          {highlighted.map((loc, index) => (
-            <CircleMarker
-              key={loc.property_uid || index}
-              center={[loc.lat, loc.lng]}
-              radius={selectedFilter ? 11 : 9}
-              pathOptions={{
-                color: selectedFilter ? HIGHLIGHT_COLOR : "#fff",
-                weight: selectedFilter ? 3 : 2,
-                fillColor: loc.color,
-                fillOpacity: 1,
-              }}
-            >
-              <Popup>
-                <div className="text-xs space-y-0.5">
-                  <p className="font-semibold text-[#7a1453]">{loc.name}</p>
-
-                  {loc.property_uid && <p>Property UID: {loc.property_uid}</p>}
-
-                  {loc.parcel_no && <p>Parcel: {loc.parcel_no}</p>}
-
-                  {loc.property_id && <p>Property ID: {loc.property_id}</p>}
-
-                  {loc.property_location && (
-                    <p>Location: {loc.property_location}</p>
-                  )}
-
-                  {loc.tax_rate_zone && <p>Zone: {loc.tax_rate_zone}</p>}
-
-                  {loc.status && <p>Status: {loc.status}</p>}
-                </div>
-              </Popup>
-            </CircleMarker>
-          ))}
+          {/* Markers now drawn on a plain canvas instead of Leaflet's SVG pane */}
+          <CanvasMarkerLayer
+            dimmed={dimmed}
+            highlighted={highlighted}
+            selectedFilter={selectedFilter}
+          />
 
           <div className="absolute bottom-0 right-0 z-[1000] bg-gray-100 px-2 py-2 rounded text-[12px] text-gray-500 shadow-sm">
             Powered by{" "}

@@ -17,7 +17,7 @@ export default function DashboardCharts({
           onClearFilter={onClearFilter}
         />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full">
+      <div id="charts-grid-right" className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-full">
         <DonutStatCard
           title="Tax Rate Zone"
           themeKey="tax_rate_zone"

@@ -16,6 +16,7 @@ export default function AppRoutes() {
       {/* Login Pages */}
       <Route element={<AuthLayout />}>
         <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
       </Route>
 
       {/* Protected Pages */}

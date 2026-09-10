@@ -9,16 +9,21 @@ import GISBackground from "../../components/GISBackground.jsx";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const router = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     const payload = {
       username: e.target[0].value,
       password: e.target[1].value,
     };
+
+    setLoading(true);
 
     try {
       const response = await login(payload);
@@ -31,6 +36,24 @@ export default function Login() {
       router("/dashboard");
     } catch (error) {
       console.error("Login failed:", error);
+
+      // Try to pull a meaningful message from the API response,
+      // otherwise fall back to a generic one.
+      const status = error?.response?.status;
+      const serverMessage = error?.response?.data?.message;
+
+      if (status === 401 || status === 400) {
+        setError(serverMessage || "Incorrect username or password.");
+      } else if (!error?.response) {
+        setError("Unable to reach the server. Please try again.");
+      } else {
+        setError(serverMessage || "Something went wrong. Please try again.");
+      }
+
+      // Clear password field on failure
+      e.target[1].value = "";
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,6 +84,7 @@ export default function Login() {
                 type="text"
                 placeholder="Username"
                 required
+                onChange={() => error && setError("")}
               />
             </div>
 
@@ -74,6 +98,7 @@ export default function Login() {
                 }
                 placeholder="Password"
                 required
+                onChange={() => error && setError("")}
               />
 
               <button
@@ -88,11 +113,18 @@ export default function Login() {
 
             </div>
 
+            {error && (
+              <div className="error-message" role="alert">
+                {error}
+              </div>
+            )}
+
             <button
               type="submit"
               className="login-btn"
+              disabled={loading}
             >
-              Log In
+              {loading ? "Logging in..." : "Log In"}
             </button>
 
           </form>

@@ -112,8 +112,10 @@ export const fetchAllSurveys = async (page = 1) => {
 //   return response.data;
 // };
 
-
-export const fetchRejectedPendingSurveys = async (pendingPage = 1, rejectedPage = 1) => {
+export const fetchRejectedPendingSurveys = async (
+  pendingPage = 1,
+  rejectedPage = 1,
+) => {
   const token = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user")).access_token
     : null;
@@ -136,6 +138,7 @@ export const fetchRejectedPendingSurveys = async (pendingPage = 1, rejectedPage 
   }
   return response.data;
 };
+
 export const fetchSurveyBySurveyID = async (surveyId) => {
   const token = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user")).access_token
@@ -364,7 +367,7 @@ export const fetchSurveyStatusCounts = async () => {
       },
     },
   );
-console.log("Survey Status Counts Response:", response); // Debugging line
+  console.log("Survey Status Counts Response:", response); // Debugging line
   if (response.status !== 200) {
     notify.error("Failed to fetch survey statistics");
     throw new Error("Failed to fetch survey statistics");
@@ -741,7 +744,7 @@ export const fetchDashboardData = async (
 //   startDate,
 //   endDate
 // ) => {
- 
+
 //   const token = localStorage.getItem("user")
 //     ? JSON.parse(localStorage.getItem("user")).access_token
 //     : null;
@@ -778,11 +781,7 @@ export const fetchDashboardData = async (
 //   return response.data;
 // };
 
-export const fetchKeyIndicators = async (
-  startDate,
-  endDate
-) => {
- 
+export const fetchKeyIndicators = async (startDate, endDate) => {
   const token = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user")).access_token
     : null;

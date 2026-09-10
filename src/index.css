@@ -14,3 +14,10 @@ body {
   overflow-x: hidden;
   overflow-y: visible !important;
 }
+
+/* Forces lg: breakpoint layout during PDF export, regardless of real
+   viewport width — avoids needing to resize the capture, which was
+   causing the map's live position and captured position to diverge. */
+.pdf-export-desktop {
+  min-width: 1440px;
+}
