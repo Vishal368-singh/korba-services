@@ -27,13 +27,19 @@ export default function Login() {
 
     try {
       const response = await login(payload);
+      console.log("LOGIN RESPONSE:", response);
+      console.log("ROLE:", response?.role);
 
       localStorage.setItem(
         "user",
         JSON.stringify(response)
       );
 
-      router("/dashboard");
+   if (response?.role === "MLAdmin") {
+     router("/edit");
+   } else {
+     router("/dashboard");
+   }
     } catch (error) {
       console.error("Login failed:", error);
 

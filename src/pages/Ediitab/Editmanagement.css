@@ -1,0 +1,124 @@
+
+/* ================================
+   EDIT MANAGEMENT TABLE
+================================ */
+
+.edit-management-table-container {
+  width: 100%;
+  height: calc(100vh - 300px);
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+/* Table */
+
+.edit-management-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Header */
+
+.edit-management-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #f8f8f8;
+  padding: 12px 14px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+/* Body */
+
+.edit-management-table tbody td {
+  padding: 12px 14px;
+  white-space: nowrap;
+}
+
+/* Action buttons */
+
+.edit-management-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ================================
+   PAGINATION
+================================ */
+
+.edit-management-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding: 0 5px;
+}
+
+/* Total records */
+
+.edit-management-total {
+  color: #666;
+  font-size: 14px;
+}
+
+.edit-management-total strong {
+  color: #333;
+}
+
+/* Previous / Next */
+
+.edit-management-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.edit-management-pagination-btn {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+}
+
+.edit-management-pagination-btn:disabled {
+  background: #f5f5f5;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+.edit-management-page-info {
+  min-width: 80px;
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+}
+.table-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.table-header span {
+  font-weight: 600;
+}
+
+.table-header input {
+  width: 80%;
+  box-sizing: border-box;
+  padding: 3px 5px;
+  border: 1px solid #ddd ;
+  border-radius: 4px;
+  font-size: 12px;
+  outline: none;
+  background: transparent;
+}
+
+.table-header input:focus {
+  border: 1px solid #fcf8f8 ;
+  outline: none;
+  box-shadow: none;
+}

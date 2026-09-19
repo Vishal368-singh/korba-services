@@ -8,9 +8,14 @@ import Dashboard from "../pages/Dashboard/Dashboard";
 import Survey from "../pages/Survey/Survey";
 import SurveyPreview from "../pages/SurveyPreview/SurveyPreview";
 import SurveyorsManagement from "../pages/User/SurveyorsManagement";
+import Editmanagement from "../pages/Ediitab/Editmanagement";
 // import NotFound from "../pages/NotFound/NotFound";
 
 export default function AppRoutes() {
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  console.log(user);
+  console.log(user?.role);
   return (
     <Routes>
       {/* Login Pages */}
@@ -25,6 +30,7 @@ export default function AppRoutes() {
         <Route path="/survey" element={<Survey />} />
         <Route path="/users" element={<SurveyorsManagement />} />
         <Route path="/surveys/:surveyId" element={<SurveyPreview />} />
+        <Route path="/edit" element={<Editmanagement />} />
       </Route>
 
       {/* <Route path="*" element={<NotFound />} /> */}

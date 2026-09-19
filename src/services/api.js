@@ -884,3 +884,34 @@ export const updateSurveyorAPI = async (surveyorId, payload) => {
 
   return response;
 };
+export const fetchEditManagementDataAPI = async (page = 1, limit = 20) => {
+  const token = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user")).access_token
+    : null;
+
+  if (!token) {
+    notify.error("No token found. Please log in first.");
+    throw new Error("No token found. Please log in first.");
+  }
+
+  const response = await api.post(
+    "/korba-services/web/edit-management-survey-data",
+    {
+      page,
+      limit,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    },
+  );
+
+  if (response.status !== 200) {
+    notify.error("Failed to fetch edit management data");
+    throw new Error("Failed to fetch edit management data");
+  }
+
+  return response.data;
+};
