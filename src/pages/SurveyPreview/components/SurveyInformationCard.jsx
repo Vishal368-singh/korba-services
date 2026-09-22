@@ -82,18 +82,21 @@ export default function SurveyInformationCard({ data, onUpdate }) {
       label: "Parcel Number",
       type: "text",
       required: true,
+      disabled: true,
     },
     {
       key: "property_id",
       label: "Property ID",
       type: "text",
       required: true,
+      disabled: true,
     },
     {
       key: "existing_property_id",
       label: "Existing Property ID",
       type: "text",
       required: true,
+      disabled: true,
     },
     {
       key: "property_location",
@@ -114,6 +117,7 @@ export default function SurveyInformationCard({ data, onUpdate }) {
       label: "Survey ID",
       type: "text",
       required: true,
+      disabled: true,
     },
     {
       key: "survey_date",
@@ -126,12 +130,14 @@ export default function SurveyInformationCard({ data, onUpdate }) {
       label: "Surveyor Name",
       type: "text",
       required: true,
+      disabled: true,
     },
     {
       key: "surveyor_id",
       label: "Surveyor ID",
       type: "text",
       required: true,
+      disabled: true,
     },
     {
       key: "ward_no",
@@ -334,7 +340,7 @@ export default function SurveyInformationCard({ data, onUpdate }) {
                 onChange={handleFieldChange}
                 fieldKey={field.key}
                 type={field.type}
-                disabled={!isEditing}
+             disabled={!isEditing || field.disabled === true}
                 isMobile={isMobile}
                 error={validationErrors[field.key] || ""}
                 required={field.required}

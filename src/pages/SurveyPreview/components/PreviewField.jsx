@@ -21,14 +21,27 @@ export default function PreviewField({
   suffix = "",
   error = "",
 }) {
-  const [localValue, setLocalValue] = useState(value || "");
+  // const [localValue, setLocalValue] = useState(value || "");
+  // const [localError, setLocalError] = useState("");
+
+  // const theme = useTheme();
+  // const isSmallMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  // useEffect(() => {
+  //   setLocalValue(value || "");
+  //   setLocalError("");
+  // }, [value]);
+  const [localValue, setLocalValue] = useState(
+    value !== undefined && value !== null ? value : "",
+  );
+
   const [localError, setLocalError] = useState("");
 
   const theme = useTheme();
   const isSmallMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
-    setLocalValue(value || "");
+    setLocalValue(value !== undefined && value !== null ? value : "");
     setLocalError("");
   }, [value]);
 

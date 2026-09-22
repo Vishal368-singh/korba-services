@@ -163,7 +163,7 @@ export default function DocumentsCard({ data, onUpdate }) {
             width: isMobile ? "100%" : "auto",
           }}
         >
-          {!isEditing ? (
+          {/* {!isEditing ? (
             <Button
               variant="contained"
               startIcon={<Edit />}
@@ -200,7 +200,7 @@ export default function DocumentsCard({ data, onUpdate }) {
                 Save Section
               </Button>
             </>
-          )}
+          )} */}
         </Box>
       </Box>
 

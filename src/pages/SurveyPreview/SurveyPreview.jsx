@@ -68,11 +68,26 @@ export default function SurveyPreview() {
 
     try {
       setSaving(true);
+
       const loadingId = notify.loading("Saving all changes...");
 
-      // Prepare the complete survey data
+      // ---------------------------------------
+      // survey_id comes from URL / loaded survey
+      // ---------------------------------------
+      const currentSurveyId = survey?.survey_information?.survey_id || surveyId;
+
+      if (!currentSurveyId) {
+        notify.dismiss(loadingId);
+        notify.error("Survey ID not found");
+        return;
+      }
+
+      // ---------------------------------------
+      // Complete survey payload
+      // ---------------------------------------
       const surveyData = {
-        survey_id: surveyId,
+        survey_id: currentSurveyId,
+
         survey_information: survey.survey_information,
         owner_details: survey.owner_details,
         property_details: survey.property_details,
@@ -87,23 +102,35 @@ export default function SurveyPreview() {
         surveyor_remarks: survey.surveyor_remarks,
       };
 
-      // Call API to update survey
-      const response = await updateSurvey(surveyId, surveyData);
+      console.log("================================");
+      console.log("SURVEY ID:", currentSurveyId);
+      console.log("UPDATE PAYLOAD:", surveyData);
+      console.log("================================");
+
+      // ---------------------------------------
+      // Send ONLY survey_id to identify record
+      // ---------------------------------------
+      const response = await updateSurvey(currentSurveyId, surveyData);
 
       notify.dismiss(loadingId);
 
-      if (response.success) {
+      console.log("UPDATE RESPONSE:", response);
+
+      if (response?.success) {
         notify.success("All changes saved successfully!");
+
         setHasChanges(false);
-        // Reload survey to get fresh data
+
+        // Reload fresh data
         await loadSurvey();
       } else {
-        notify.error(response.message || "Failed to save changes");
+        notify.error(response?.message || "Failed to save changes");
       }
     } catch (error) {
       console.error("Error saving survey:", error);
+
       notify.error(
-        error.message || "Failed to save changes. Please try again.",
+        error?.message || "Failed to save changes. Please try again.",
       );
     } finally {
       setSaving(false);
@@ -134,8 +161,14 @@ export default function SurveyPreview() {
     return <div className="preview-loading">Survey not found.</div>;
   }
 
+
+
   return (
-    <div className="preview-page">
+    <div
+      className="preview-page"
+      style={{ userSelect: "none" }}
+      onContextMenu={(e) => e.preventDefault()}
+    >
       {/* Header */}
       <div className="preview-header">
         <div>

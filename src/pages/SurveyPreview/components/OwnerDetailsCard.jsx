@@ -115,13 +115,13 @@ export default function OwnerDetailsCard({ data, onUpdate }) {
 
   const fields = [
     {
-      key: "Name of Respondent",
+      key: "respondent_name",
       label: "Name of Respondent",
       type: "text",
       required: true,
     },
     {
-      key: "Relationship of Respondent with Property Owner",
+      key: "relationship_with_respondent",
       label: "Relationship of Respondent with Property Owner",
       type: "DROPDOWN",
       required: true,
@@ -145,17 +145,17 @@ export default function OwnerDetailsCard({ data, onUpdate }) {
       required: true,
     },
     {
-      key: "Alternate Mobile Number",
+      key: "alternate_mobile",
       label: "Alternate Mobile",
       type: "number",
     },
     {
-      key: "AADHAAR Number",
+      key: "aadhaar_no",
       label: "AADHAAR Number",
       type: "number",
     },
     {
-      key: "Email ID",
+      key: "email",
       label: "Email ID",
       type: "email",
     },
@@ -166,7 +166,7 @@ export default function OwnerDetailsCard({ data, onUpdate }) {
       required: true,
     },
     {
-      key: "Pincode",
+      key: "pincode",
       label: "Pincode",
       type: "number",
       required: true,
@@ -267,19 +267,17 @@ export default function OwnerDetailsCard({ data, onUpdate }) {
         >
           {/* EDIT */}
           {!isEditing ? (
-            <RoleBased allowedRoles={["MLAdmin", "admin"]}>
-              <Button
-                variant="contained"
-                startIcon={<Edit />}
-                onClick={handleEdit}
-                sx={{
-                  ...buttonStyles,
-                  width: isMobile ? "100%" : "auto",
-                }}
-              >
-                Edit Section
-              </Button>
-            </RoleBased>
+            <Button
+              variant="contained"
+              startIcon={<Edit />}
+              onClick={handleEdit}
+              sx={{
+                ...buttonStyles,
+                width: isMobile ? "100%" : "auto",
+              }}
+            >
+              Edit Section
+            </Button>
           ) : (
             <>
               {/* CANCEL */}

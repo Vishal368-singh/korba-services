@@ -2,7 +2,7 @@ import api from "../config/axios";
 import notify from "../utils/toast";
 
 export const login = async (payload) => {
-  const response = await api.post("/auth/login", payload);
+  const response = await api.post("/auth/web/login", payload);
   if (response.status !== 200) {
     notify.error("Login failed");
     throw new Error("Login failed");
@@ -11,6 +11,14 @@ export const login = async (payload) => {
     throw new Error("Access denied: Surveyor is not allowed to log in.");
   }
   notify.success("Login successful");
+  return response.data;
+};
+
+export const forceLogOut = async (username) => {
+  const response = await api.post(
+    `/auth/force-logout?username=${username}`,
+  );
+
   return response.data;
 };
 
@@ -287,17 +295,47 @@ export const verifyOTP = async (email, otp) => {
 };
 
 // Update entire survey
+// export const updateSurvey = async (surveyId, surveyData) => {
+//   const token = localStorage.getItem("user")
+//     ? JSON.parse(localStorage.getItem("user")).access_token
+//     : null;
+
+//   if (!token) {
+//     notify.error("No token found. Please log in first.");
+//     throw new Error("No token found. Please log in first.");
+//   }
+
+//   const response = await api.put(`/web/update/${surveyId}`, surveyData, {
+//     headers: {
+//       Authorization: `Bearer ${token}`,
+//       "Content-Type": "application/json",
+//     },
+//   });
+
+//   if (response.status !== 200) {
+//     notify.error("Failed to update survey");
+//     throw new Error("Failed to update survey");
+//   }
+
+//   return response.data;
+// };
+
+// Update entire survey
 export const updateSurvey = async (surveyId, surveyData) => {
-  const token = localStorage.getItem("user")
-    ? JSON.parse(localStorage.getItem("user")).access_token
-    : null;
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  const token = user?.access_token;
+  const user_id = user?.user_id;
 
   if (!token) {
     notify.error("No token found. Please log in first.");
     throw new Error("No token found. Please log in first.");
   }
 
-  const response = await api.put(`/web/update/${surveyId}`, surveyData, {
+  const response = await api.put(`/web/update-survey/${surveyId}`, surveyData, {
+    params: {
+      changed_by: user_id,
+    },
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",

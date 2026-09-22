@@ -158,11 +158,11 @@ export const validateLandBuilding = (data) => {
 export const validateOwnerDetails = (data) => {
   const errors = {};
 
-  if (!data["Name of Respondent"]?.trim()) {
-    errors["Name of Respondent"] = "Name of Respondent is required";
+  if (!data["respondent_name"]?.trim()) {
+    errors["Name of Respondent is required"] = "Name of Respondent is required";
   }
 
-  if (!data["Relationship of Respondent with Property Owner"]?.trim()) {
+  if (!data["relationship_with_respondent"]?.trim()) {
     errors["Relationship of Respondent with Property Owner"] =
       "Relationship is required";
   }
@@ -185,7 +185,7 @@ export const validateOwnerDetails = (data) => {
     errors.correspondence_address = "Correspondence Address is required";
   }
 
-  if (!data.Pincode?.trim()) {
+  if (!data.pincode?.trim()) {
     errors.Pincode = "Pincode is required";
   }
 

@@ -192,7 +192,7 @@ export default function Sidebar({ collapsed, setCollapsed }) {
 
   // Only surveyor is restricted
   const menus =
-    user?.role === "MLAdmin"
+    user?.role === "supervisor"
       ? allMenus.filter((item) => item.path === "/edit")
       : allMenus;
 
