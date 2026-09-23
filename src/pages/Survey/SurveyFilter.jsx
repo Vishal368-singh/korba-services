@@ -5,9 +5,9 @@ import SearchableMultiSelect from "../../components/SearchableMultiSelect";
 const WARD_OPTIONS=["Ward 1","Ward 2","Ward 3","Ward 4"];
 const SURVEYOR_OPTIONS=["Surveyor 1","Surveyor 2","Surveyor 3","Surveyor 4"];
 
-export default function SurveyFilter() {
-  const [wards,setWards]=useState([]);
-  const [surveyors,setSurveyors]=useState([]);
+export default function SurveyFilter({ search, setSearch }) {
+  const [wards, setWards] = useState([]);
+  const [surveyors, setSurveyors] = useState([]);
   return (
     <div className="filter-section">
       <div className="search-box">
@@ -15,21 +15,23 @@ export default function SurveyFilter() {
 
         <input
           type="text"
-          placeholder="Search Survey ID / Owner"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search Survey ID / Parcel No / Surveyor"
         />
       </div>
-      
+
       <SearchableMultiSelect
-      options={ WARD_OPTIONS}
-      selected={wards}
-      onChange={setWards}
-      placeholder="All Wards"
+        options={WARD_OPTIONS}
+        selected={wards}
+        onChange={setWards}
+        placeholder="All Wards"
       />
       <SearchableMultiSelect
-      options={SURVEYOR_OPTIONS}
-      selected={surveyors}
-      onChange={setSurveyors}
-      placeholder="All Surveyors"
+        options={SURVEYOR_OPTIONS}
+        selected={surveyors}
+        onChange={setSurveyors}
+        placeholder="All Surveyors"
       />
 
       <input type="date" />

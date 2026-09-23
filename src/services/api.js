@@ -15,9 +15,7 @@ export const login = async (payload) => {
 };
 
 export const forceLogOut = async (username) => {
-  const response = await api.post(
-    `/auth/force-logout?username=${username}`,
-  );
+  const response = await api.post(`/auth/force-logout?username=${username}`);
 
   return response.data;
 };
@@ -47,7 +45,7 @@ export const logout = async () => {
   return response.data;
 };
 
-export const fetchCompletedSurveys = async (page = 1) => {
+export const fetchCompletedSurveys = async (page = 1, search = "") => {
   const token = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user")).access_token
     : null;
@@ -57,7 +55,7 @@ export const fetchCompletedSurveys = async (page = 1) => {
   }
   const response = await api.post(
     "/web/completed-survey-data-summary",
-    { page },
+    { page, limit: 20, search: search || "" },
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -71,29 +69,29 @@ export const fetchCompletedSurveys = async (page = 1) => {
   return response.data;
 };
 
-export const fetchAllSurveys = async (page = 1) => {
-  const token = localStorage.getItem("user")
-    ? JSON.parse(localStorage.getItem("user")).access_token
-    : null;
-  if (!token) {
-    notify.error("No token found. Please log in first.");
-    throw new Error("No token found. Please log in first.");
-  }
-  const response = await api.post(
-    "/web/all-survey-data-summary",
-    { page },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  );
-  if (response.status !== 200) {
-    notify.error("Failed to fetch completed surveys");
-    throw new Error("Failed to fetch completed surveys");
-  }
-  return response.data;
-};
+// export const fetchAllSurveys = async (page = 1) => {
+//   const token = localStorage.getItem("user")
+//     ? JSON.parse(localStorage.getItem("user")).access_token
+//     : null;
+//   if (!token) {
+//     notify.error("No token found. Please log in first.");
+//     throw new Error("No token found. Please log in first.");
+//   }
+//   const response = await api.post(
+//     "/web/all-survey-data-summary",
+//     { page },
+//     {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//       },
+//     },
+//   );
+//   if (response.status !== 200) {
+//     notify.error("Failed to fetch completed surveys");
+//     throw new Error("Failed to fetch completed surveys");
+//   }
+//   return response.data;
+// };
 
 // export const fetchRejectedPendingSurveys = async (page = 1) => {
 //   const token = localStorage.getItem("user")
@@ -119,7 +117,37 @@ export const fetchAllSurveys = async (page = 1) => {
 //   }
 //   return response.data;
 // };
+export const fetchAllSurveys = async (page = 1, limit = 20, search = "") => {
+  const token = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user")).access_token
+    : null;
 
+  if (!token) {
+    notify.error("No token found. Please log in first.");
+    throw new Error("No token found. Please log in first.");
+  }
+
+  const response = await api.post(
+    "/web/all-survey-data-summary",
+    {
+      page,
+      limit,
+      search,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  if (response.status !== 200) {
+    notify.error("Failed to fetch survey data");
+    throw new Error("Failed to fetch survey data");
+  }
+
+  return response.data;
+};
 export const fetchRejectedPendingSurveys = async (
   pendingPage = 1,
   rejectedPage = 1,

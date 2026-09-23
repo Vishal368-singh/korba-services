@@ -11,22 +11,31 @@ createRoot(document.getElementById("root")).render(
     <App />
   </BrowserRouter>,
 );
-/**
+/**23/09/2026 
  * 
-Implemented force logout functionality for users already logged in on another browser or window.
-Added backend API to clear the existing user's active session.
-Added login conflict handling for HTTP 409 response.
-Added confirmation popup for forcefully logging out an existing session.
-Integrated force logout API with the React login flow.
-Implemented re-login automatically after successful force logout.
-Updated Axios API service with response interceptor handling.
-Added automatic redirect to login page on 401 Unauthorized session errors.
-Tested force logout API through Postman and verified session status handling.
-Debugged and refined the login/session flow for multiple browser or device scenarios. 
-Added a ProtectedRoute guard in AppRoutes.jsx to enforce login-check before rendering protected routes.
-Fixed direct URL access bypassing authentication (e.g. typing /dashboard without login).
-Fixed routes not re-validating auth state after logout/back-navigation.
-Restricted /edit route to supervisor role only.
-Removed incorrect role restriction on /surveys/:surveyId so supervisors can access the survey update form.
-Removed incorrect role restriction on /dashboard, /survey, /users that was blocking valid roles like admin and office, keeping role restriction only on /edit.
+Implemented server-side search for the Approved/Completed Survey API.
+Updated the Approved Survey API to accept the search parameter.
+Fixed the frontend Approved tab search parameter mapping.
+Ensured search is applied before pagination.
+Added search support for Survey ID, Parcel No, Property ID, Surveyor Name, Surveyor ID, and Zone.
+Verified that search results are calculated from the complete database records, not just the current page.
+Maintained existing pagination and total record count after applying search.
+Debugged the API request payload where search was incorrectly receiving 20.
+Updated the frontend API call to send the actual search text.
+Tested the search  pagination flow for Approved/Completed surveys.
 */
+
+/*
+16/0902026
+Added dynamic layer detection for Soil, LULC, and None
+Updated layer toggle function to activity log
+Connected activity logging with Layer and Date Range selectors
+Updated Activity Log to show real API data instead of mock data
+Created Activity Log table with search, filters, sorting, and active session status
+Created shared useAuthUser and useIsAdmin hooks for user and role handling
+Added RequireAdmin route protection for Activity Log
+Updated Sidebar to show Activity Log only for admins
+Implemented admin-only visibility for the Activity Log option in the sidebar
+Verified activity data and API responses through browser console logs
+Debugged and verified Activity API requests using browser Network and debugger tools
+Verified databse for Activity capturing */
