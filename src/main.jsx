@@ -12,17 +12,19 @@ createRoot(document.getElementById("root")).render(
   </BrowserRouter>,
 );
 /**23/09/2026 
- * 
-Implemented server-side search for the Approved/Completed Survey API.
-Updated the Approved Survey API to accept the search parameter.
-Fixed the frontend Approved tab search parameter mapping.
-Ensured search is applied before pagination.
-Added search support for Survey ID, Parcel No, Property ID, Surveyor Name, Surveyor ID, and Zone.
-Verified that search results are calculated from the complete database records, not just the current page.
-Maintained existing pagination and total record count after applying search.
-Debugged the API request payload where search was incorrectly receiving 20.
-Updated the frontend API call to send the actual search text.
-Tested the search  pagination flow for Approved/Completed surveys.
+    Ensured search is applied before pagination.
+    Added search support for Survey ID, Parcel No, Property ID, Surveyor Name, Surveyor ID, and Zone.
+    Verified that search results are calculated from the complete database records, not just the current page.
+    Maintained existing pagination and total record count after applying search.
+    Debugged the API request payload where search was incorrectly receiving 20.
+    debugged and reslove the issue of force logout
+    design the popup for force logout and added buttons connect with api 
+    Fixed the frontend Approved tab search parameter mapping
+    Updated the Approved Survey API to accept the search parameter.
+    Updated the frontend API call to send the actual search text
+    Implemented server side search for the Approved/Completed Survey API
+    installed the apk and testing the survey id and existing_id for multiple records
+
 */
 
 /*

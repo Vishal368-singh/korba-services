@@ -151,6 +151,7 @@ export const fetchAllSurveys = async (page = 1, limit = 20, search = "") => {
 export const fetchRejectedPendingSurveys = async (
   pendingPage = 1,
   rejectedPage = 1,
+  search = "",
 ) => {
   const token = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user")).access_token
@@ -161,7 +162,7 @@ export const fetchRejectedPendingSurveys = async (
   }
   const response = await api.post(
     "/web/pending-rejected-survey-data-summary",
-    { pending_page: pendingPage, rejected_page: rejectedPage },
+    { pending_page: pendingPage, rejected_page: rejectedPage, search: search },
     {
       headers: {
         Authorization: `Bearer ${token}`,
