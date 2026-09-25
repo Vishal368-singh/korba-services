@@ -14,7 +14,8 @@ const formatDate = (date) =>
     : "";
 
 const isSameDay = (a, b) =>
-  a && b &&
+  a &&
+  b &&
   a.getFullYear() === b.getFullYear() &&
   a.getMonth() === b.getMonth() &&
   a.getDate() === b.getDate();
@@ -93,7 +94,10 @@ export default function DateRangePicker({ startDate, endDate, onChange }) {
   const startOffset = firstDayOfMonth(year, month);
   const dayCells = [
     ...Array(startOffset).fill(null),
-    ...Array.from({ length: totalDays }, (_, i) => new Date(year, month, i + 1)),
+    ...Array.from(
+      { length: totalDays },
+      (_, i) => new Date(year, month, i + 1),
+    ),
   ];
 
   const isInRange = (day) =>
@@ -127,9 +131,7 @@ export default function DateRangePicker({ startDate, endDate, onChange }) {
             {/* Month nav */}
             <div className="flex items-center justify-between mb-3">
               <button
-                onClick={() =>
-                  setViewMonth(new Date(year, month - 1, 1))
-                }
+                onClick={() => setViewMonth(new Date(year, month - 1, 1))}
                 className="p-1.5 rounded hover:bg-gray-100 text-gray-600"
               >
                 <FaChevronLeft size={12} />
@@ -141,9 +143,7 @@ export default function DateRangePicker({ startDate, endDate, onChange }) {
                 })}
               </span>
               <button
-                onClick={() =>
-                  setViewMonth(new Date(year, month + 1, 1))
-                }
+                onClick={() => setViewMonth(new Date(year, month + 1, 1))}
                 className="p-1.5 rounded hover:bg-gray-100 text-gray-600"
               >
                 <FaChevronRight size={12} />
@@ -180,8 +180,8 @@ export default function DateRangePicker({ startDate, endDate, onChange }) {
                       selected
                         ? { backgroundColor: PRIMARY, color: "#fff" }
                         : inRange
-                        ? { backgroundColor: `${PRIMARY}1A`, color: PRIMARY }
-                        : undefined
+                          ? { backgroundColor: `${PRIMARY}1A`, color: PRIMARY }
+                          : undefined
                     }
                     className={`text-xs h-8 w-8 rounded-full flex items-center justify-center transition
                       ${!selected && !inRange ? "hover:bg-gray-100 text-gray-700" : ""}
@@ -212,7 +212,10 @@ export default function DateRangePicker({ startDate, endDate, onChange }) {
                 </button>
                 <button
                   onClick={handleApply}
-                  style={{ backgroundColor: PRIMARY }}
+                  style={{
+                    backgroundColor: PRIMARY,
+                    padding: "5px",
+                  }}
                   className="text-xs font-medium text-white px-3 py-1.5 rounded-md hover:opacity-90"
                 >
                   Apply

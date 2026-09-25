@@ -50,7 +50,7 @@ import SurveyorsManagement from "../pages/User/SurveyorsManagement";
 import Editmanagement from "../pages/Ediitab/Editmanagement";
 
 // ================= ROLE CONFIG =================
-const COMMON_ROLES = ["officier", "MLAdmin"];
+const COMMON_ROLES = ["officier", "MLAdmin", "supervisor"];
 const SUPERVISOR_ROLES = ["supervisor"];
 
 // ================= PROTECTED ROUTE =================

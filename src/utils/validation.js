@@ -17,11 +17,11 @@ export const validateSectionA = (data) => {
   const errors = {};
 
   // Parcel Number
-  if (isEmpty(data.parcel_no)) {
-    errors.parcel_no = "Parcel Number is required";
-  } else if (!/^\d{5}$/.test(data.parcel_no)) {
-    errors.parcel_no = "Parcel Number must be 5 digits";
-  }
+  // if (isEmpty(data.parcel_no)) {
+  //   errors.parcel_no = "Parcel Number is required";
+  // } else if (!/^\d{5}$/.test(data.parcel_no)) {
+  //   errors.parcel_no = "Parcel Number must be 5 digits";
+  // }
 
   // Ward Number
   if (isEmpty(data.ward_no)) {
@@ -73,7 +73,9 @@ export const validateSectionA = (data) => {
   } else if (!isValidLongitude(data.gps_longitude)) {
     errors.gps_longitude = "Invalid GPS Longitude";
   }
-
+  if (isEmpty(data.survey_date)) {
+    errors.survey_date = "Survey Date is required";
+  }
   // Tax Rate Zone
   if (isEmpty(data.tax_rate_zone)) {
     errors.tax_rate_zone = "Tax Rate Zone is required";
@@ -159,12 +161,12 @@ export const validateOwnerDetails = (data) => {
   const errors = {};
 
   if (!data["respondent_name"]?.trim()) {
-    errors["Name of Respondent is required"] = "Name of Respondent is required";
+    errors.respondent_name = "Name of Respondent is required";
   }
 
   if (!data["relationship_with_respondent"]?.trim()) {
-    errors["Relationship of Respondent with Property Owner"] =
-      "Relationship is required";
+    errors.relationship_with_respondent =
+      "Relationship of Respondent with Property Owner is required";
   }
 
   if (!data.owner_name?.trim()) {
@@ -186,7 +188,7 @@ export const validateOwnerDetails = (data) => {
   }
 
   if (!data.pincode?.trim()) {
-    errors.Pincode = "Pincode is required";
+    errors.pincode = "Pincode is required";
   }
 
   return errors;

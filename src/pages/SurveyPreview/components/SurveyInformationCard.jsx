@@ -340,7 +340,7 @@ export default function SurveyInformationCard({ data, onUpdate }) {
                 onChange={handleFieldChange}
                 fieldKey={field.key}
                 type={field.type}
-             disabled={!isEditing || field.disabled === true}
+                disabled={!isEditing || field.disabled === true}
                 isMobile={isMobile}
                 error={validationErrors[field.key] || ""}
                 required={field.required}

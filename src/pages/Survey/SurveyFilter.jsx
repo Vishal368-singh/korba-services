@@ -21,18 +21,18 @@ export default function SurveyFilter({ search, setSearch }) {
         />
       </div>
 
-      <SearchableMultiSelect
+      {/* <SearchableMultiSelect
         options={WARD_OPTIONS}
         selected={wards}
         onChange={setWards}
         placeholder="All Wards"
-      />
-      <SearchableMultiSelect
+      /> */}
+      {/* <SearchableMultiSelect
         options={SURVEYOR_OPTIONS}
         selected={surveyors}
         onChange={setSurveyors}
         placeholder="All Surveyors"
-      />
+      /> */}
 
       <input type="date" />
     </div>
