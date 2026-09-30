@@ -45,31 +45,11 @@ export const logout = async () => {
   return response.data;
 };
 
-export const fetchCompletedSurveys = async (page = 1, search = "") => {
-  const token = localStorage.getItem("user")
-    ? JSON.parse(localStorage.getItem("user")).access_token
-    : null;
-  if (!token) {
-    notify.error("No token found. Please log in first.");
-    throw new Error("No token found. Please log in first.");
-  }
-  const response = await api.post(
-    "/web/completed-survey-data-summary",
-    { page, limit: 20, search: search || "" },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  );
-  if (response.status !== 200) {
-    notify.error("Failed to fetch completed surveys");
-    throw new Error("Failed to fetch completed surveys");
-  }
-  return response.data;
-};
-
-// export const fetchAllSurveys = async (page = 1) => {
+// export const fetchCompletedSurveys = async (
+//   page = 1,
+//   search = "",
+//   selectedDate = "",
+// ) => {
 //   const token = localStorage.getItem("user")
 //     ? JSON.parse(localStorage.getItem("user")).access_token
 //     : null;
@@ -78,8 +58,8 @@ export const fetchCompletedSurveys = async (page = 1, search = "") => {
 //     throw new Error("No token found. Please log in first.");
 //   }
 //   const response = await api.post(
-//     "/web/all-survey-data-summary",
-//     { page },
+//     "/web/completed-survey-data-summary",
+//     { page, limit: 20, search: search || "", survey_date: selectedDate },
 //     {
 //       headers: {
 //         Authorization: `Bearer ${token}`,
@@ -93,31 +73,51 @@ export const fetchCompletedSurveys = async (page = 1, search = "") => {
 //   return response.data;
 // };
 
-// export const fetchRejectedPendingSurveys = async (page = 1) => {
+// export const fetchAllSurveys = async (
+//   page = 1,
+//   limit = 20,
+//   search = "",
+//   selectedDate = "",
+// ) => {
 //   const token = localStorage.getItem("user")
 //     ? JSON.parse(localStorage.getItem("user")).access_token
 //     : null;
+
 //   if (!token) {
 //     notify.error("No token found. Please log in first.");
 //     throw new Error("No token found. Please log in first.");
 //   }
+
 //   const response = await api.post(
-//     "/web/pending-rejected-survey-data-summary",
-//     { page },
+//     "/web/all-survey-data-summary",
+//     {
+//       page,
+//       limit,
+//       search,
+//       survey_date: selectedDate,
+//     },
 //     {
 //       headers: {
 //         Authorization: `Bearer ${token}`,
 //       },
 //     },
 //   );
-//   console.log("Rejected/Pending Surveys Response:", response); // Debugging line
+
 //   if (response.status !== 200) {
-//     notify.error("Failed to fetch rejected surveys");
-//     throw new Error("Failed to fetch rejected surveys");
+//     notify.error("Failed to fetch survey data");
+//     throw new Error("Failed to fetch survey data");
 //   }
+
 //   return response.data;
 // };
-export const fetchAllSurveys = async (page = 1, limit = 20, search = "") => {
+export const fetchSurveys = async (
+  page = 1,
+  limit = 20,
+  search = "",
+  startDate = "",
+  endDate = "",
+  status = "All",
+) => {
   const token = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user")).access_token
     : null;
@@ -133,6 +133,9 @@ export const fetchAllSurveys = async (page = 1, limit = 20, search = "") => {
       page,
       limit,
       search,
+      start_date: startDate,
+      end_date: endDate,
+      status,
     },
     {
       headers: {
@@ -148,33 +151,39 @@ export const fetchAllSurveys = async (page = 1, limit = 20, search = "") => {
 
   return response.data;
 };
-export const fetchRejectedPendingSurveys = async (
-  pendingPage = 1,
-  rejectedPage = 1,
-  search = "",
-) => {
-  const token = localStorage.getItem("user")
-    ? JSON.parse(localStorage.getItem("user")).access_token
-    : null;
-  if (!token) {
-    notify.error("No token found. Please log in first.");
-    throw new Error("No token found. Please log in first.");
-  }
-  const response = await api.post(
-    "/web/pending-rejected-survey-data-summary",
-    { pending_page: pendingPage, rejected_page: rejectedPage, search: search },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  );
-  if (response.status !== 200) {
-    notify.error("Failed to fetch rejected surveys");
-    throw new Error("Failed to fetch rejected surveys");
-  }
-  return response.data;
-};
+// export const fetchRejectedPendingSurveys = async (
+//   pendingPage = 1,
+//   rejectedPage = 1,
+//   search = "",
+//   selectedDate = "",
+// ) => {
+//   const token = localStorage.getItem("user")
+//     ? JSON.parse(localStorage.getItem("user")).access_token
+//     : null;
+//   if (!token) {
+//     notify.error("No token found. Please log in first.");
+//     throw new Error("No token found. Please log in first.");
+//   }
+//   const response = await api.post(
+//     "/web/pending-rejected-survey-data-summary",
+//     {
+//       pending_page: pendingPage,
+//       rejected_page: rejectedPage,
+//       search: search,
+//       survey_date: selectedDate,
+//     },
+//     {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//       },
+//     },
+//   );
+//   if (response.status !== 200) {
+//     notify.error("Failed to fetch rejected surveys");
+//     throw new Error("Failed to fetch rejected surveys");
+//   }
+//   return response.data;
+// };
 
 export const fetchSurveyBySurveyID = async (surveyId) => {
   const token = localStorage.getItem("user")
@@ -434,7 +443,6 @@ export const fetchSurveyStatusCounts = async () => {
       },
     },
   );
-  console.log("Survey Status Counts Response:", response); // Debugging line
   if (response.status !== 200) {
     notify.error("Failed to fetch survey statistics");
     throw new Error("Failed to fetch survey statistics");
@@ -807,47 +815,6 @@ export const fetchDashboardData = async (
   return response.data;
 };
 
-// export const fetchKeyIndicators = async (
-//   startDate,
-//   endDate
-// ) => {
-
-//   const token = localStorage.getItem("user")
-//     ? JSON.parse(localStorage.getItem("user")).access_token
-//     : null;
-
-//   if (!token) {
-//     notify.error("No token found. Please log in first.");
-//     throw new Error("No token found. Please log in first.");
-//   }
-
-//   const formatDate = (date) => {
-//     if (!date) return "";
-//     const d = new Date(date);
-//     return d.toISOString().split("T")[0];
-//   };
-
-//   const params = new URLSearchParams();
-//   if (startDate) params.append("start_date", formatDate(startDate));
-//   if (endDate) params.append("end_date", formatDate(endDate));
-//   // if (selectedUids && selectedUids.length > 0) {
-//   //   params.append("property_uids", selectedUids.join(","));
-//   // }
-
-//   const url = `/api/dashboard/key-indicators${params.toString() ? `?${params.toString()}` : ""}`;
-
-//   const response = await api.get(url, {
-//     headers: { Authorization: `Bearer ${token}` },
-//   });
-//  console.log("fetchKeyIndicators response:", response);
-//   if (response.status !== 200) {
-//     notify.error("Failed to fetch dashboard data");
-//     throw new Error("Failed to fetch dashboard data");
-//   }
-
-//   return response.data;
-// };
-
 export const fetchKeyIndicators = async (startDate, endDate) => {
   const token = localStorage.getItem("user")
     ? JSON.parse(localStorage.getItem("user")).access_token
@@ -979,6 +946,99 @@ export const fetchEditManagementDataAPI = async (page = 1, limit = 20) => {
     notify.error("Failed to fetch edit management data");
     throw new Error("Failed to fetch edit management data");
   }
+
+  return response.data;
+};
+export const fetchSurveyExcel = async (
+  startDate = "",
+  endDate = "",
+  status = "All",
+) => {
+  const token = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user")).access_token
+    : null;
+  if (!token) {
+    notify.error("No token found. Please log in first.");
+    throw new Error("No token found. Please log in first.");
+  }
+  const response = await api.post(
+    "/web/generate-survey-excel",
+    {
+      updated_at_from: startDate || null,
+      updated_at_to: endDate || null,
+      status: status || "All",
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    },
+  );
+  if (response.status !== 200) {
+    notify.error("Failed to generate Excel");
+    throw new Error("Failed to generate Excel");
+  }
+  return response.data;
+};
+export const sendOTPAPI = async (email, otp) => {
+  const token = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user")).access_token
+    : null;
+
+  if (!token) {
+    notify.error("No token found. Please log in first.");
+    throw new Error("No token found. Please log in first.");
+  }
+
+  const response = await api.post(
+    "/api/dashboard/send-otp",
+    {
+      email,
+      otp,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    },
+  );
+
+  if (response.status !== 200) {
+    notify.error("Failed to send OTP");
+    throw new Error("Failed to send OTP");
+  }
+
+  return response.data;
+};
+export const activateUserAPI = async (email) => {
+  const token = localStorage.getItem("user")
+    ? JSON.parse(localStorage.getItem("user")).access_token
+    : null;
+
+  if (!token) {
+    throw new Error("No token found. Please log in first.");
+  }
+
+  const response = await api.post("/auth/activate-user", null, {
+    params: {
+      email: email,
+    },
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  return response.data;
+};
+export const deactivateUserAPI = async (email) => {
+  const response = await api.post("/auth/deactivate-user", null, {
+    params: {
+      email: email,
+    },
+  });
 
   return response.data;
 };

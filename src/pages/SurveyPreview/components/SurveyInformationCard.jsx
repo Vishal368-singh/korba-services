@@ -52,8 +52,7 @@ export default function SurveyInformationCard({ data, onUpdate }) {
   const handleSave = () => {
     const errors = validateSectionA(formData);
 
-    console.log("FORM DATA:", formData);
-    console.log("VALIDATION ERRORS:", errors);
+
 
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);

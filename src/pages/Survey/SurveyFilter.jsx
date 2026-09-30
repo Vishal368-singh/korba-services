@@ -5,7 +5,14 @@ import SearchableMultiSelect from "../../components/SearchableMultiSelect";
 const WARD_OPTIONS=["Ward 1","Ward 2","Ward 3","Ward 4"];
 const SURVEYOR_OPTIONS=["Surveyor 1","Surveyor 2","Surveyor 3","Surveyor 4"];
 
-export default function SurveyFilter({ search, setSearch }) {
+export default function SurveyFilter({
+  search,
+  setSearch,
+  startDate,
+  setStartDate,
+  endDate,
+  setEndDate,
+}) {
   const [wards, setWards] = useState([]);
   const [surveyors, setSurveyors] = useState([]);
   return (
@@ -34,7 +41,16 @@ export default function SurveyFilter({ search, setSearch }) {
         placeholder="All Surveyors"
       /> */}
 
-      <input type="date" />
+      <input
+        type="date"
+        value={startDate}
+        onChange={(e) => setStartDate(e.target.value)}
+      />
+      <input
+        type="date"
+        value={endDate}
+        onChange={(e) => setEndDate(e.target.value)}
+      />
     </div>
   );
 }

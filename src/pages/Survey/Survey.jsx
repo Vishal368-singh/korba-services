@@ -3,10 +3,9 @@ import { FaSyncAlt, FaFileExport } from "react-icons/fa";
 
 import "./Survey.css";
 import {
-  fetchCompletedSurveys,
-  fetchRejectedPendingSurveys,
-  fetchAllSurveys,
+  fetchSurveys,
   fetchSurveyStatusCounts,
+  fetchSurveyExcel,
 } from "../../services/api";
 
 import SurveyStatistics from "./SurveyStatistics";
@@ -27,7 +26,8 @@ export default function Survey() {
 
   // Search
   const [search, setSearch] = useState("");
-
+const [startDate, setStartDate] = useState("");
+const [endDate, setEndDate] = useState("");
   const [pagination, setPagination] = useState({
     total_surveys: 0,
     total_pages: 1,
@@ -44,86 +44,173 @@ export default function Survey() {
     setSearch(value);
     setCurrentPage(1);
   };
+ const handleStartDateChange = (value) => {
+   setStartDate(value);
+   setCurrentPage(1);
+ };
 
+ const handleEndDateChange = (value) => {
+   setEndDate(value);
+   setCurrentPage(1);
+ };
   // =========================================================
   // LOAD SURVEY DATA
   // =========================================================
-  const loadSurveyData = useCallback(
-    async (pageOverride) => {
-      const pageToUse = pageOverride ?? currentPage;
+  // const loadSurveyData = useCallback(
+  //   async (pageOverride) => {
+  //     const pageToUse = pageOverride ?? currentPage;
 
-      const requestId = ++latestRequestId.current;
+  //     const requestId = ++latestRequestId.current;
 
-      try {
-        setLoading(true);
+  //     try {
+  //       setLoading(true);
 
-        let response;
+  //       let response;
 
-        switch (activeTab) {
-          case "Approved":
-            response = await fetchCompletedSurveys(pageToUse, search);
-            break;
+  //       switch (activeTab) {
+  //         case "Approved":
+  //           response = await fetchCompletedSurveys(
+  //             pageToUse,
+  //             search,
+  //             selectedDate,
+  //           );
+  //           break;
 
-          case "All":
-            response = await fetchAllSurveys(pageToUse, 20, search);
-            break;
+  //         case "All":
+  //           response = await fetchAllSurveys(
+  //             pageToUse,
+  //             20,
+  //             search,
+  //             selectedDate,
+  //           );
+  //           break;
 
-          case "Rejected":
-            response = await fetchRejectedPendingSurveys(pageToUse, 1, search);
-            response = response.rejected;
-            break;
+  //         case "Rejected":
+  //           response = await fetchRejectedPendingSurveys(
+  //             pageToUse,
+  //             1,
+  //             search,
+  //             selectedDate,
+  //           );
+  //           response = response.rejected;
+  //           break;
 
-          case "Pending":
-          default:
-            response = await fetchRejectedPendingSurveys(pageToUse, 1, search);
-            response = response.pending;
-            break;
-        }
+  //         case "Pending":
+  //         default:
+  //           response = await fetchRejectedPendingSurveys(
+  //             pageToUse,
+  //             1,
+  //             search,
+  //             selectedDate,
+  //           );
+  //           response = response.pending;
+  //           break;
+  //       }
 
-        // Ignore old request
-        if (requestId !== latestRequestId.current) {
-          return;
-        }
+  //       // Ignore old request
+  //       if (requestId !== latestRequestId.current) {
+  //         return;
+  //       }
 
-        const paginationSource = response.pagination || response;
+  //       const paginationSource = response.pagination || response;
 
-        const totalPages = paginationSource.total_pages ?? 1;
+  //       const totalPages = paginationSource.total_pages ?? 1;
 
-        const surveysObj = response.surveys || {};
+  //       const surveysObj = response.surveys || {};
 
-        setSurveyData(surveysObj);
+  //       setSurveyData(surveysObj);
+
+  //       setPagination({
+  //         total_surveys: paginationSource.total_surveys ?? 0,
+
+  //         total_pages: totalPages,
+
+  //         has_next: paginationSource.has_next ?? false,
+
+  //         has_previous: paginationSource.has_previous ?? false,
+  //       });
+  //     } catch (error) {
+  //       if (requestId === latestRequestId.current) {
+  //         console.error("Error fetching survey data:", error);
+
+  //         setSurveyData([]);
+
+  //         setPagination({
+  //           total_surveys: 0,
+  //           total_pages: 1,
+  //           has_next: false,
+  //           has_previous: false,
+  //         });
+  //       }
+  //     } finally {
+  //       if (requestId === latestRequestId.current) {
+  //         setLoading(false);
+  //       }
+  //     }
+  //   },
+  //   [activeTab, currentPage, search, selectedDate],
+  // );
+const loadSurveyData = useCallback(
+  async (pageOverride) => {
+    const pageToUse = pageOverride ?? currentPage;
+
+    const requestId = ++latestRequestId.current;
+
+    try {
+      setLoading(true);
+
+      // Active tab directly becomes API status
+      const status = activeTab;
+
+      const response = await fetchSurveys(
+        pageToUse,
+        20,
+        search,
+        startDate,
+        endDate,
+        status,
+      );
+
+      // Ignore old request
+      if (requestId !== latestRequestId.current) {
+        return;
+      }
+
+      const paginationSource = response.pagination || response;
+
+      const totalPages = paginationSource.total_pages ?? 1;
+
+      const surveysObj = response.surveys || {};
+
+      setSurveyData(surveysObj);
+
+      setPagination({
+        total_surveys: paginationSource.total_surveys ?? 0,
+        total_pages: totalPages,
+        has_next: paginationSource.has_next ?? false,
+        has_previous: paginationSource.has_previous ?? false,
+      });
+    } catch (error) {
+      if (requestId === latestRequestId.current) {
+        console.error("Error fetching survey data:", error);
+
+        setSurveyData([]);
 
         setPagination({
-          total_surveys: paginationSource.total_surveys ?? 0,
-
-          total_pages: totalPages,
-
-          has_next: paginationSource.has_next ?? false,
-
-          has_previous: paginationSource.has_previous ?? false,
+          total_surveys: 0,
+          total_pages: 1,
+          has_next: false,
+          has_previous: false,
         });
-      } catch (error) {
-        if (requestId === latestRequestId.current) {
-          console.error("Error fetching survey data:", error);
-
-          setSurveyData([]);
-
-          setPagination({
-            total_surveys: 0,
-            total_pages: 1,
-            has_next: false,
-            has_previous: false,
-          });
-        }
-      } finally {
-        if (requestId === latestRequestId.current) {
-          setLoading(false);
-        }
       }
-    },
-    [activeTab, currentPage, search],
-  );
-
+    } finally {
+      if (requestId === latestRequestId.current) {
+        setLoading(false);
+      }
+    }
+  },
+  [activeTab, currentPage, search, startDate, endDate],
+);
   // =========================================================
   // LOAD DATA WHEN TAB / PAGE / SEARCH CHANGES
   // =========================================================
@@ -141,6 +228,7 @@ export default function Survey() {
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     setCurrentPage(1);
+    // setSelectedDate("");
   };
 
   // =========================================================
@@ -210,7 +298,22 @@ export default function Survey() {
 
     notify.success("Data Refresh");
   };
+const handleExportReport = async () => {
+  try {
+    notify.info("Generating Excel...");
+    const response = await fetchSurveyExcel(startDate, endDate, activeTab);
 
+    if (response?.download_url) {
+      window.open(response.download_url, "_blank");
+      notify.success("Excel generated successfully");
+    } else {
+      notify.error("Excel download URL not found");
+    }
+  } catch (error) {
+    console.error("Excel export error:", error);
+    notify.error("Failed to generate Excel");
+  }
+};
   return (
     <div className="survey-page">
       {/* Header */}
@@ -231,7 +334,7 @@ export default function Survey() {
             Refresh
           </button>
 
-          <button className="export-btn">
+          <button className="export-btn" onClick={handleExportReport}>
             <FaFileExport />
             Export
           </button>
@@ -242,7 +345,14 @@ export default function Survey() {
       <SurveyStatistics counts={optimisticCounts} loading={statsLoading} />
 
       {/* Search / Filters */}
-      <SurveyFilter search={search} setSearch={handleSearchChange} />
+      <SurveyFilter
+        search={search}
+        setSearch={handleSearchChange}
+        startDate={startDate}
+        setStartDate={handleStartDateChange}
+        endDate={endDate}
+        setEndDate={handleEndDateChange}
+      />
 
       {/* Tabs */}
       <SurveyTabs

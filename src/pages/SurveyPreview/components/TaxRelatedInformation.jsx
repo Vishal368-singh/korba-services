@@ -52,7 +52,6 @@ export default function TaxRelatedInformation({ data, onUpdate }) {
   //   setIsEditing(false);
   // };
   const handleSave = () => {
-    console.log("Form Data on Save:", formData); // Debugging line
     const errors = validateTaxRelatedInformation(formData);
 
     if (Object.keys(errors).length > 0) {

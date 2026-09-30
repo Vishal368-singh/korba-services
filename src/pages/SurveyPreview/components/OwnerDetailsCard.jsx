@@ -77,12 +77,11 @@ export default function OwnerDetailsCard({ data, onUpdate }) {
   //   setIsEditing(false);
   // };
   const handleSave = () => {
-    console.log("SAVE CLICKED");
-    console.log("FORM DATA:", formData);
+    
 
     const errors = validateOwnerDetails(formData);
 
-    console.log("VALIDATION ERRORS:", errors);
+  
 
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
@@ -91,7 +90,7 @@ export default function OwnerDetailsCard({ data, onUpdate }) {
 
     setValidationErrors({});
 
-    console.log("VALIDATION PASSED");
+ 
 
     if (onUpdate) {
       onUpdate("owner_details", formData);

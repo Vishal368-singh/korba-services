@@ -103,8 +103,7 @@ export default function LandBuildingCard({ data, onUpdate }) {
   const handleSave = () => {
     const errors = validateLandBuilding(formData);
 
-    console.log("FORM DATA:", formData);
-    console.log("VALIDATION ERRORS:", errors);
+   
 
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);

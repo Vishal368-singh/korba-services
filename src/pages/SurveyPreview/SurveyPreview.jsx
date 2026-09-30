@@ -102,11 +102,7 @@ export default function SurveyPreview() {
         surveyor_remarks: survey.surveyor_remarks,
       };
 
-      console.log("================================");
-      console.log("SURVEY ID:", currentSurveyId);
-      console.log("UPDATE PAYLOAD:", surveyData);
-      console.log("================================");
-
+  
       // ---------------------------------------
       // Send ONLY survey_id to identify record
       // ---------------------------------------
@@ -114,7 +110,7 @@ export default function SurveyPreview() {
 
       notify.dismiss(loadingId);
 
-      console.log("UPDATE RESPONSE:", response);
+    
 
       if (response?.success) {
         notify.success("All changes saved successfully!");

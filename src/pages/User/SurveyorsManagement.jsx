@@ -6,6 +6,9 @@ import {
   updateSurveyorAPI, // <-- NEW: add this to services/api.js (see note below)
   fetchSurveyorsList,
   getLocationOptions,
+  sendOTPAPI,
+  activateUserAPI,
+  deactivateUserAPI,
 } from "../../services/api";
 import OTPModal from "./OtpModal/OTPModal";
 
@@ -89,6 +92,10 @@ function SurveyorsManagement() {
   const [otpValidationModal, setOtpValidationModal] = useState(false);
   const [emailForOTP, setEmailForOTP] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [generatedOtp, setGeneratedOtp] = useState("");
+  const [deactivateModal, setDeactivateModal] = useState(false);
+  const [selectedSurveyor, setSelectedSurveyor] = useState(null);
+  const [deactivating, setDeactivating] = useState(false);
 
   // =========================================================
   // TRANSLITERATION DEBOUNCE
@@ -668,43 +675,129 @@ function SurveyorsManagement() {
     try {
       const loadingId = notify.loading("Sending OTP...");
 
+      // Generate 6-digit OTP at runtime
+      const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
+
+      // Store OTP in React state
+      setGeneratedOtp(newOtp);
+
+      // Store email for OTP modal
+      setEmailForOTP(email);
+
+      // Send OTP to backend
+      const response = await sendOTPAPI(email, newOtp);
+
       notify.dismiss(loadingId);
 
-      notify.success(`OTP sent to ${email}`);
+   
 
-      setOtpValidationModal(true);
-      setEmailForOTP(email);
+      if (response?.success) {
+        notify.success(`OTP sent to ${email}`);
+
+        // Clear previous OTP input
+        setOtp(["", "", "", "", "", ""]);
+
+        // Open OTP modal
+        setOtpValidationModal(true);
+      } else {
+        notify.error("Failed to send OTP");
+      }
     } catch (error) {
       console.error("Error sending OTP:", error);
 
-      notify.error(error.message || "Failed to send OTP. Please try again.");
+      notify.error(
+        error?.response?.data?.detail ||
+          error?.response?.data?.message ||
+          error?.message ||
+          "Failed to send OTP. Please try again.",
+      );
     }
   };
 
   const handleVerify = async (otpValue) => {
     try {
       const loadingId = notify.loading("Verifying OTP...");
-
-      if (otpValue !== "123456") {
+      // 1. Verify OTP
+      if (otpValue !== generatedOtp) {
         notify.dismiss(loadingId);
         notify.error("Invalid OTP, enter the correct OTP.");
-        return false; // <-- ADD THIS so the modal can react
+        return false;
+      }
+      // 3. Change user status Pending -> Active
+      const response = await activateUserAPI(emailForOTP);
+      notify.dismiss(loadingId);
+
+      // 4. Check API response
+      if (!response?.success) {
+        notify.error("OTP verified but user activation failed.");
+        return false;
       }
 
-      notify.dismiss(loadingId);
+      // 5. Close OTP modal
       setOtpValidationModal(false);
-      notify.success("OTP verified successfully!");
+
+      // 6. Clear OTP
+      setOtp(["", "", "", "", "", ""]);
 
       await loadSurveyors();
 
-      setOtp(["", "", "", "", "", ""]);
-      return true; // <-- ADD THIS (optional, but explicit)
+      // 7. Success
+      notify.success("OTP verified and user activated successfully!");
+
+      return true;
     } catch (error) {
       console.error("Error verifying OTP:", error);
-      notify.error(error.message || "Invalid OTP. Please try again.");
-      return false; // <-- ADD THIS
+
+      notify.dismiss();
+
+      notify.error(
+        error?.response?.data?.detail ||
+          error?.response?.data?.message ||
+          error?.message ||
+          "Failed to activate user.",
+      );
+
+      return false;
     }
   };
+const handleDeactivateClick = (surveyor) => {
+  setSelectedSurveyor(surveyor);
+  setDeactivateModal(true);
+};
+
+const handleDeactivateConfirm = async () => {
+  if (!selectedSurveyor) return;
+
+  try {
+    setDeactivating(true);
+
+    const response = await deactivateUserAPI(selectedSurveyor.email);
+
+    if (!response?.success) {
+      notify.error(response?.message || "Failed to deactivate user.");
+      return;
+    }
+
+    notify.success("User deactivated successfully.");
+
+    setDeactivateModal(false);
+    setSelectedSurveyor(null);
+
+    await loadSurveyors();
+  } catch (error) {
+    console.error("Error deactivating user:", error);
+
+    notify.error(
+      error?.response?.data?.detail ||
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to deactivate user.",
+    );
+  } finally {
+    setDeactivating(false);
+  }
+};
 
   // =========================================================
   // FILTERING
@@ -885,7 +978,7 @@ function SurveyorsManagement() {
               {isActive && (
                 <button
                   className="reject-btn"
-                  onClick={() => {}}
+                 onClick={() => handleDeactivateClick(s)}
                   title="Invalidate"
                 >
                   <i className="fas fa-times-circle"></i>
@@ -972,7 +1065,59 @@ function SurveyorsManagement() {
           <div className="stat-number">{validated}</div>
         </div>
       </div>
+      {deactivateModal && selectedSurveyor && (
+        <div className="modal-overlay">
+          <div className="confirmation-dialog">
+            <div className="confirmation-icon">
+              <i className="fas fa-user-slash"></i>
+            </div>
 
+            <h2>Deactivate User?</h2>
+
+            <p>Are you sure you want to deactivate this user?</p>
+
+            <div className="user-info">
+              <strong>{selectedSurveyor.surveyor_name}</strong>
+              <span>{selectedSurveyor.email}</span>
+            </div>
+
+            <p className="warning-text">This user will no longer be active.</p>
+
+            <div className="confirmation-actions">
+              <button
+                type="button"
+                className="dialog-cancel-btn"
+                onClick={() => {
+                  setDeactivateModal(false);
+                  setSelectedSurveyor(null);
+                }}
+                disabled={deactivating}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className="dialog-confirm-btn"
+                onClick={handleDeactivateConfirm}
+                disabled={deactivating}
+              >
+                {deactivating ? (
+                  <>
+                    <i className="fas fa-spinner fa-spin"></i>
+                    Deactivating...
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-user-slash"></i>
+                    Deactivate
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="card">
         <div className="card-title">
           <i
@@ -1072,10 +1217,7 @@ function SurveyorsManagement() {
             <div className="form-group">
               <label>
                 <i className="fas fa-lock" style={{ color: "#7A1453" }}></i>{" "}
-                Password{" "}
-                {
-                  <span className="required-fields">*</span>
-                }
+                Password {<span className="required-fields">*</span>}
               </label>
 
               <input
